@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ระบบ HR - ใบลา</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--ink:#14262b;--muted:#5b6b70;--bg:#eef1f4;--card:#fff;--line:#d5dce1;--brand:#0f4c5c;--brand-d:#0a3640;
+--warn:#a86a00;--warn-bg:#fdf0d5;--ok:#1a7f4b;--ok-bg:#dcf3e6;--no:#b3261e;--no-bg:#fbe3e1}
+*{box-sizing:border-box}
+body{margin:0;font-family:'IBM Plex Sans Thai',system-ui,sans-serif;background:var(--bg);color:var(--ink);font-size:15px;line-height:1.5}
+header{background:var(--brand);color:#fff;padding:12px 20px;display:flex;align-items:center;justify-content:space-between;gap:12px}
+header h1{font-size:18px;font-weight:600;margin:0}
+button,input,select,textarea{font:inherit;color:var(--ink)}
+input,select,textarea{border:1px solid #b8c3c9;border-radius:8px;padding:8px 10px;background:#fff;min-height:40px;width:100%}
+textarea{min-height:70px}
+:focus-visible{outline:3px solid #7fb8c6;outline-offset:1px}
+.btn{background:var(--brand);color:#fff;border:0;border-radius:8px;padding:9px 16px;font-weight:500;cursor:pointer;min-height:40px}
+.btn:hover{background:var(--brand-d)}
+.btn.ghost{background:#fff;color:var(--brand);border:1px solid var(--brand)}
+.btn.sm{padding:4px 12px;min-height:32px;font-size:14px}
+.btn.ok{background:var(--ok)}.btn.no{background:var(--no)}
+.btn:disabled{opacity:.6;cursor:default}
+header .btn.ghost{border-color:#fff;background:transparent;color:#fff}
+main{max-width:1280px;margin:0 auto;padding:20px}
+#login{max-width:340px;margin:12vh auto;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:24px}
+#login h2{margin:0 0 4px}
+#login p{color:var(--muted);margin:0 0 16px}
+#err{color:var(--no);min-height:22px;margin:8px 0 0;font-size:14px}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px;margin-bottom:16px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px 16px}
+.card b{display:block;font-size:26px;font-weight:600}
+.card span{color:var(--muted);font-size:14px}
+.bar{display:flex;flex-wrap:wrap;gap:10px;align-items:end;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:12px;margin-bottom:16px}
+.bar label{font-size:13px;color:var(--muted);display:block;margin-bottom:2px}
+.bar>div{min-width:140px;flex:1}
+.bar .grow{flex:2;min-width:200px}
+.tabs{display:flex;gap:8px;margin-bottom:12px}
+.tab{background:#fff;border:1px solid var(--line);border-radius:8px;padding:8px 16px;cursor:pointer}
+.tab[aria-selected=true]{background:var(--brand);color:#fff;border-color:var(--brand)}
+.wrap{background:var(--card);border:1px solid var(--line);border-radius:10px;overflow-x:auto}
+table{border-collapse:collapse;width:100%;min-width:900px}
+th,td{padding:9px 12px;text-align:left;border-bottom:1px solid var(--line);vertical-align:top;white-space:nowrap}
+td.wrapt{white-space:normal;min-width:180px}
+th{background:#f6f8f9;font-weight:600;position:sticky;top:0}
+tr:last-child td{border-bottom:0}
+.chip{font-size:13px;font-weight:500;padding:2px 10px;border-radius:99px;white-space:nowrap}
+.s-wait{background:var(--warn-bg);color:var(--warn)}.s-ok{background:var(--ok-bg);color:var(--ok)}.s-no{background:var(--no-bg);color:var(--no)}
+.m{color:var(--muted);font-size:13px}
+.num{text-align:right}
+.empty{padding:28px;text-align:center;color:var(--muted)}
+dialog{border:0;border-radius:12px;padding:20px;width:min(480px,94vw)}
+dialog::backdrop{background:rgba(20,38,43,.5)}
+dialog h2{margin:0 0 8px;font-size:18px}
+dialog label{display:block;font-size:14px;font-weight:500;margin:10px 0 3px}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.actions{display:flex;justify-content:flex-end;gap:8px;margin-top:16px}
+#toast{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);background:var(--ink);color:#fff;padding:10px 16px;border-radius:8px;display:none;z-index:99}
+.hidden{display:none!important}
+</style>
+</head>
+<body>
+<div id="login">
+  <h2>ระบบ HR</h2>
+  <p>กรอกรหัสผ่านเพื่อดูใบลาของพนักงาน</p>
+  <form id="loginForm">
+    <input id="pass" type="password" placeholder="รหัสผ่าน HR" autocomplete="current-password" aria-label="รหัสผ่าน HR">
+    <div id="err" role="alert"></div>
+    <button class="btn" style="width:100%;margin-top:8px" id="loginBtn">เข้าสู่ระบบ</button>
+  </form>
+</div>
+
+<div id="app" class="hidden">
+  <header>
+    <h1>ระบบ HR - ใบลาพนักงาน</h1>
+    <div style="display:flex;gap:8px">
+      <button class="btn ghost sm" id="addBtn" type="button">บันทึกการลาแทนพนักงาน</button>
+      <button class="btn ghost sm" id="csvBtn" type="button">ส่งออก CSV</button>
+      <button class="btn ghost sm" id="reloadBtn" type="button">โหลดใหม่</button>
+      <button class="btn ghost sm" id="logoutBtn" type="button">ออกจากระบบ</button>
+    </div>
+  </header>
+  <main>
+    <div class="cards" id="cards"></div>
+    <div class="bar">
+      <div class="grow"><label for="q">ค้นหาชื่อ / รหัส / แผนก</label><input id="q"></div>
+      <div><label for="fStatus">สถานะ</label>
+        <select id="fStatus"><option value="">ทั้งหมด</option><option>รออนุมัติ</option><option>อนุมัติ</option><option>ไม่อนุมัติ</option></select></div>
+      <div><label for="fType">ประเภทการลา</label><select id="fType"><option value="">ทั้งหมด</option></select></div>
+      <div><label for="fMonth">เดือนที่ลา</label><input id="fMonth" type="month"></div>
+      <button class="btn ghost" id="clearBtn" type="button">ล้างตัวกรอง</button>
+    </div>
+    <div class="tabs" role="tablist">
+      <button class="tab" role="tab" id="tabList" aria-selected="true" type="button">รายการใบลา</button>
+      <button class="tab" role="tab" id="tabSum" aria-selected="false" type="button">สรุปรายคน (เฉพาะที่อนุมัติ)</button>
+    </div>
+    <div class="wrap" id="view"></div>
+  </main>
+</div>
+
+<dialog id="dlg">
+  <form id="addForm" method="dialog">
+    <h2>บันทึกการลาแทนพนักงาน</h2>
+    <div class="m">บันทึกแล้วสถานะเป็น "อนุมัติ" ทันที เหมาะกับกรณีขาดงานหัก 1 เท่า / 2 เท่า</div>
+    <div class="two">
+      <div><label for="aEmp">รหัสพนักงาน</label><input id="aEmp" required></div>
+      <div><label for="aDept">แผนก</label><input id="aDept"></div>
+    </div>
+    <label for="aName">ชื่อ-นามสกุล</label><input id="aName" required>
+    <label for="aType">ประเภท</label><select id="aType"></select>
+    <div class="two">
+      <div><label for="aStart">ตั้งแต่วันที่</label><input id="aStart" type="date" required></div>
+      <div><label for="aEnd">ถึงวันที่</label><input id="aEnd" type="date" required></div>
+    </div>
+    <label for="aNote">หมายเหตุ</label><textarea id="aNote"></textarea>
+    <div class="actions">
+      <button class="btn ghost" id="aCancel" type="button">ยกเลิก</button>
+      <button class="btn" id="aSave" type="submit">บันทึก</button>
+    </div>
+  </form>
+</dialog>
+<div id="toast" role="status"></div>
+
+<script>
+// วาง URL ของ Apps Script Web App ตรงนี้ (ตัวเดียวกับแอปพนักงาน ลงท้ายด้วย /exec)
+const API_URL = 'https://script.google.com/macros/s/AKfycbxCHy7YnawM5oUXTT8fKVh_Z9L72Gzvlq1YvyYIBDh-QnOMGMjU48NVQ_feoC7aXHc8Dw/exec';
+
+const TYPES = ['01 ลาป่วย','02 ลากิจ','03 วันหยุดพักผ่อนประจำปี','04 ลาเพื่อทหาร','05 ลาเพื่อทำหมัน',
+  '06 ขาดงานหัก 1 เท่า','07 ลาอุปสมบท','08 ลาคลอด','09 ลาสมรส','10 ขาดงานหัก 2 เท่า',
+  '11 ลาฌาปนกิจ','12 วันหยุดพักผ่อนประจำปีตามแผน','13 หยุดพิเศษ'];
+
+const $ = s => document.querySelector(s);
+let pass = sessionStorage.getItem('hrpass') || '';
+let items = [];
+let tab = 'list';
+
+function esc(s) { const d = document.createElement('div'); d.textContent = s == null ? '' : s; return d.innerHTML; }
+function toast(m) { const t = $('#toast'); t.textContent = m; t.style.display = 'block'; clearTimeout(toast.t); toast.t = setTimeout(() => t.style.display = 'none', 3000); }
+function fmtDate(s) { const [y, m, d] = String(s).slice(0, 10).split('-').map(Number); return d + '/' + m + '/' + (y + 543); }
+function fmtTs(s) { const d = new Date(s); return isNaN(d) ? '' : d.toLocaleString('th-TH', { dateStyle: 'short', timeStyle: 'short' }); }
+
+async function call(action, payload) {
+  const res = await fetch(API_URL, {
+    method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+    body: JSON.stringify(Object.assign({ action, passcode: pass }, payload || {}))
+  });
+  return res.json();
+}
+
+// ---------- เข้าสู่ระบบ ----------
+async function enter() {
+  if (API_URL.includes('PASTE_')) { $('#err').textContent = 'ยังไม่ได้ตั้งค่า API_URL ในไฟล์'; return false; }
+  try {
+    const j = await call('hrList');
+    if (!j.ok) { $('#err').textContent = j.error === 'auth' ? 'รหัสผ่านไม่ถูกต้อง' : 'เกิดข้อผิดพลาด: ' + j.error; return false; }
+    items = j.items; sessionStorage.setItem('hrpass', pass);
+    $('#login').classList.add('hidden'); $('#app').classList.remove('hidden'); render();
+    return true;
+  } catch (e) { $('#err').textContent = 'เชื่อมต่อไม่ได้ ตรวจสอบอินเทอร์เน็ตและ API_URL'; return false; }
+}
+$('#loginForm').addEventListener('submit', async ev => {
+  ev.preventDefault(); pass = $('#pass').value; $('#err').textContent = '';
+  $('#loginBtn').disabled = true; await enter(); $('#loginBtn').disabled = false;
+});
+$('#logoutBtn').addEventListener('click', () => { sessionStorage.removeItem('hrpass'); location.href = '../index.html'; });
+$('#reloadBtn').addEventListener('click', async () => {
+  const j = await call('hrList'); if (j.ok) { items = j.items; render(); toast('โหลดข้อมูลล่าสุดแล้ว'); } else toast('โหลดไม่สำเร็จ');
+});
+
+// ---------- ตัวกรอง ----------
+['fType', 'aType'].forEach(id => TYPES.forEach(t => $('#' + id).insertAdjacentHTML('beforeend', '<option>' + t + '</option>')));
+['q', 'fStatus', 'fType', 'fMonth'].forEach(id => $('#' + id).addEventListener('input', render));
+$('#clearBtn').addEventListener('click', () => { ['q', 'fStatus', 'fType', 'fMonth'].forEach(id => $('#' + id).value = ''); render(); });
+
+function filtered(ignoreStatus) {
+  const q = $('#q').value.trim().toLowerCase(), st = $('#fStatus').value, ty = $('#fType').value, mo = $('#fMonth').value;
+  return items.filter(r => {
+    if (!ignoreStatus && st && r.status !== st) return false;
+    if (ty && r.type !== ty) return false;
+    if (mo && !(String(r.start).slice(0, 7) <= mo && mo <= String(r.end).slice(0, 7))) return false;
+    if (q && !(r.name + ' ' + r.empId + ' ' + r.dept).toLowerCase().includes(q)) return false;
+    return true;
+  });
+}
+
+// ---------- แสดงผล ----------
+function render() {
+  const pending = items.filter(r => r.status === 'รออนุมัติ').length;
+  const mo = new Date().toISOString().slice(0, 7);
+  const okMonth = items.filter(r => r.status === 'อนุมัติ' && String(r.start).slice(0, 7) <= mo && mo <= String(r.end).slice(0, 7));
+  const daysMonth = okMonth.reduce((a, r) => a + Number(r.days || 0), 0);
+  $('#cards').innerHTML =
+    '<div class="card"><b>' + pending + '</b><span>รออนุมัติ</span></div>' +
+    '<div class="card"><b>' + okMonth.length + '</b><span>ใบลาที่อนุมัติ (เดือนนี้)</span></div>' +
+    '<div class="card"><b>' + daysMonth + '</b><span>วันลารวม (เดือนนี้)</span></div>' +
+    '<div class="card"><b>' + items.length + '</b><span>ใบลาทั้งหมด</span></div>';
+  tab === 'list' ? renderList() : renderSummary();
+}
+
+function renderList() {
+  const rows = filtered(false);
+  if (!rows.length) { $('#view').innerHTML = '<div class="empty">ไม่พบใบลาตามตัวกรองที่เลือก</div>'; return; }
+  const cls = { 'รออนุมัติ': 's-wait', 'อนุมัติ': 's-ok', 'ไม่อนุมัติ': 's-no' };
+  $('#view').innerHTML = '<table><thead><tr><th>เลขที่ / เวลายื่น</th><th>พนักงาน</th><th>ประเภท</th><th>วันที่ลา</th>' +
+    '<th class="num">วัน</th><th>เหตุผล</th><th>สถานะ</th><th>จัดการ</th></tr></thead><tbody>' +
+    rows.map(r => {
+      const range = String(r.start).slice(0, 10) === String(r.end).slice(0, 10) ? fmtDate(r.start) : fmtDate(r.start) + ' - ' + fmtDate(r.end);
+      const act = r.status === 'รออนุมัติ'
+        ? '<button class="btn sm ok" data-a="ok" data-c="' + esc(r.cid) + '">อนุมัติ</button> <button class="btn sm no" data-a="no" data-c="' + esc(r.cid) + '">ไม่อนุมัติ</button>'
+        : '<button class="btn sm ghost" data-a="re" data-c="' + esc(r.cid) + '">ย้อนเป็นรออนุมัติ</button>';
+      return '<tr><td>' + esc(r.no) + '<div class="m">' + fmtTs(r.ts) + '</div></td>' +
+        '<td>' + esc(r.name) + '<div class="m">' + esc(r.empId) + (r.dept ? ' · ' + esc(r.dept) : '') + '</div></td>' +
+        '<td>' + esc(r.type) + '</td><td>' + range + '</td><td class="num">' + esc(r.days) + '</td>' +
+        '<td class="wrapt">' + esc(r.reason) + (r.phone ? '<div class="m">โทร ' + esc(r.phone) + '</div>' : '') +
+        (r.note ? '<div class="m">หมายเหตุ HR: ' + esc(r.note) + '</div>' : '') + '</td>' +
+        '<td><span class="chip ' + (cls[r.status] || '') + '">' + esc(r.status) + '</span></td><td>' + act + '</td></tr>';
+    }).join('') + '</tbody></table>';
+}
+
+function renderSummary() {
+  const rows = filtered(true).filter(r => r.status === 'อนุมัติ');
+  if (!rows.length) { $('#view').innerHTML = '<div class="empty">ยังไม่มีใบลาที่อนุมัติตามตัวกรองที่เลือก</div>'; return; }
+  const by = {};
+  rows.forEach(r => {
+    const k = r.empId; by[k] = by[k] || { empId: r.empId, name: r.name, dept: r.dept, t: {}, total: 0 };
+    const c = String(r.type).slice(0, 2); const d = Number(r.days || 0);
+    by[k].t[c] = (by[k].t[c] || 0) + d; by[k].total += d;
+  });
+  const codes = TYPES.map(t => t.slice(0, 2));
+  $('#view').innerHTML = '<table><thead><tr><th>รหัส</th><th>ชื่อ</th><th>แผนก</th>' +
+    TYPES.map(t => '<th class="num" title="' + esc(t) + '">' + t.slice(0, 2) + '</th>').join('') + '<th class="num">รวม</th></tr></thead><tbody>' +
+    Object.values(by).sort((a, b) => b.total - a.total).map(e =>
+      '<tr><td>' + esc(e.empId) + '</td><td>' + esc(e.name) + '</td><td>' + esc(e.dept) + '</td>' +
+      codes.map(c => '<td class="num">' + (e.t[c] || '') + '</td>').join('') + '<td class="num"><b>' + e.total + '</b></td></tr>').join('') +
+    '</tbody></table><div class="m" style="padding:10px 12px">เลื่อนเมาส์ไปที่รหัสประเภท (01-13) เพื่อดูชื่อการลา</div>';
+}
+
+$('#tabList').addEventListener('click', () => { tab = 'list'; $('#tabList').setAttribute('aria-selected', 'true'); $('#tabSum').setAttribute('aria-selected', 'false'); render(); });
+$('#tabSum').addEventListener('click', () => { tab = 'sum'; $('#tabSum').setAttribute('aria-selected', 'true'); $('#tabList').setAttribute('aria-selected', 'false'); render(); });
+
+// ---------- อนุมัติ / ไม่อนุมัติ ----------
+$('#view').addEventListener('click', async ev => {
+  const b = ev.target.closest('button[data-a]'); if (!b) return;
+  const cid = b.dataset.c, a = b.dataset.a;
+  let status = a === 'ok' ? 'อนุมัติ' : a === 'no' ? 'ไม่อนุมัติ' : 'รออนุมัติ', note = '';
+  if (a === 'no') { note = prompt('เหตุผลที่ไม่อนุมัติ (ไม่บังคับ)') ; if (note === null) return; }
+  b.disabled = true;
+  try {
+    const j = await call('hrDecide', { cid, status, note });
+    if (!j.ok) throw new Error(j.error);
+    const r = items.find(x => x.cid === cid); r.status = status; r.note = note; r.decidedAt = new Date().toISOString();
+    toast('บันทึกแล้ว: ' + status); render();
+  } catch (e) { b.disabled = false; toast('บันทึกไม่สำเร็จ ลองใหม่อีกครั้ง'); }
+});
+
+// ---------- บันทึกแทนพนักงาน ----------
+$('#addBtn').addEventListener('click', () => $('#dlg').showModal());
+$('#aCancel').addEventListener('click', () => $('#dlg').close());
+$('#addForm').addEventListener('submit', async ev => {
+  ev.preventDefault();
+  const v = id => $('#' + id).value.trim();
+  if (v('aEnd') < v('aStart')) { toast('วันที่สิ้นสุดต้องไม่ก่อนวันที่เริ่ม'); return; }
+  const days = (new Date(v('aEnd')) - new Date(v('aStart'))) / 86400000 + 1;
+  $('#aSave').disabled = true;
+  try {
+    const j = await call('hrAdd', { empId: v('aEmp'), name: v('aName'), dept: v('aDept'), type: v('aType'), start: v('aStart'), end: v('aEnd'), days, note: v('aNote') });
+    if (!j.ok) throw new Error(j.error);
+    $('#dlg').close(); $('#addForm').reset(); toast('บันทึกแล้ว เลขที่ ' + j.no);
+    const r = await call('hrList'); if (r.ok) { items = r.items; render(); }
+  } catch (e) { toast('บันทึกไม่สำเร็จ ลองใหม่อีกครั้ง'); }
+  $('#aSave').disabled = false;
+});
+
+// ---------- ส่งออก CSV ----------
+$('#csvBtn').addEventListener('click', () => {
+  const rows = filtered(false);
+  if (!rows.length) { toast('ไม่มีข้อมูลให้ส่งออก'); return; }
+  const head = ['เลขที่', 'เวลายื่น', 'รหัสพนักงาน', 'ชื่อ-นามสกุล', 'แผนก', 'ประเภท', 'วันที่เริ่ม', 'วันที่สิ้นสุด', 'จำนวนวัน', 'เหตุผล', 'เบอร์ติดต่อ', 'สถานะ', 'หมายเหตุ HR'];
+  const q = s => '"' + String(s == null ? '' : s).replace(/"/g, '""') + '"';
+  const lines = [head.map(q).join(',')].concat(rows.map(r =>
+    [r.no, fmtTs(r.ts), r.empId, r.name, r.dept, r.type, String(r.start).slice(0, 10), String(r.end).slice(0, 10), r.days, r.reason, r.phone, r.status, r.note].map(q).join(',')));
+  const blob = new Blob(['\ufeff' + lines.join('\r\n')], { type: 'text/csv;charset=utf-8' });
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
+  a.download = 'leave-' + new Date().toISOString().slice(0, 10) + '.csv'; a.click(); URL.revokeObjectURL(a.href);
+});
+
+if (pass) enter();
+</script>
+</body>
+</html>

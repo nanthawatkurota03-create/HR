@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0f4c5c">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icon.svg">
+<title>ขอใบลา</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--ink:#14262b;--muted:#5b6b70;--bg:#eef1f4;--card:#fff;--line:#d5dce1;--brand:#0f4c5c;--brand-d:#0a3640;
+--warn:#a86a00;--warn-bg:#fdf0d5;--ok:#1a7f4b;--ok-bg:#dcf3e6;--no:#b3261e;--no-bg:#fbe3e1;--idle-bg:#e4e8eb}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{font-family:'IBM Plex Sans Thai',system-ui,sans-serif;background:var(--bg);color:var(--ink);font-size:16px;line-height:1.5;
+padding-bottom:env(safe-area-inset-bottom,0)}
+header{background:var(--brand);color:#fff;padding:calc(14px + env(safe-area-inset-top,0)) 16px 14px;display:flex;align-items:center;justify-content:space-between;gap:12px;position:sticky;top:0;z-index:5}
+header h1{font-size:19px;font-weight:600;margin:0}
+.hbtns{display:flex;gap:8px;align-items:center}
+#installBtn{display:none;background:#fff;color:var(--brand);border:0;border-radius:8px;padding:6px 12px;font:inherit;font-size:14px;font-weight:500}
+#hrBtn{background:transparent;color:#fff;border:1px solid #fff;border-radius:8px;padding:6px 12px;font:inherit;font-size:14px;font-weight:500}
+#hrBtn:focus-visible,#installBtn:focus-visible{outline:3px solid #fff;outline-offset:2px}
+dialog{border:0;border-radius:12px;padding:20px;width:min(360px,92vw);color:var(--ink)}
+dialog::backdrop{background:rgba(20,38,43,.5)}
+dialog h2{margin:0 0 4px}
+#hrErr{color:var(--no);min-height:22px;margin-top:6px;font-size:14px}
+.dact{display:flex;gap:8px;justify-content:flex-end;margin-top:8px}
+.dbtn{background:var(--brand);color:#fff;border:0;border-radius:8px;padding:10px 16px;font:inherit;font-weight:500;min-height:44px}
+.dbtn.ghost{background:#fff;color:var(--brand);border:1px solid var(--brand)}
+.dbtn:disabled{opacity:.6}
+main{max-width:560px;margin:0 auto;padding:16px}
+#netBanner{display:none;background:var(--warn-bg);color:var(--warn);border-radius:8px;padding:8px 12px;margin-bottom:12px;font-size:14px}
+section{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:16px;margin-bottom:16px}
+h2{font-size:17px;margin:0 0 12px;font-weight:600}
+label{display:block;font-size:14px;font-weight:500;margin:12px 0 4px}
+input,select,textarea{width:100%;font:inherit;color:var(--ink);background:#fff;border:1px solid #b8c3c9;border-radius:8px;padding:10px 12px;min-height:44px}
+textarea{min-height:84px;resize:vertical}
+input:focus,select:focus,textarea:focus,button:focus-visible{outline:3px solid #7fb8c6;outline-offset:1px}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.check{display:flex;align-items:center;gap:8px;margin-top:10px;font-weight:400}
+.check input{width:20px;min-height:20px;height:20px}
+.days{margin-top:12px;padding:10px 12px;background:var(--bg);border-radius:8px;font-weight:500}
+.btn{width:100%;margin-top:16px;background:var(--brand);color:#fff;border:0;border-radius:10px;padding:14px;font:inherit;font-weight:600;font-size:17px}
+.btn:active{background:var(--brand-d)}
+.btn:disabled{opacity:.6}
+.item{border-top:1px solid var(--line);padding:12px 0}
+.item:first-of-type{border-top:0;padding-top:0}
+.item .top{display:flex;justify-content:space-between;gap:8px;align-items:flex-start}
+.item .t{font-weight:600}
+.item .m{color:var(--muted);font-size:14px}
+.chip{font-size:13px;font-weight:500;padding:2px 10px;border-radius:99px;white-space:nowrap}
+.s-wait{background:var(--warn-bg);color:var(--warn)}
+.s-ok{background:var(--ok-bg);color:var(--ok)}
+.s-no{background:var(--no-bg);color:var(--no)}
+.s-idle{background:var(--idle-bg);color:var(--muted)}
+.empty{color:var(--muted);margin:0}
+.link{background:none;border:0;color:var(--brand);font:inherit;font-size:14px;font-weight:500;padding:4px 0}
+#toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0));transform:translateX(-50%);background:var(--ink);color:#fff;padding:10px 16px;border-radius:8px;display:none;max-width:90%;font-size:15px;z-index:9}
+</style>
+</head>
+<body>
+<header>
+  <h1>ขอใบลา</h1>
+  <div class="hbtns">
+    <button id="installBtn" type="button">ติดตั้งแอป</button>
+    <button id="hrBtn" type="button">เข้าสู่ระบบ HR</button>
+  </div>
+</header>
+<dialog id="hrDlg">
+  <form id="hrForm" method="dialog">
+    <h2>เข้าสู่ระบบ HR</h2>
+    <label for="hrPass">รหัสผ่าน HR</label>
+    <input id="hrPass" type="password" autocomplete="current-password">
+    <div id="hrErr" role="alert"></div>
+    <div class="dact">
+      <button class="dbtn ghost" id="hrCancel" type="button">ยกเลิก</button>
+      <button class="dbtn" id="hrGo" type="submit">เข้าสู่ระบบ</button>
+    </div>
+  </form>
+</dialog>
+<main>
+  <div id="netBanner">ออฟไลน์อยู่ ใบลาจะถูกเก็บไว้และส่งให้อัตโนมัติเมื่อมีสัญญาณ</div>
+
+  <section>
+    <h2>กรอกใบลา</h2>
+    <form id="f" novalidate>
+      <div class="row">
+        <div><label for="empId">รหัสพนักงาน</label><input id="empId" required autocomplete="off" inputmode="text"></div>
+        <div><label for="dept">แผนก</label><input id="dept" autocomplete="off"></div>
+      </div>
+      <label for="name">ชื่อ-นามสกุล</label><input id="name" required autocomplete="name">
+      <label for="type">ประเภทการลา</label>
+      <select id="type">
+        <option>01 ลาป่วย</option>
+        <option>02 ลากิจ</option>
+        <option>03 วันหยุดพักผ่อนประจำปี</option>
+        <option>04 ลาเพื่อทหาร</option>
+        <option>05 ลาเพื่อทำหมัน</option>
+        <option>06 ขาดงานหัก 1 เท่า</option>
+        <option>07 ลาอุปสมบท</option>
+        <option>08 ลาคลอด</option>
+        <option>09 ลาสมรส</option>
+        <option>10 ขาดงานหัก 2 เท่า</option>
+        <option>11 ลาฌาปนกิจ</option>
+        <option>12 วันหยุดพักผ่อนประจำปีตามแผน</option>
+        <option>13 หยุดพิเศษ</option>
+      </select>
+      <div class="row">
+        <div><label for="start">ตั้งแต่วันที่</label><input id="start" type="date" required></div>
+        <div><label for="end">ถึงวันที่</label><input id="end" type="date" required></div>
+      </div>
+      <label class="check" for="half"><input id="half" type="checkbox" disabled> ลาครึ่งวัน (เลือกได้เมื่อลาวันเดียว)</label>
+      <div class="days" id="days">จำนวนวันลา: -</div>
+      <label for="reason">เหตุผลการลา</label><textarea id="reason" required></textarea>
+      <label for="phone">เบอร์ติดต่อระหว่างลา</label><input id="phone" type="tel" inputmode="tel" autocomplete="tel">
+      <button class="btn" id="submit" type="submit">ส่งใบลาให้ HR</button>
+    </form>
+  </section>
+
+  <section>
+    <div class="top" style="display:flex;justify-content:space-between;align-items:center">
+      <h2 style="margin:0">ใบลาของฉัน</h2>
+      <button class="link" id="refresh" type="button">อัปเดตสถานะ</button>
+    </div>
+    <div id="list" style="margin-top:12px"></div>
+  </section>
+</main>
+<div id="toast" role="status"></div>
+
+<script>
+// วาง URL ของ Apps Script Web App ตรงนี้ (ลงท้ายด้วย /exec)
+const API_URL = 'https://script.google.com/macros/s/AKfycbxCHy7YnawM5oUXTT8fKVh_Z9L72Gzvlq1YvyYIBDh-QnOMGMjU48NVQ_feoC7aXHc8Dw/exec';
+
+const $ = s => document.querySelector(s);
+const LS = {
+  get(k, d) { try { const v = JSON.parse(localStorage.getItem(k)); return v === null ? d : v; } catch (e) { return d; } },
+  set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} }
+};
+let reqs = LS.get('reqs', []);
+const apiReady = () => !API_URL.includes('PASTE_');
+
+function toast(msg) {
+  const t = $('#toast'); t.textContent = msg; t.style.display = 'block';
+  clearTimeout(toast.t); toast.t = setTimeout(() => t.style.display = 'none', 3200);
+}
+function esc(s) { const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
+function fmtDate(s) {
+  const [y, m, d] = s.split('-').map(Number);
+  return d + '/' + m + '/' + (y + 543);
+}
+
+// ----- คำนวณจำนวนวัน -----
+function calcDays() {
+  const s = $('#start').value, e = $('#end').value;
+  const half = $('#half');
+  half.disabled = !(s && e && s === e);
+  if (half.disabled) half.checked = false;
+  if (!s || !e) { $('#days').textContent = 'จำนวนวันลา: -'; return null; }
+  if (e < s) { $('#days').textContent = 'วันที่สิ้นสุดต้องไม่ก่อนวันที่เริ่ม'; return null; }
+  const n = (new Date(e) - new Date(s)) / 86400000 + 1;
+  const days = half.checked ? 0.5 : n;
+  $('#days').textContent = 'จำนวนวันลา: ' + days + ' วัน';
+  return days;
+}
+['start', 'end', 'half'].forEach(id => $('#' + id).addEventListener('input', calcDays));
+
+// ----- โปรไฟล์ที่จำไว้ -----
+const prof = LS.get('profile', {});
+['empId', 'name', 'dept', 'phone'].forEach(k => { if (prof[k]) $('#' + k).value = prof[k]; });
+
+// ----- ส่งข้อมูล -----
+async function send(r) {
+  if (!apiReady() || !navigator.onLine) return false;
+  try {
+    const res = await fetch(API_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify(r)
+    });
+    const j = await res.json();
+    if (j.ok) { r.synced = true; r.no = j.no; r.status = j.status; LS.set('reqs', reqs); render(); return true; }
+  } catch (e) {}
+  return false;
+}
+async function flush() {
+  for (const r of reqs.filter(x => !x.synced)) {
+    if (!(await send(r))) break;
+  }
+}
+async function refreshStatus(manual) {
+  if (!apiReady() || !navigator.onLine) { if (manual) toast('ออฟไลน์อยู่'); return; }
+  const ids = reqs.filter(r => r.synced && r.status === 'รออนุมัติ').map(r => r.cid);
+  if (!ids.length) { if (manual) toast('ไม่มีใบลาที่รออนุมัติ'); return; }
+  try {
+    const res = await fetch(API_URL + '?action=status&ids=' + encodeURIComponent(ids.join(',')));
+    const j = await res.json();
+    if (j.ok) {
+      reqs.forEach(r => { const it = j.items[r.cid]; if (it) { r.status = it.status; r.no = it.no; } });
+      LS.set('reqs', reqs); render();
+      if (manual) toast('อัปเดตสถานะแล้ว');
+    }
+  } catch (e) { if (manual) toast('อัปเดตไม่สำเร็จ ลองใหม่อีกครั้ง'); }
+}
+
+$('#f').addEventListener('submit', async ev => {
+  ev.preventDefault();
+  const days = calcDays();
+  const v = id => $('#' + id).value.trim();
+  if (!v('empId') || !v('name') || !v('start') || !v('end') || !v('reason')) { toast('กรอกข้อมูลที่จำเป็นให้ครบ'); return; }
+  if (days === null) { toast('ตรวจสอบวันที่ลาอีกครั้ง'); return; }
+  if (!apiReady()) { toast('ยังไม่ได้ตั้งค่า API_URL ใน index.html'); return; }
+  const r = {
+    cid: crypto.randomUUID(), empId: v('empId'), name: v('name'), dept: v('dept'), type: $('#type').value,
+    start: v('start'), end: v('end'), days, half: $('#half').checked, reason: v('reason'), phone: v('phone'),
+    createdAt: new Date().toISOString(), synced: false, status: 'รอส่ง', no: ''
+  };
+  LS.set('profile', { empId: r.empId, name: r.name, dept: r.dept, phone: r.phone });
+  reqs.unshift(r); LS.set('reqs', reqs); render();
+  $('#submit').disabled = true;
+  const ok = await send(r);
+  $('#submit').disabled = false;
+  toast(ok ? 'ส่งใบลาให้ HR แล้ว' : 'ยังส่งไม่ได้ เก็บไว้แล้ว จะส่งให้เมื่อมีสัญญาณ');
+  $('#start').value = $('#end').value = $('#reason').value = '';
+  $('#half').checked = false; calcDays();
+});
+
+// ----- แสดงรายการ -----
+function render() {
+  const el = $('#list');
+  if (!reqs.length) { el.innerHTML = '<p class="empty">ยังไม่มีใบลา กรอกฟอร์มด้านบนเพื่อส่งใบลาฉบับแรก</p>'; return; }
+  const cls = { 'รออนุมัติ': 's-wait', 'อนุมัติ': 's-ok', 'ไม่อนุมัติ': 's-no', 'รอส่ง': 's-idle' };
+  el.innerHTML = reqs.map(r => {
+    const range = r.start === r.end ? fmtDate(r.start) : fmtDate(r.start) + ' - ' + fmtDate(r.end);
+    return '<div class="item"><div class="top"><div><div class="t">' + esc(r.type) + ' ' + r.days + ' วัน</div>' +
+      '<div class="m">' + range + '</div>' + (r.no ? '<div class="m">เลขที่ ' + esc(r.no) + '</div>' : '') + '</div>' +
+      '<span class="chip ' + (cls[r.status] || 's-idle') + '">' + esc(r.status) + '</span></div></div>';
+  }).join('');
+}
+$('#refresh').addEventListener('click', () => refreshStatus(true));
+
+// ----- ออนไลน์/ออฟไลน์ -----
+function net() { $('#netBanner').style.display = navigator.onLine ? 'none' : 'block'; }
+window.addEventListener('online', () => { net(); flush().then(() => refreshStatus(false)); });
+window.addEventListener('offline', net);
+
+// ----- เข้าสู่ระบบ HR (ปุ่มมุมขวาบน) -----
+$('#hrBtn').addEventListener('click', () => { $('#hrErr').textContent = ''; $('#hrPass').value = ''; $('#hrDlg').showModal(); $('#hrPass').focus(); });
+$('#hrCancel').addEventListener('click', () => $('#hrDlg').close());
+$('#hrForm').addEventListener('submit', async ev => {
+  ev.preventDefault();
+  const pass = $('#hrPass').value;
+  if (!pass) { $('#hrErr').textContent = 'กรอกรหัสผ่าน'; return; }
+  if (!apiReady()) { $('#hrErr').textContent = 'ยังไม่ได้ตั้งค่า API_URL ใน index.html'; return; }
+  if (!navigator.onLine) { $('#hrErr').textContent = 'ออฟไลน์อยู่ ต้องมีอินเทอร์เน็ตเพื่อเข้าสู่ระบบ HR'; return; }
+  $('#hrGo').disabled = true; $('#hrErr').textContent = '';
+  try {
+    const res = await fetch(API_URL, {
+      method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify({ action: 'hrList', passcode: pass })
+    });
+    const j = await res.json();
+    if (j.ok) {
+      try { sessionStorage.setItem('hrpass', pass); } catch (e) {}
+      location.href = 'hr/index.html';
+      return;
+    }
+    $('#hrErr').textContent = j.error === 'auth' ? 'รหัสผ่านไม่ถูกต้อง' : 'เกิดข้อผิดพลาด ลองใหม่อีกครั้ง';
+  } catch (e) { $('#hrErr').textContent = 'เชื่อมต่อไม่ได้ ลองใหม่อีกครั้ง'; }
+  $('#hrGo').disabled = false;
+});
+
+// ----- PWA -----
+let deferred;
+window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); deferred = e; $('#installBtn').style.display = 'block'; });
+$('#installBtn').addEventListener('click', async () => {
+  if (!deferred) return; deferred.prompt(); await deferred.userChoice; deferred = null; $('#installBtn').style.display = 'none';
+});
+if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js');
+
+net(); calcDays(); render(); flush().then(() => refreshStatus(false));
+</script>
+</body>
+</html>
