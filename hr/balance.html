@@ -62,6 +62,9 @@ dialog h2{margin:0 0 4px;font-size:18px}
 .brow .r{padding-bottom:10px;font-weight:600}
 #toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0));transform:translateX(-50%);background:var(--ink);color:#fff;padding:10px 16px;border-radius:8px;display:none;max-width:90%;font-size:15px;z-index:99}
 @media (max-width:520px){.brow{grid-template-columns:1fr 1fr}.brow .bn{grid-column:1/-1;padding-bottom:0}}
+.lvsel{width:auto;min-height:34px;padding:4px 8px;font-size:14px}
+.lv-leader{background:#e0ecf7;color:#1b5e9b}
+.lv-manager{background:#efe3f7;color:#6a2c91}
 </style>
 </head>
 <body>
@@ -136,6 +139,12 @@ dialog h2{margin:0 0 4px;font-size:18px}
       <div style="display:flex;gap:8px"><input id="ePin" inputmode="numeric" autocomplete="off"><button class="btn ghost" id="eRand" type="button">สุ่ม</button></div>
       <div class="sub">พนักงานจะถูกบังคับให้เปลี่ยน PIN ตอนเข้าสู่ระบบครั้งแรก</div>
     </div>
+    <label for="eLevel">ระดับ</label>
+    <select id="eLevel">
+      <option value="พนักงาน">พนักงาน</option>
+      <option value="Leader">Leader (อนุมัติใบลาของพนักงาน)</option>
+      <option value="Manager">Manager (อนุมัติใบลาของพนักงานและ Leader)</option>
+    </select>
     <label class="chk" for="eActive" style="margin-top:12px"><input id="eActive" type="checkbox" checked> ใช้งาน (ปิดเมื่อพนักงานลาออก จะล็อกอินไม่ได้)</label>
     <div class="derr" id="empErr" role="alert"></div>
     <div class="dact">
@@ -165,9 +174,9 @@ dialog h2{margin:0 0 4px;font-size:18px}
 <dialog id="impDlg">
   <form id="impForm" method="dialog">
     <h2>นำเข้าพนักงานหลายคน</h2>
-    <label for="iText">วางรายชื่อ 1 บรรทัดต่อ 1 คน: รหัส, ชื่อ-นามสกุล, แผนก</label>
-    <textarea id="iText" placeholder="1001, สมชาย ใจดี, Lathe&#10;1002, สมหญิง รักงาน, Grinding"></textarea>
-    <div class="sub">คั่นด้วยคอมมาหรือแท็บ (วางจาก Excel ได้เลย) รหัสที่มีอยู่แล้วจะถูกข้าม</div>
+    <label for="iText">วางรายชื่อ 1 บรรทัดต่อ 1 คน: รหัส, ชื่อ-นามสกุล, แผนก, ระดับ (ไม่บังคับ)</label>
+    <textarea id="iText" placeholder="1001, สมชาย ใจดี, Lathe&#10;1002, สมหญิง รักงาน, Grinding, Leader"></textarea>
+    <div class="sub">คั่นด้วยคอมมาหรือแท็บ (วางจาก Excel ได้เลย) ระดับใส่ได้: พนักงาน / Leader / Manager (เว้นว่าง = พนักงาน) รหัสที่มีอยู่แล้วจะถูกข้าม</div>
     <label for="iPin">PIN เริ่มต้นของทุกคน (ตัวเลข 4-8 หลัก)</label>
     <input id="iPin" inputmode="numeric" autocomplete="off">
     <div class="derr" id="impErr" role="alert"></div>
@@ -184,6 +193,8 @@ dialog h2{margin:0 0 4px;font-size:18px}
 const API_URL = 'https://script.google.com/macros/s/AKfycbyohtDVshSFXMEmf93Q893hA7kYBVBzjWcWqc0KPb1Z6YiWIpd6rdmrMHg5GjermPCuUw/exec';
 const $ = s => document.querySelector(s);
 const esc = s => { const d = document.createElement('div'); d.textContent = s == null ? '' : s; return d.innerHTML; };
+const LEVELS = ['พนักงาน', 'Leader', 'Manager'];
+const lvChip = l => l === 'Manager' ? '<span class="chip lv-manager">Manager</span>' : l === 'Leader' ? '<span class="chip lv-leader">Leader</span>' : '';
 const fmtN = n => String(+Number(n).toFixed(2));
 
 let PASS = '';
@@ -265,18 +276,20 @@ function renderBal() {
       const rem = b.total - b.used;
       return '<td class="num"><span class="rem' + (rem <= 0 ? ' low' : '') + '">' + fmtN(rem) + '</span> <span class="sub">(' + fmtN(b.used) + '/' + fmtN(b.total) + ')</span></td>';
     }).join('');
-    return '<tr><td>' + esc(e.id) + '</td><td>' + esc(e.name) + (e.active ? '' : ' <span class="chip s-idle">ไม่ใช้งาน</span>') + '</td><td>' + esc(e.dept) + '</td>' + cells +
+    return '<tr><td>' + esc(e.id) + '</td><td>' + esc(e.name) + (e.level && e.level !== 'พนักงาน' ? ' ' + lvChip(e.level) : '') + (e.active ? '' : ' <span class="chip s-idle">ไม่ใช้งาน</span>') + '</td><td>' + esc(e.dept) + '</td>' + cells +
       '<td><button class="btn sm" data-bal="' + esc(e.id) + '" type="button">แก้ไข</button></td></tr>';
   }).join('');
 }
 
 function renderEmp() {
   const list = filtered(true);
-  const th = '<tr><th>รหัส</th><th>ชื่อ-นามสกุล</th><th>แผนก</th><th>สถานะ</th><th>PIN</th><th></th></tr>';
-  if (!list.length) { $('#empTable').innerHTML = th + '<tr><td colspan="6"><p class="empty">ยังไม่มีพนักงาน กด "เพิ่มพนักงาน" หรือ "นำเข้าหลายคน"</p></td></tr>'; return; }
+  const th = '<tr><th>รหัส</th><th>ชื่อ-นามสกุล</th><th>แผนก</th><th>ระดับ</th><th>สถานะ</th><th>PIN</th><th></th></tr>';
+  if (!list.length) { $('#empTable').innerHTML = th + '<tr><td colspan="7"><p class="empty">ยังไม่มีพนักงาน กด "เพิ่มพนักงาน" หรือ "นำเข้าหลายคน"</p></td></tr>'; return; }
   $('#empTable').innerHTML = th + list.map(e => {
     const pin = !e.hasPin ? '<span class="chip s-no">ยังไม่ตั้ง</span>' : (e.mustChange ? '<span class="chip s-wait">รอเปลี่ยนครั้งแรก</span>' : '<span class="chip s-ok">ตั้งแล้ว</span>');
     return '<tr><td>' + esc(e.id) + '</td><td>' + esc(e.name) + '</td><td>' + esc(e.dept) + '</td>' +
+      '<td><select class="lvsel" data-lv="' + esc(e.id) + '" aria-label="ระดับของ ' + esc(e.name) + '">' +
+      LEVELS.map(l => '<option value="' + l + '"' + ((e.level || 'พนักงาน') === l ? ' selected' : '') + '>' + l + '</option>').join('') + '</select></td>' +
       '<td><span class="chip ' + (e.active ? 's-ok' : 's-idle') + '">' + (e.active ? 'ใช้งาน' : 'ไม่ใช้งาน') + '</span></td><td>' + pin + '</td>' +
       '<td style="white-space:nowrap"><button class="btn ghost sm" data-edit="' + esc(e.id) + '" type="button">แก้ไข</button> ' +
       '<button class="btn ghost sm" data-pin="' + esc(e.id) + '" type="button">รีเซ็ต PIN</button></td></tr>';
@@ -289,6 +302,18 @@ document.addEventListener('click', ev => {
   if (t.dataset.bal) openBal(t.dataset.bal);
   else if (t.dataset.edit) openEmp(t.dataset.edit);
   else if (t.dataset.pin) openPin(t.dataset.pin);
+});
+
+document.addEventListener('change', async ev => {
+  const s = ev.target.closest('select[data-lv]'); if (!s) return;
+  const e = emp(s.dataset.lv), prev = e.level || 'พนักงาน';
+  s.disabled = true;
+  try {
+    const j = await api('hrLevelSave', { empId: e.id, level: s.value });
+    if (j.ok) { e.level = j.level; toast(e.name + ' เป็น ' + j.level + ' แล้ว'); renderBal(); }
+    else { s.value = prev; toast('บันทึกระดับไม่สำเร็จ: ' + (j.error || '')); }
+  } catch (err) { s.value = prev; toast('เชื่อมต่อไม่ได้ ลองใหม่อีกครั้ง'); }
+  s.disabled = false;
 });
 
 // ----- แก้ยอดวันลา -----
@@ -363,6 +388,7 @@ function openEmp(id) {
   $('#eId').value = e ? e.id : ''; $('#eId').readOnly = !empNew;
   $('#eName').value = e ? e.name : ''; $('#eDept').value = e ? e.dept : ''; $('#ePhone').value = e ? e.phone : '';
   $('#eActive').checked = e ? e.active : true;
+  $('#eLevel').value = e ? (e.level || 'พนักงาน') : 'พนักงาน';
   $('#ePinBox').hidden = !empNew; $('#ePin').value = empNew ? randPin() : '';
   $('#empErr').textContent = '';
   $('#empDlg').showModal();
@@ -380,7 +406,7 @@ $('#empForm').addEventListener('submit', async ev => {
   $('#empSave').disabled = true; $('#empErr').textContent = '';
   try {
     const j = await api('hrEmpSave', { empId: id, name: name, dept: $('#eDept').value.trim(), phone: $('#ePhone').value.trim(),
-      active: $('#eActive').checked, pin: pin });
+      active: $('#eActive').checked, level: $('#eLevel').value, pin: pin });
     if (j.ok) {
       $('#empDlg').close();
       toast(empNew ? 'เพิ่มพนักงานแล้ว PIN เริ่มต้น: ' + pin : 'บันทึกแล้ว');
