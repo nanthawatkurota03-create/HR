@@ -72,16 +72,72 @@ input:focus,select:focus,textarea:focus,button:focus-visible{outline:3px solid #
 .bal.low .bv{color:var(--no)}
 .bal .bp{font-size:12px;color:var(--warn);font-weight:500}
 #toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0));transform:translateX(-50%);background:var(--ink);color:#fff;padding:10px 16px;border-radius:8px;display:none;max-width:90%;font-size:15px;z-index:9}
+
+header h1{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#menuBtn{background:transparent;border:0;color:#fff;width:44px;height:44px;margin:-8px 0 -8px -10px;display:grid;place-items:center;border-radius:8px;position:relative;flex:none;cursor:pointer}
+#menuBtn:focus-visible{outline:3px solid #fff;outline-offset:-3px}
+#menuDot{position:absolute;top:8px;right:8px;width:12px;height:12px;border-radius:50%;background:#ffb703;border:2px solid var(--brand)}
+.scrim{position:fixed;inset:0;background:rgba(20,38,43,.5);z-index:15}
+.drawer{position:fixed;top:0;bottom:0;left:0;width:min(300px,84vw);background:#fff;z-index:20;display:flex;flex-direction:column;
+transform:translateX(-100%);visibility:hidden;transition:transform .2s ease,visibility .2s;box-shadow:2px 0 12px rgba(0,0,0,.2);
+padding-bottom:env(safe-area-inset-bottom,0);overflow-y:auto}
+.drawer.open{transform:none;visibility:visible}
+@media (prefers-reduced-motion:reduce){.drawer{transition:none}}
+.dhead{background:var(--brand);color:#fff;padding:calc(18px + env(safe-area-inset-top,0)) 16px 16px}
+.dhead .dn{font-weight:600;font-size:17px}
+.dhead .dm{font-size:14px;opacity:.9}
+.mi{display:flex;align-items:center;gap:8px;width:100%;min-height:52px;padding:10px 16px;background:#fff;border:0;border-left:4px solid transparent;
+font:inherit;font-size:16px;text-align:left;color:var(--ink);cursor:pointer}
+.mi small{display:block;color:var(--muted);font-size:13px}
+.mi.on{background:var(--bg);border-left-color:var(--brand);font-weight:600}
+.mi:focus-visible{outline:3px solid #7fb8c6;outline-offset:-3px}
+.badge{margin-left:auto;background:var(--no);color:#fff;border-radius:99px;font-size:13px;font-weight:600;padding:1px 9px}
+.dfoot{margin-top:auto;padding:12px 16px}
+.drawer #installBtn{width:100%;background:var(--bg);color:var(--brand);border:1px solid var(--brand);padding:10px 12px;font-size:15px}
+.apBtns{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+.dbtn.ok{background:var(--ok)}
+.dbtn.no{background:var(--no)}
+.apNote{margin-top:10px}
+.sub{color:var(--muted);font-size:14px;margin:-4px 0 4px}
+.dfoot>*+*{margin-top:12px}
 </style>
 </head>
 <body>
 <header>
-  <h1>ขอใบลา</h1>
+  <button id="menuBtn" type="button" aria-label="เมนู" aria-controls="drawer" aria-expanded="false" hidden>
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+    <span id="menuDot" hidden></span>
+  </button>
+  <h1 id="pageTitle">ขอใบลา</h1>
   <div class="hbtns">
-    <button id="installBtn" type="button">ติดตั้งแอป</button>
     <button id="hrBtn" type="button">เข้าสู่ระบบ HR</button>
   </div>
 </header>
+
+<div class="scrim" id="scrim" hidden></div>
+<nav class="drawer" id="drawer" aria-label="เมนูหลัก">
+  <div class="dhead">
+    <div class="dn" id="dName"></div>
+    <div class="dm" id="dMeta"></div>
+  </div>
+  <button class="mi" type="button" data-view="hr">
+    <span>ขอใบลา<small>ส่งให้ HR (ระบบเดิม)</small></span>
+  </button>
+  <button class="mi" type="button" data-view="online">
+    <span>ลางานออนไลน์<small>ส่งให้หัวหน้าอนุมัติ</small></span>
+  </button>
+  <button class="mi" type="button" data-view="approve" id="miApprove" hidden>
+    <span>อนุมัติใบลา<small>สำหรับหัวหน้า</small></span>
+    <span class="badge" id="apBadge" hidden></span>
+  </button>
+  <div class="dfoot">
+    <div id="pushBox" hidden>
+      <button id="pushBtn" class="dbtn ghost" type="button" style="width:100%">เปิดแจ้งเตือนบนมือถือ</button>
+      <div class="m" id="pushNote" style="margin-top:6px"></div>
+    </div>
+    <button id="installBtn" type="button">ติดตั้งแอป</button>
+  </div>
+</nav>
 
 <dialog id="hrDlg">
   <form id="hrForm" method="dialog">
@@ -145,6 +201,7 @@ input:focus,select:focus,textarea:focus,button:focus-visible{outline:3px solid #
       </div>
     </section>
 
+    <div id="viewHr">
     <section>
       <h2 id="balTitle">ยอดวันลาคงเหลือ</h2>
       <div class="bals" id="bals"></div>
@@ -190,6 +247,50 @@ input:focus,select:focus,textarea:focus,button:focus-visible{outline:3px solid #
       </div>
       <div id="list" style="margin-top:12px"></div>
     </section>
+    </div>
+
+    <!-- ลางานออนไลน์ (พนักงาน -> หัวหน้า) -->
+    <div id="viewOnline" hidden>
+      <section>
+        <h2>ลางานออนไลน์</h2>
+        <div class="sub" id="olSup"></div>
+        <form id="olForm" novalidate>
+          <label for="olType">ประเภทการลา</label>
+          <select id="olType"></select>
+          <div class="row">
+            <div><label for="olStart">ตั้งแต่วันที่</label><input id="olStart" type="date" required></div>
+            <div><label for="olEnd">ถึงวันที่</label><input id="olEnd" type="date" required></div>
+          </div>
+          <label class="check" for="olHalf"><input id="olHalf" type="checkbox" disabled> ลาครึ่งวัน (เลือกได้เมื่อลาวันเดียว)</label>
+          <div class="days" id="olDays">จำนวนวันลา: -</div>
+          <label for="olReason">เหตุผลการลา</label><textarea id="olReason" required></textarea>
+          <label for="olPhone">เบอร์ติดต่อระหว่างลา</label><input id="olPhone" type="tel" inputmode="tel" autocomplete="tel">
+          <button class="btn" id="olSubmit" type="submit">ส่งให้หัวหน้า</button>
+        </form>
+      </section>
+      <section>
+        <div class="top" style="display:flex;justify-content:space-between;align-items:center">
+          <h2 style="margin:0">การลาออนไลน์ของฉัน</h2>
+          <button class="link" id="olRefresh" type="button">อัปเดตสถานะ</button>
+        </div>
+        <div id="olList" style="margin-top:12px"></div>
+      </section>
+    </div>
+
+    <!-- อนุมัติใบลา (หัวหน้า) -->
+    <div id="viewApprove" hidden>
+      <section>
+        <div class="top" style="display:flex;justify-content:space-between;align-items:center">
+          <h2 style="margin:0">ใบลารออนุมัติ</h2>
+          <button class="link" id="apRefresh" type="button">รีเฟรช</button>
+        </div>
+        <div id="apList" style="margin-top:12px"></div>
+      </section>
+      <section>
+        <h2>พิจารณาแล้วล่าสุด</h2>
+        <div id="apHist"></div>
+      </section>
+    </div>
   </div>
 </main>
 <div id="toast" role="status"></div>
@@ -236,6 +337,7 @@ async function api(body) {
 // ----- แสดง/ซ่อนหน้า -----
 function showLogin(msg) {
   $('#loginBox').hidden = false; $('#app').hidden = true;
+  resetOl();
   $('#lgErr').textContent = msg || '';
   const last = LS.get('lastEmpId', '');
   if (last && !$('#lgId').value) $('#lgId').value = last;
@@ -246,6 +348,7 @@ function showApp() {
   $('#whoMeta').textContent = 'รหัส ' + S.emp.id + (S.emp.dept ? ' · แผนก ' + S.emp.dept : '');
   if (S.emp.phone && !$('#phone').value) $('#phone').value = S.emp.phone;
   renderBalances(); renderHint(); render();
+  $('#menuBtn').hidden = false; renderMenuInfo(); applyView(); startPoll(); initPush();
 }
 
 // ----- ยอดวันลา -----
@@ -386,6 +489,7 @@ $('#loginForm').addEventListener('submit', async ev => {
 $('#logout').addEventListener('click', () => {
   const pending = reqs.filter(r => !r.synced).length;
   if (pending && !confirm('มีใบลา ' + pending + ' ฉบับที่ยังไม่ได้ส่ง ออกจากระบบแล้วจะส่งต่อเมื่อเข้าสู่ระบบอีกครั้ง ออกจากระบบ?')) return;
+  pushOffQuiet();
   LS.del('session'); S = null; reqs = [];
   $('#lgPin').value = '';
   showLogin('');
@@ -494,6 +598,285 @@ $('#hrForm').addEventListener('submit', async ev => {
     $('#hrErr').textContent = j.error === 'auth' ? 'รหัสผ่านไม่ถูกต้อง' : 'เกิดข้อผิดพลาด ลองใหม่อีกครั้ง';
   } catch (e) { $('#hrErr').textContent = 'เชื่อมต่อไม่ได้ ลองใหม่อีกครั้ง'; }
   $('#hrGo').disabled = false;
+});
+
+// ===== เมนู hamburger + ลางานออนไลน์ + อนุมัติใบลา =====
+const TITLES = { hr: 'ขอใบลา', online: 'ลางานออนไลน์', approve: 'อนุมัติใบลา' };
+let VIEW = location.hash === '#approve' ? 'approve' : location.hash === '#online' ? 'online' : 'hr';
+let OL = { mine: [], inbox: [], hist: [], pending: 0 };
+let olTimer = null, olCid = null, olLast = -1;
+const escA = s => esc(s == null ? '' : s).replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+const fmtTs = ts => { const d = new Date(ts); return isNaN(d) ? '' : d.toLocaleString('th-TH', { dateStyle: 'short', timeStyle: 'short' }); };
+const rangeOf = r => r.start === r.end ? fmtDate(r.start) : fmtDate(r.start) + ' - ' + fmtDate(r.end);
+const STATUS_CLS = { 'รออนุมัติ': 's-wait', 'อนุมัติ': 's-ok', 'ไม่อนุมัติ': 's-no' };
+
+$('#olType').innerHTML = $('#type').innerHTML;
+
+function openMenu() {
+  $('#drawer').classList.add('open'); $('#scrim').hidden = false;
+  $('#menuBtn').setAttribute('aria-expanded', 'true');
+  const on = $('#drawer .mi.on') || $('#drawer .mi:not([hidden])'); if (on) on.focus();
+}
+function closeMenu() {
+  $('#drawer').classList.remove('open'); $('#scrim').hidden = true;
+  $('#menuBtn').setAttribute('aria-expanded', 'false');
+}
+$('#menuBtn').addEventListener('click', () => $('#drawer').classList.contains('open') ? closeMenu() : openMenu());
+$('#scrim').addEventListener('click', closeMenu);
+document.addEventListener('keydown', ev => { if (ev.key === 'Escape') closeMenu(); });
+document.querySelectorAll('#drawer .mi[data-view]').forEach(b => b.addEventListener('click', () => setView(b.dataset.view)));
+
+function applyView() {
+  if (!S) return;
+  if (VIEW === 'approve' && S.emp.isSup === false) VIEW = 'hr';
+  $('#viewHr').hidden = VIEW !== 'hr';
+  $('#viewOnline').hidden = VIEW !== 'online';
+  $('#viewApprove').hidden = VIEW !== 'approve';
+  $('#pageTitle').textContent = TITLES[VIEW];
+  document.querySelectorAll('#drawer .mi[data-view]').forEach(b => b.classList.toggle('on', b.dataset.view === VIEW));
+  if (VIEW === 'online' && S.emp.phone && !$('#olPhone').value) $('#olPhone').value = S.emp.phone;
+}
+function setView(v) {
+  VIEW = v; applyView(); closeMenu(); window.scrollTo(0, 0);
+  if (v !== 'hr') olSync(false);
+}
+function renderMenuInfo() {
+  if (!S) return;
+  $('#dName').textContent = S.emp.name;
+  $('#dMeta').textContent = 'รหัส ' + S.emp.id + (S.emp.dept ? ' · ' + S.emp.dept : '');
+  const sup = S.emp.isSup === true;
+  $('#miApprove').hidden = !sup;
+  const n = sup ? (OL.pending || 0) : 0;
+  $('#apBadge').hidden = !n; $('#apBadge').textContent = n;
+  $('#menuDot').hidden = !n;
+  $('#menuBtn').setAttribute('aria-label', n ? 'เมนู (มีใบลารออนุมัติ ' + n + ' ฉบับ)' : 'เมนู');
+}
+function resetOl() {
+  OL = { mine: [], inbox: [], hist: [], pending: 0 }; olLast = -1; olCid = null;
+  clearInterval(olTimer); olTimer = null; pushInit = false;
+  closeMenu(); $('#menuBtn').hidden = true;
+}
+
+// ----- คำนวณจำนวนวัน (ฟอร์มลาออนไลน์) -----
+function olCalc() {
+  const s = $('#olStart').value, e = $('#olEnd').value, half = $('#olHalf');
+  half.disabled = !(s && e && s === e);
+  if (half.disabled) half.checked = false;
+  if (!s || !e) { $('#olDays').textContent = 'จำนวนวันลา: -'; return null; }
+  if (e < s) { $('#olDays').textContent = 'วันที่สิ้นสุดต้องไม่ก่อนวันที่เริ่ม'; return null; }
+  const n = (new Date(e) - new Date(s)) / 86400000 + 1;
+  const days = half.checked ? 0.5 : n;
+  $('#olDays').textContent = 'จำนวนวันลา: ' + days + ' วัน';
+  return days;
+}
+['olStart', 'olEnd', 'olHalf'].forEach(id => $('#' + id).addEventListener('input', olCalc));
+olCalc();
+
+// ----- ดึงข้อมูลลางานออนไลน์ -----
+async function olSync(manual) {
+  if (!S) return;
+  if (!apiReady() || !navigator.onLine) { if (manual) toast('ออฟไลน์อยู่'); return; }
+  try {
+    const j = await api({ action: 'olSync', token: S.token });
+    if (!S) return;
+    if (j.ok) {
+      OL = { mine: j.mine || [], inbox: j.inbox || [], hist: j.hist || [], pending: j.pending || 0 };
+      if (S.emp.isSup !== j.isSup) { S.emp.isSup = j.isSup; saveSession(); }
+      if (j.isSup && olLast >= 0 && OL.pending > olLast) toast('มีใบลาใหม่รออนุมัติ ' + (OL.pending - olLast) + ' ฉบับ');
+      olLast = OL.pending;
+      renderMenuInfo(); applyView(); renderOl();
+      if (manual) toast('อัปเดตแล้ว');
+    } else if (j.error === 'auth') expire();
+  } catch (e) { if (manual) toast('อัปเดตไม่สำเร็จ ลองใหม่อีกครั้ง'); }
+}
+function startPoll() {
+  if (olTimer) return;
+  olSync(false);
+  // หัวหน้าเช็คใบลาใหม่ทุก 2 นาทีขณะเปิดแอปอยู่ (พนักงานทั่วไปอัปเดตตอนเปิดแอป/กดปุ่ม เพื่อไม่ให้ระบบหนักเกินไป)
+  olTimer = setInterval(() => { if (S && S.emp.isSup && !document.hidden) olSync(false); }, 120000);
+}
+document.addEventListener('visibilitychange', () => { if (!document.hidden && S && S.emp.isSup) olSync(false); });
+
+// ----- แสดงรายการ -----
+function renderOl() {
+  if (!S) return;
+  $('#olSup').textContent = S.emp.supName ? 'ส่งถึงหัวหน้า: ' + S.emp.supName : 'ยังไม่ได้กำหนดหัวหน้า กรุณาติดต่อ HR';
+  $('#olList').innerHTML = OL.mine.length ? OL.mine.map(r =>
+    '<div class="item"><div class="top"><div>' +
+    '<div class="t">' + esc(r.type) + ' ' + esc(r.days) + ' วัน</div>' +
+    '<div class="m">' + rangeOf(r) + '</div>' +
+    '<div class="m">หัวหน้า: ' + esc(r.supName) + (r.no ? ' · เลขที่ ' + esc(r.no) : '') + '</div>' +
+    (r.note ? '<div class="m">หมายเหตุหัวหน้า: ' + esc(r.note) + '</div>' : '') +
+    '</div><span class="chip ' + (STATUS_CLS[r.status] || 's-idle') + '">' + esc(r.status) + '</span></div></div>'
+  ).join('') : '<p class="empty">ยังไม่มีรายการ กรอกฟอร์มด้านบนเพื่อส่งให้หัวหน้า</p>';
+
+  $('#apList').innerHTML = OL.inbox.length ? OL.inbox.map(r =>
+    '<div class="item ap" data-cid="' + escA(r.cid) + '" data-name="' + escA(r.name) + '">' +
+    '<div class="top"><div><div class="t">' + esc(r.name) + ' (' + esc(r.empId) + ')</div>' +
+    '<div class="m">' + (r.dept ? 'แผนก ' + esc(r.dept) : '') + '</div></div>' +
+    '<span class="chip s-wait">รออนุมัติ</span></div>' +
+    '<div style="margin-top:6px"><b>' + esc(r.type) + ' ' + esc(r.days) + ' วัน</b></div>' +
+    '<div class="m">' + rangeOf(r) + '</div>' +
+    '<div style="margin-top:6px">เหตุผล: ' + esc(r.reason) + '</div>' +
+    '<div class="m">เบอร์ติดต่อ: ' + esc(r.phone || '-') + ' · ยื่นเมื่อ ' + esc(fmtTs(r.ts)) + '</div>' +
+    '<input class="apNote" maxlength="300" placeholder="หมายเหตุถึงพนักงาน (ไม่บังคับ)" aria-label="หมายเหตุ">' +
+    '<div class="apBtns"><button class="dbtn ok" type="button" data-d="ok">ยืนยันอนุมัติ</button>' +
+    '<button class="dbtn no" type="button" data-d="no">ไม่อนุมัติ</button></div></div>'
+  ).join('') : '<p class="empty">ไม่มีใบลาที่รออนุมัติ</p>';
+
+  $('#apHist').innerHTML = OL.hist.length ? OL.hist.map(r =>
+    '<div class="item"><div class="top"><div>' +
+    '<div class="t">' + esc(r.name) + ' · ' + esc(r.type) + ' ' + esc(r.days) + ' วัน</div>' +
+    '<div class="m">' + rangeOf(r) + '</div>' +
+    (r.note ? '<div class="m">หมายเหตุ: ' + esc(r.note) + '</div>' : '') +
+    '</div><span class="chip ' + (STATUS_CLS[r.status] || 's-idle') + '">' + esc(r.status) + '</span></div></div>'
+  ).join('') : '<p class="empty">ยังไม่มีรายการ</p>';
+}
+$('#olRefresh').addEventListener('click', () => olSync(true));
+$('#apRefresh').addEventListener('click', () => olSync(true));
+
+// ----- พนักงานส่งลางานออนไลน์ -----
+$('#olForm').addEventListener('submit', async ev => {
+  ev.preventDefault();
+  if (!S) return;
+  const v = id => $('#' + id).value.trim();
+  const days = olCalc();
+  if (!v('olStart') || !v('olEnd') || !v('olReason')) { toast('กรอกข้อมูลที่จำเป็นให้ครบ'); return; }
+  if (days === null) { toast('ตรวจสอบวันที่ลาอีกครั้ง'); return; }
+  if (!apiReady()) { toast('ยังไม่ได้ตั้งค่า API_URL ใน index.html'); return; }
+  if (!navigator.onLine) { toast('ออฟไลน์อยู่ ต้องมีอินเทอร์เน็ตเพื่อส่งใบลาออนไลน์'); return; }
+  if (!olCid) olCid = crypto.randomUUID(); // ใช้ id เดิมถ้าส่งซ้ำ เซิร์ฟเวอร์จะไม่สร้างใบซ้ำ
+  $('#olSubmit').disabled = true;
+  try {
+    const j = await api({ action: 'olSubmit', token: S.token, cid: olCid, type: $('#olType').value,
+      start: v('olStart'), end: v('olEnd'), half: $('#olHalf').checked, reason: v('olReason'), phone: v('olPhone') });
+    if (j.ok) {
+      olCid = null;
+      toast('ส่งให้หัวหน้าแล้ว');
+      $('#olStart').value = $('#olEnd').value = $('#olReason').value = ''; $('#olHalf').checked = false; olCalc();
+      await olSync(false);
+    } else if (j.error === 'auth') { expire(); }
+    else { olCid = null; toast(j.message || 'ส่งไม่สำเร็จ (' + j.error + ')'); }
+  } catch (e) { toast('เชื่อมต่อไม่ได้ ลองกดส่งอีกครั้ง'); }
+  $('#olSubmit').disabled = false;
+});
+
+// ----- หัวหน้ากดอนุมัติ / ไม่อนุมัติ -----
+$('#apList').addEventListener('click', async ev => {
+  const b = ev.target.closest('button[data-d]'); if (!b || !S) return;
+  const card = b.closest('.ap');
+  const dec = b.dataset.d, name = card.dataset.name;
+  if (!confirm((dec === 'ok' ? 'ยืนยันอนุมัติ' : 'ไม่อนุมัติ') + 'ใบลาของ ' + name + ' ?')) return;
+  card.querySelectorAll('button').forEach(x => x.disabled = true);
+  try {
+    const j = await api({ action: 'olDecide', token: S.token, cid: card.dataset.cid, decision: dec,
+      note: card.querySelector('.apNote').value.trim() });
+    if (j.ok) { toast('บันทึกแล้ว: ' + j.status); await olSync(false); return; }
+    if (j.error === 'auth') { expire(); return; }
+    toast(j.error === 'done' ? 'ใบลานี้ถูกพิจารณาไปแล้ว' : 'บันทึกไม่สำเร็จ (' + j.error + ')');
+    await olSync(false);
+  } catch (e) {
+    toast('เชื่อมต่อไม่ได้ ลองใหม่อีกครั้ง');
+    card.querySelectorAll('button').forEach(x => x.disabled = false);
+  }
+});
+
+// ===== แจ้งเตือนบนมือถือ (Firebase Cloud Messaging) =====
+// ค่าจาก Firebase Console > Project settings > General > Your apps (Web) และ Cloud Messaging > Web Push certificates
+// (ต้องตั้งค่า FIREBASE_CFG เดียวกันใน sw.js ด้วย)
+const FIREBASE_CFG = { apiKey: '', authDomain: '', projectId: '', messagingSenderId: '', appId: '' };
+const VAPID_KEY = '';
+const FB_VER = '10.12.2';
+let pushInit = false, fbMsg = null;
+const pushReady = () => !!(FIREBASE_CFG.apiKey && VAPID_KEY);
+const pushSupported = () => 'serviceWorker' in navigator && 'PushManager' in window && 'Notification' in window;
+const pushOn = () => !!(S && LS.get('pushOn:' + S.emp.id, false)) && pushSupported() && Notification.permission === 'granted';
+function loadScript(src) {
+  return new Promise((res, rej) => { const s = document.createElement('script'); s.src = src; s.onload = res; s.onerror = rej; document.head.appendChild(s); });
+}
+async function fbMessaging() {
+  if (fbMsg) return fbMsg;
+  await loadScript('https://www.gstatic.com/firebasejs/' + FB_VER + '/firebase-app-compat.js');
+  await loadScript('https://www.gstatic.com/firebasejs/' + FB_VER + '/firebase-messaging-compat.js');
+  if (!firebase.apps.length) firebase.initializeApp(FIREBASE_CFG);
+  fbMsg = firebase.messaging();
+  // แอปเปิดอยู่หน้าจอ: แสดง toast + โหลดข้อมูลใหม่
+  fbMsg.onMessage(p => { const d = p.data || {}; toast((d.title || '') + (d.body ? ': ' + d.body : '')); olSync(false); });
+  return fbMsg;
+}
+async function pushGetToken() {
+  const reg = await navigator.serviceWorker.ready;
+  const m = await fbMessaging();
+  return m.getToken({ vapidKey: VAPID_KEY, serviceWorkerRegistration: reg });
+}
+function renderPushBtn() {
+  const box = $('#pushBox');
+  if (!S || !pushReady()) { box.hidden = true; return; }
+  box.hidden = false;
+  const btn = $('#pushBtn'), note = $('#pushNote');
+  btn.disabled = false; note.textContent = '';
+  if (!pushSupported()) {
+    btn.disabled = true; btn.textContent = 'เปิดแจ้งเตือนบนมือถือ';
+    note.textContent = 'เครื่องนี้ยังเปิดแจ้งเตือนไม่ได้ ถ้าใช้ iPhone ให้กดแชร์ > "เพิ่มไปยังหน้าจอโฮม" แล้วเปิดแอปจากไอคอนนั้น (ต้อง iOS 16.4 ขึ้นไป)';
+  } else if (Notification.permission === 'denied') {
+    btn.disabled = true; btn.textContent = 'เปิดแจ้งเตือนบนมือถือ';
+    note.textContent = 'การแจ้งเตือนถูกบล็อกอยู่ ไปเปิดอนุญาตที่ตั้งค่าของเบราว์เซอร์/แอปนี้ก่อน';
+  } else if (pushOn()) {
+    btn.textContent = 'ปิดแจ้งเตือนบนมือถือ'; note.textContent = 'เปิดอยู่: จะได้แจ้งเตือนเมื่อมีใบลาใหม่หรือมีผลอนุมัติ';
+  } else btn.textContent = 'เปิดแจ้งเตือนบนมือถือ';
+}
+async function enablePush() {
+  if (!S || !pushReady() || !pushSupported()) return;
+  if (!navigator.onLine) { toast('ออฟไลน์อยู่ ต้องมีอินเทอร์เน็ต'); return; }
+  $('#pushBtn').disabled = true;
+  try {
+    const perm = await Notification.requestPermission();
+    if (perm !== 'granted') { toast('ไม่ได้อนุญาตการแจ้งเตือน'); renderPushBtn(); return; }
+    const tok = await pushGetToken();
+    if (!tok) throw new Error('no token');
+    const j = await api({ action: 'pushReg', token: S.token, fcm: tok, ua: navigator.userAgent });
+    if (j.ok) {
+      LS.set('fcmTok', tok); LS.set('fcmOwner', S.emp.id); LS.set('pushOn:' + S.emp.id, true);
+      toast('เปิดแจ้งเตือนแล้ว');
+    } else if (j.error === 'auth') { expire(); return; }
+    else toast('ลงทะเบียนแจ้งเตือนไม่สำเร็จ');
+  } catch (e) { toast('เปิดแจ้งเตือนไม่สำเร็จ ลองใหม่อีกครั้ง'); }
+  renderPushBtn();
+}
+async function disablePush() {
+  if (!S) return;
+  const tok = LS.get('fcmTok', null);
+  LS.set('pushOn:' + S.emp.id, false); LS.del('fcmTok'); LS.del('fcmOwner');
+  try { if (tok) await api({ action: 'pushUnreg', token: S.token, fcm: tok }); } catch (e) {}
+  try { const m = await fbMessaging(); await m.deleteToken(); } catch (e) {}
+  renderPushBtn(); toast('ปิดแจ้งเตือนแล้ว');
+}
+$('#pushBtn').addEventListener('click', () => pushOn() ? disablePush() : enablePush());
+// ออกจากระบบ: ถอนอุปกรณ์นี้ออกจากบัญชี (เครื่องที่ใช้ร่วมกันจะไม่เด้งแจ้งเตือนของคนก่อนหน้า) เปิดใหม่อัตโนมัติเมื่อล็อกอินอีกครั้ง
+function pushOffQuiet() {
+  const tok = LS.get('fcmTok', null);
+  if (!S || !tok) return;
+  api({ action: 'pushUnreg', token: S.token, fcm: tok }).catch(() => {});
+  LS.del('fcmTok'); LS.del('fcmOwner');
+}
+// เปิดแอป/ล็อกอิน: ถ้าเคยเปิดแจ้งเตือนไว้ ให้ตรวจ token และลงทะเบียนใหม่เงียบ ๆ
+async function initPush() {
+  renderPushBtn();
+  if (pushInit || !S || !pushReady() || !pushSupported() || !navigator.onLine) return;
+  pushInit = true;
+  if (!pushOn()) return;
+  try {
+    const tok = await pushGetToken();
+    if (!tok) return;
+    if (tok !== LS.get('fcmTok', null) || LS.get('fcmOwner', '') !== S.emp.id) {
+      const j = await api({ action: 'pushReg', token: S.token, fcm: tok, ua: navigator.userAgent });
+      if (j.ok) { LS.set('fcmTok', tok); LS.set('fcmOwner', S.emp.id); }
+    }
+  } catch (e) {}
+}
+// กดแจ้งเตือนขณะแอปเปิดอยู่ใน background: sw.js ส่งหน้าที่ต้องเปิดมาให้
+if ('serviceWorker' in navigator) navigator.serviceWorker.addEventListener('message', ev => {
+  if (ev.data && ev.data.view && S) setView(ev.data.view);
 });
 
 // ----- PWA -----
