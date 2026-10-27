@@ -11,7 +11,7 @@
 --warn:#a86a00;--warn-bg:#fdf0d5;--ok:#1a7f4b;--ok-bg:#dcf3e6;--no:#b3261e;--no-bg:#fbe3e1}
 *{box-sizing:border-box}
 body{margin:0;font-family:'IBM Plex Sans Thai',system-ui,sans-serif;background:var(--bg);color:var(--ink);font-size:15px;line-height:1.5}
-header{background:var(--brand);color:#fff;padding:12px 20px;display:flex;align-items:center;justify-content:space-between;gap:12px}
+header{background:var(--brand);color:#fff;padding:12px 20px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
 header h1{font-size:18px;font-weight:600;margin:0}
 button,input,select,textarea{font:inherit;color:var(--ink)}
 input,select,textarea{border:1px solid #b8c3c9;border-radius:8px;padding:8px 10px;background:#fff;min-height:40px;width:100%}
@@ -23,6 +23,7 @@ textarea{min-height:70px}
 .btn.sm{padding:4px 12px;min-height:32px;font-size:14px}
 .btn.ok{background:var(--ok)}.btn.no{background:var(--no)}
 .btn:disabled{opacity:.6;cursor:default}
+a.btn{display:inline-flex;align-items:center;text-decoration:none}
 header .btn.ghost{border-color:#fff;background:transparent;color:#fff}
 main{max-width:1280px;margin:0 auto;padding:20px}
 #login{max-width:340px;margin:12vh auto;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:24px}
@@ -49,6 +50,7 @@ tr:last-child td{border-bottom:0}
 .chip{font-size:13px;font-weight:500;padding:2px 10px;border-radius:99px;white-space:nowrap}
 .s-wait{background:var(--warn-bg);color:var(--warn)}.s-ok{background:var(--ok-bg);color:var(--ok)}.s-no{background:var(--no-bg);color:var(--no)}
 .m{color:var(--muted);font-size:13px}
+.low{color:var(--no);font-weight:500}
 .num{text-align:right}
 .empty{padding:28px;text-align:center;color:var(--muted)}
 dialog{border:0;border-radius:12px;padding:20px;width:min(480px,94vw)}
@@ -75,7 +77,8 @@ dialog label{display:block;font-size:14px;font-weight:500;margin:10px 0 3px}
 <div id="app" class="hidden">
   <header>
     <h1>ระบบ HR - ใบลาพนักงาน</h1>
-    <div style="display:flex;gap:8px">
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <a class="btn ghost sm" href="balance.html">พนักงานและยอดวันลา</a>
       <button class="btn ghost sm" id="addBtn" type="button">บันทึกการลาแทนพนักงาน</button>
       <button class="btn ghost sm" id="csvBtn" type="button">ส่งออก CSV</button>
       <button class="btn ghost sm" id="reloadBtn" type="button">โหลดใหม่</button>
@@ -135,11 +138,13 @@ const $ = s => document.querySelector(s);
 let pass = sessionStorage.getItem('hrpass') || '';
 let items = [];
 let tab = 'list';
+let BAL = { year: 0, map: {}, names: {} }; // ยอดวันลาของปีปัจจุบัน ใช้แสดงในใบที่รออนุมัติ
 
 function esc(s) { const d = document.createElement('div'); d.textContent = s == null ? '' : s; return d.innerHTML; }
 function toast(m) { const t = $('#toast'); t.textContent = m; t.style.display = 'block'; clearTimeout(toast.t); toast.t = setTimeout(() => t.style.display = 'none', 3000); }
 function fmtDate(s) { const [y, m, d] = String(s).slice(0, 10).split('-').map(Number); return d + '/' + m + '/' + (y + 543); }
 function fmtTs(s) { const d = new Date(s); return isNaN(d) ? '' : d.toLocaleString('th-TH', { dateStyle: 'short', timeStyle: 'short' }); }
+const fmtN = n => String(+Number(n).toFixed(2));
 
 async function call(action, payload) {
   const res = await fetch(API_URL, {
@@ -147,6 +152,27 @@ async function call(action, payload) {
     body: JSON.stringify(Object.assign({ action, passcode: pass }, payload || {}))
   });
   return res.json();
+}
+
+// ---------- ยอดวันลา (แสดงในใบที่รออนุมัติ) ----------
+async function loadBal() {
+  try {
+    const j = await call('hrBalList', { year: new Date().getFullYear() });
+    if (!j.ok) return;
+    BAL = { year: j.year, map: {}, names: {} };
+    j.balances.forEach(b => BAL.map[b.empId + '|' + b.code] = b);
+    j.tracked.forEach(t => BAL.names[t.code] = t.name);
+  } catch (e) {}
+}
+function balLine(r) {
+  if (r.status !== 'รออนุมัติ') return '';
+  if (Number(String(r.start).slice(0, 4)) !== BAL.year) return '';
+  const code = String(r.type).slice(0, 2);
+  const b = BAL.map[String(r.empId).trim() + '|' + code];
+  if (!b) return '';
+  const rem = b.total - b.used, over = Number(r.days || 0) > rem;
+  return '<div class="m' + (over ? ' low' : '') + '">คงเหลือ' + esc(BAL.names[code] || '') + ' ' + fmtN(rem) +
+    ' วัน (ใช้ไป ' + fmtN(b.used) + '/' + fmtN(b.total) + ')' + (over ? ' · ขอลาเกินยอด' : '') + '</div>';
 }
 
 // ---------- เข้าสู่ระบบ ----------
@@ -157,6 +183,7 @@ async function enter() {
     if (!j.ok) { $('#err').textContent = j.error === 'auth' ? 'รหัสผ่านไม่ถูกต้อง' : 'เกิดข้อผิดพลาด: ' + j.error; return false; }
     items = j.items; sessionStorage.setItem('hrpass', pass);
     $('#login').classList.add('hidden'); $('#app').classList.remove('hidden'); render();
+    loadBal().then(render);
     return true;
   } catch (e) { $('#err').textContent = 'เชื่อมต่อไม่ได้ ตรวจสอบอินเทอร์เน็ตและ API_URL'; return false; }
 }
@@ -166,7 +193,8 @@ $('#loginForm').addEventListener('submit', async ev => {
 });
 $('#logoutBtn').addEventListener('click', () => { sessionStorage.removeItem('hrpass'); location.href = '../index.html'; });
 $('#reloadBtn').addEventListener('click', async () => {
-  const j = await call('hrList'); if (j.ok) { items = j.items; render(); toast('โหลดข้อมูลล่าสุดแล้ว'); } else toast('โหลดไม่สำเร็จ');
+  const j = await call('hrList');
+  if (j.ok) { items = j.items; await loadBal(); render(); toast('โหลดข้อมูลล่าสุดแล้ว'); } else toast('โหลดไม่สำเร็จ');
 });
 
 // ---------- ตัวกรอง ----------
@@ -212,7 +240,7 @@ function renderList() {
         : '<button class="btn sm ghost" data-a="re" data-c="' + esc(r.cid) + '">ย้อนเป็นรออนุมัติ</button>';
       return '<tr><td>' + esc(r.no) + '<div class="m">' + fmtTs(r.ts) + '</div></td>' +
         '<td>' + esc(r.name) + '<div class="m">' + esc(r.empId) + (r.dept ? ' · ' + esc(r.dept) : '') + '</div></td>' +
-        '<td>' + esc(r.type) + '</td><td>' + range + '</td><td class="num">' + esc(r.days) + '</td>' +
+        '<td>' + esc(r.type) + balLine(r) + '</td><td>' + range + '</td><td class="num">' + esc(r.days) + '</td>' +
         '<td class="wrapt">' + esc(r.reason) + (r.phone ? '<div class="m">โทร ' + esc(r.phone) + '</div>' : '') +
         (r.note ? '<div class="m">หมายเหตุ HR: ' + esc(r.note) + '</div>' : '') + '</td>' +
         '<td><span class="chip ' + (cls[r.status] || '') + '">' + esc(r.status) + '</span></td><td>' + act + '</td></tr>';
@@ -252,6 +280,7 @@ $('#view').addEventListener('click', async ev => {
     if (!j.ok) throw new Error(j.error);
     const r = items.find(x => x.cid === cid); r.status = status; r.note = note; r.decidedAt = new Date().toISOString();
     toast('บันทึกแล้ว: ' + status); render();
+    loadBal().then(render); // ยอดวันลาถูกหัก/คืนแล้ว โหลดยอดใหม่
   } catch (e) { b.disabled = false; toast('บันทึกไม่สำเร็จ ลองใหม่อีกครั้ง'); }
 });
 
@@ -269,6 +298,7 @@ $('#addForm').addEventListener('submit', async ev => {
     if (!j.ok) throw new Error(j.error);
     $('#dlg').close(); $('#addForm').reset(); toast('บันทึกแล้ว เลขที่ ' + j.no);
     const r = await call('hrList'); if (r.ok) { items = r.items; render(); }
+    loadBal().then(render);
   } catch (e) { toast('บันทึกไม่สำเร็จ ลองใหม่อีกครั้ง'); }
   $('#aSave').disabled = false;
 });
