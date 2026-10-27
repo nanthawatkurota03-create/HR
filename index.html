@@ -100,6 +100,8 @@ font:inherit;font-size:16px;text-align:left;color:var(--ink);cursor:pointer}
 .apNote{margin-top:10px}
 .sub{color:var(--muted);font-size:14px;margin:-4px 0 4px}
 .dfoot>*+*{margin-top:12px}
+.lvb{font-size:12px;font-weight:600;padding:1px 8px;border-radius:99px;background:#e0ecf7;color:#1b5e9b;margin-left:6px;vertical-align:middle}
+.lvb.mg{background:#efe3f7;color:#6a2c91}
 </style>
 </head>
 <body>
@@ -127,7 +129,7 @@ font:inherit;font-size:16px;text-align:left;color:var(--ink);cursor:pointer}
     <span>ลางานออนไลน์<small>ส่งให้หัวหน้าอนุมัติ</small></span>
   </button>
   <button class="mi" type="button" data-view="approve" id="miApprove" hidden>
-    <span>อนุมัติใบลา<small>สำหรับหัวหน้า</small></span>
+    <span>อนุมัติใบลา<small>สำหรับ Leader / Manager</small></span>
     <span class="badge" id="apBadge" hidden></span>
   </button>
   <div class="dfoot">
@@ -643,7 +645,7 @@ function setView(v) {
 function renderMenuInfo() {
   if (!S) return;
   $('#dName').textContent = S.emp.name;
-  $('#dMeta').textContent = 'รหัส ' + S.emp.id + (S.emp.dept ? ' · ' + S.emp.dept : '');
+  $('#dMeta').textContent = 'รหัส ' + S.emp.id + (S.emp.dept ? ' · ' + S.emp.dept : '') + (S.emp.level && S.emp.level !== 'พนักงาน' ? ' · ' + S.emp.level : '');
   const sup = S.emp.isSup === true;
   $('#miApprove').hidden = !sup;
   const n = sup ? (OL.pending || 0) : 0;
@@ -700,7 +702,7 @@ document.addEventListener('visibilitychange', () => { if (!document.hidden && S 
 // ----- แสดงรายการ -----
 function renderOl() {
   if (!S) return;
-  $('#olSup').textContent = S.emp.supName ? 'ส่งถึงหัวหน้า: ' + S.emp.supName : 'ยังไม่ได้กำหนดหัวหน้า กรุณาติดต่อ HR';
+  $('#olSup').textContent = S.emp.supName ? 'ส่งถึง: ' + S.emp.supName : 'ยังไม่มีผู้อนุมัติของแผนกนี้ กรุณาติดต่อ HR';
   $('#olList').innerHTML = OL.mine.length ? OL.mine.map(r =>
     '<div class="item"><div class="top"><div>' +
     '<div class="t">' + esc(r.type) + ' ' + esc(r.days) + ' วัน</div>' +
@@ -712,7 +714,7 @@ function renderOl() {
 
   $('#apList').innerHTML = OL.inbox.length ? OL.inbox.map(r =>
     '<div class="item ap" data-cid="' + escA(r.cid) + '" data-name="' + escA(r.name) + '">' +
-    '<div class="top"><div><div class="t">' + esc(r.name) + ' (' + esc(r.empId) + ')</div>' +
+    '<div class="top"><div><div class="t">' + esc(r.name) + ' (' + esc(r.empId) + ')' + (r.level && r.level !== 'พนักงาน' ? '<span class="lvb' + (r.level === 'Manager' ? ' mg' : '') + '">' + esc(r.level) + '</span>' : '') + '</div>' +
     '<div class="m">' + (r.dept ? 'แผนก ' + esc(r.dept) : '') + '</div></div>' +
     '<span class="chip s-wait">รออนุมัติ</span></div>' +
     '<div style="margin-top:6px"><b>' + esc(r.type) + ' ' + esc(r.days) + ' วัน</b></div>' +
