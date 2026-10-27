@@ -17,6 +17,7 @@
 html,body{margin:0}
 body{font-family:'IBM Plex Sans Thai',system-ui,sans-serif;background:var(--bg);color:var(--ink);font-size:16px;line-height:1.5;
 padding-bottom:env(safe-area-inset-bottom,0)}
+[hidden]{display:none!important}
 header{background:var(--brand);color:#fff;padding:calc(14px + env(safe-area-inset-top,0)) 16px 14px;display:flex;align-items:center;justify-content:space-between;gap:12px;position:sticky;top:0;z-index:5}
 header h1{font-size:19px;font-weight:600;margin:0}
 .hbtns{display:flex;gap:8px;align-items:center}
@@ -26,7 +27,7 @@ header h1{font-size:19px;font-weight:600;margin:0}
 dialog{border:0;border-radius:12px;padding:20px;width:min(360px,92vw);color:var(--ink)}
 dialog::backdrop{background:rgba(20,38,43,.5)}
 dialog h2{margin:0 0 4px}
-#hrErr{color:var(--no);min-height:22px;margin-top:6px;font-size:14px}
+.derr{color:var(--no);min-height:22px;margin-top:6px;font-size:14px}
 .dact{display:flex;gap:8px;justify-content:flex-end;margin-top:8px}
 .dbtn{background:var(--brand);color:#fff;border:0;border-radius:8px;padding:10px 16px;font:inherit;font-weight:500;min-height:44px}
 .dbtn.ghost{background:#fff;color:var(--brand);border:1px solid var(--brand)}
@@ -58,6 +59,18 @@ input:focus,select:focus,textarea:focus,button:focus-visible{outline:3px solid #
 .s-idle{background:var(--idle-bg);color:var(--muted)}
 .empty{color:var(--muted);margin:0}
 .link{background:none;border:0;color:var(--brand);font:inherit;font-size:14px;font-weight:500;padding:4px 0}
+.m{color:var(--muted);font-size:14px}
+.who{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+.who .n{font-weight:600;font-size:17px}
+.who .acts{display:flex;flex-direction:column;align-items:flex-end;gap:2px}
+.bals{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.bal{border:1px solid var(--line);border-radius:10px;padding:10px 8px;text-align:center;background:#fff}
+.bal .bn{font-size:13px;color:var(--muted);line-height:1.3;min-height:34px}
+.bal .bv{font-size:26px;font-weight:600;line-height:1.2}
+.bal .bv small{font-size:13px;font-weight:400;color:var(--muted)}
+.bal .bm{font-size:12px;color:var(--muted)}
+.bal.low .bv{color:var(--no)}
+.bal .bp{font-size:12px;color:var(--warn);font-weight:500}
 #toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0));transform:translateX(-50%);background:var(--ink);color:#fff;padding:10px 16px;border-radius:8px;display:none;max-width:90%;font-size:15px;z-index:9}
 </style>
 </head>
@@ -69,64 +82,115 @@ input:focus,select:focus,textarea:focus,button:focus-visible{outline:3px solid #
     <button id="hrBtn" type="button">เข้าสู่ระบบ HR</button>
   </div>
 </header>
+
 <dialog id="hrDlg">
   <form id="hrForm" method="dialog">
     <h2>เข้าสู่ระบบ HR</h2>
     <label for="hrPass">รหัสผ่าน HR</label>
     <input id="hrPass" type="password" autocomplete="current-password">
-    <div id="hrErr" role="alert"></div>
+    <div id="hrErr" class="derr" role="alert"></div>
     <div class="dact">
       <button class="dbtn ghost" id="hrCancel" type="button">ยกเลิก</button>
       <button class="dbtn" id="hrGo" type="submit">เข้าสู่ระบบ</button>
     </div>
   </form>
 </dialog>
+
+<dialog id="pinDlg">
+  <form id="pinForm" method="dialog">
+    <h2 id="pinTitle">เปลี่ยน PIN</h2>
+    <div class="m" id="pinNote"></div>
+    <label for="pinOld">PIN ปัจจุบัน</label>
+    <input id="pinOld" type="password" inputmode="numeric" autocomplete="current-password">
+    <label for="pinNew">PIN ใหม่ (ตัวเลข 4-8 หลัก)</label>
+    <input id="pinNew" type="password" inputmode="numeric" autocomplete="new-password">
+    <label for="pinNew2">ยืนยัน PIN ใหม่</label>
+    <input id="pinNew2" type="password" inputmode="numeric" autocomplete="new-password">
+    <div id="pinErr" class="derr" role="alert"></div>
+    <div class="dact">
+      <button class="dbtn ghost" id="pinCancel" type="button">ยกเลิก</button>
+      <button class="dbtn" id="pinGo" type="submit">บันทึก PIN</button>
+    </div>
+  </form>
+</dialog>
+
 <main>
   <div id="netBanner">ออฟไลน์อยู่ ใบลาจะถูกเก็บไว้และส่งให้อัตโนมัติเมื่อมีสัญญาณ</div>
 
-  <section>
-    <h2>กรอกใบลา</h2>
-    <form id="f" novalidate>
-      <div class="row">
-        <div><label for="empId">รหัสพนักงาน</label><input id="empId" required autocomplete="off" inputmode="text"></div>
-        <div><label for="dept">แผนก</label><input id="dept" autocomplete="off"></div>
-      </div>
-      <label for="name">ชื่อ-นามสกุล</label><input id="name" required autocomplete="name">
-      <label for="type">ประเภทการลา</label>
-      <select id="type">
-        <option>01 ลาป่วย</option>
-        <option>02 ลากิจ</option>
-        <option>03 วันหยุดพักผ่อนประจำปี</option>
-        <option>04 ลาเพื่อทหาร</option>
-        <option>05 ลาเพื่อทำหมัน</option>
-        <option>06 ขาดงานหัก 1 เท่า</option>
-        <option>07 ลาอุปสมบท</option>
-        <option>08 ลาคลอด</option>
-        <option>09 ลาสมรส</option>
-        <option>10 ขาดงานหัก 2 เท่า</option>
-        <option>11 ลาฌาปนกิจ</option>
-        <option>12 วันหยุดพักผ่อนประจำปีตามแผน</option>
-        <option>13 หยุดพิเศษ</option>
-      </select>
-      <div class="row">
-        <div><label for="start">ตั้งแต่วันที่</label><input id="start" type="date" required></div>
-        <div><label for="end">ถึงวันที่</label><input id="end" type="date" required></div>
-      </div>
-      <label class="check" for="half"><input id="half" type="checkbox" disabled> ลาครึ่งวัน (เลือกได้เมื่อลาวันเดียว)</label>
-      <div class="days" id="days">จำนวนวันลา: -</div>
-      <label for="reason">เหตุผลการลา</label><textarea id="reason" required></textarea>
-      <label for="phone">เบอร์ติดต่อระหว่างลา</label><input id="phone" type="tel" inputmode="tel" autocomplete="tel">
-      <button class="btn" id="submit" type="submit">ส่งใบลาให้ HR</button>
+  <!-- ล็อกอินพนักงาน -->
+  <section id="loginBox" hidden>
+    <h2>เข้าสู่ระบบ</h2>
+    <form id="loginForm" novalidate>
+      <label for="lgId">รหัสพนักงาน</label>
+      <input id="lgId" autocomplete="username" inputmode="text">
+      <label for="lgPin">PIN</label>
+      <input id="lgPin" type="password" inputmode="numeric" autocomplete="current-password">
+      <div id="lgErr" class="derr" role="alert"></div>
+      <button class="btn" id="lgGo" type="submit">เข้าสู่ระบบ</button>
+      <p class="m" style="margin:12px 0 0">ยังไม่มี PIN หรือลืม PIN ติดต่อ HR</p>
     </form>
   </section>
 
-  <section>
-    <div class="top" style="display:flex;justify-content:space-between;align-items:center">
-      <h2 style="margin:0">ใบลาของฉัน</h2>
-      <button class="link" id="refresh" type="button">อัปเดตสถานะ</button>
-    </div>
-    <div id="list" style="margin-top:12px"></div>
-  </section>
+  <div id="app" hidden>
+    <section>
+      <div class="who">
+        <div>
+          <div class="n" id="whoName"></div>
+          <div class="m" id="whoMeta"></div>
+        </div>
+        <div class="acts">
+          <button class="link" id="chPin" type="button">เปลี่ยน PIN</button>
+          <button class="link" id="logout" type="button">ออกจากระบบ</button>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <h2 id="balTitle">ยอดวันลาคงเหลือ</h2>
+      <div class="bals" id="bals"></div>
+      <div class="m" id="balMeta" style="margin-top:8px"></div>
+    </section>
+
+    <section>
+      <h2>กรอกใบลา</h2>
+      <form id="f" novalidate>
+        <label for="type">ประเภทการลา</label>
+        <select id="type">
+          <option>01 ลาป่วย</option>
+          <option>02 ลากิจ</option>
+          <option>03 วันหยุดพักผ่อนประจำปี</option>
+          <option>04 ลาเพื่อทหาร</option>
+          <option>05 ลาเพื่อทำหมัน</option>
+          <option>06 ขาดงานหัก 1 เท่า</option>
+          <option>07 ลาอุปสมบท</option>
+          <option>08 ลาคลอด</option>
+          <option>09 ลาสมรส</option>
+          <option>10 ขาดงานหัก 2 เท่า</option>
+          <option>11 ลาฌาปนกิจ</option>
+          <option>12 วันหยุดพักผ่อนประจำปีตามแผน</option>
+          <option>13 หยุดพิเศษ</option>
+        </select>
+        <div class="m" id="typeHint"></div>
+        <div class="row">
+          <div><label for="start">ตั้งแต่วันที่</label><input id="start" type="date" required></div>
+          <div><label for="end">ถึงวันที่</label><input id="end" type="date" required></div>
+        </div>
+        <label class="check" for="half"><input id="half" type="checkbox" disabled> ลาครึ่งวัน (เลือกได้เมื่อลาวันเดียว)</label>
+        <div class="days" id="days">จำนวนวันลา: -</div>
+        <label for="reason">เหตุผลการลา</label><textarea id="reason" required></textarea>
+        <label for="phone">เบอร์ติดต่อระหว่างลา</label><input id="phone" type="tel" inputmode="tel" autocomplete="tel">
+        <button class="btn" id="submit" type="submit">ส่งใบลาให้ HR</button>
+      </form>
+    </section>
+
+    <section>
+      <div class="top" style="display:flex;justify-content:space-between;align-items:center">
+        <h2 style="margin:0">ใบลาของฉัน</h2>
+        <button class="link" id="refresh" type="button">อัปเดตสถานะ</button>
+      </div>
+      <div id="list" style="margin-top:12px"></div>
+    </section>
+  </div>
 </main>
 <div id="toast" role="status"></div>
 
@@ -137,20 +201,74 @@ const API_URL = 'https://script.google.com/macros/s/AKfycbyohtDVshSFXMEmf93Q893h
 const $ = s => document.querySelector(s);
 const LS = {
   get(k, d) { try { const v = JSON.parse(localStorage.getItem(k)); return v === null ? d : v; } catch (e) { return d; } },
-  set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} }
+  set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} },
+  del(k) { try { localStorage.removeItem(k); } catch (e) {} }
 };
-let reqs = LS.get('reqs', []);
 const apiReady = () => !API_URL.includes('PASTE_');
+
+// S = เซสชันที่ล็อกอินอยู่ { token, emp:{id,name,dept,phone,mustChange}, year, balances:[...] }
+let S = LS.get('session', null);
+let reqs = [];
+const reqKey = () => 'reqs:' + S.emp.id;
+const saveReqs = () => LS.set(reqKey(), reqs);
+const saveSession = () => LS.set('session', S);
 
 function toast(msg) {
   const t = $('#toast'); t.textContent = msg; t.style.display = 'block';
-  clearTimeout(toast.t); toast.t = setTimeout(() => t.style.display = 'none', 3200);
+  clearTimeout(toast.t); toast.t = setTimeout(() => t.style.display = 'none', 3600);
 }
 function esc(s) { const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
 function fmtDate(s) {
   const [y, m, d] = s.split('-').map(Number);
   return d + '/' + m + '/' + (y + 543);
 }
+const fmtN = n => String(+Number(n).toFixed(2));
+
+async function api(body) {
+  const res = await fetch(API_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+    body: JSON.stringify(body)
+  });
+  return res.json();
+}
+
+// ----- แสดง/ซ่อนหน้า -----
+function showLogin(msg) {
+  $('#loginBox').hidden = false; $('#app').hidden = true;
+  $('#lgErr').textContent = msg || '';
+  const last = LS.get('lastEmpId', '');
+  if (last && !$('#lgId').value) $('#lgId').value = last;
+}
+function showApp() {
+  $('#loginBox').hidden = true; $('#app').hidden = false;
+  $('#whoName').textContent = S.emp.name;
+  $('#whoMeta').textContent = 'รหัส ' + S.emp.id + (S.emp.dept ? ' · แผนก ' + S.emp.dept : '');
+  if (S.emp.phone && !$('#phone').value) $('#phone').value = S.emp.phone;
+  renderBalances(); renderHint(); render();
+}
+
+// ----- ยอดวันลา -----
+function renderBalances() {
+  const el = $('#bals');
+  const b = S.balances || [];
+  $('#balTitle').textContent = 'ยอดวันลาคงเหลือ ปี ' + (S.year ? S.year + 543 : '');
+  if (!b.length) { el.innerHTML = '<p class="empty" style="grid-column:1/-1">ยังไม่มีข้อมูลยอดวันลา (ต้องออนไลน์เพื่อดึงข้อมูล)</p>'; $('#balMeta').textContent = ''; return; }
+  el.innerHTML = b.map(x => {
+    const avail = x.remaining - x.pending;
+    return '<div class="bal' + (avail <= 0 ? ' low' : '') + '"><div class="bn">' + esc(x.name) + '</div>' +
+      '<div class="bv">' + fmtN(x.remaining) + ' <small>วัน</small></div>' +
+      '<div class="bm">ใช้ไป ' + fmtN(x.used) + ' / สิทธิ์ ' + fmtN(x.total) + '</div>' +
+      (x.pending > 0 ? '<div class="bp">รออนุมัติ ' + fmtN(x.pending) + ' วัน</div>' : '') + '</div>';
+  }).join('');
+  $('#balMeta').textContent = 'ยอดคงเหลือหักเมื่อ HR อนุมัติใบลาแล้ว';
+}
+function balOf(type) { return (S.balances || []).find(x => x.code === type.slice(0, 2)); }
+function renderHint() {
+  const b = balOf($('#type').value);
+  $('#typeHint').textContent = b ? 'คงเหลือที่ลาได้ ' + fmtN(b.remaining - b.pending) + ' วัน' + (b.pending > 0 ? ' (หักใบที่รออนุมัติแล้ว)' : '') : '';
+}
+$('#type').addEventListener('input', renderHint);
 
 // ----- คำนวณจำนวนวัน -----
 function calcDays() {
@@ -167,83 +285,193 @@ function calcDays() {
 }
 ['start', 'end', 'half'].forEach(id => $('#' + id).addEventListener('input', calcDays));
 
-// ----- โปรไฟล์ที่จำไว้ -----
-const prof = LS.get('profile', {});
-['empId', 'name', 'dept', 'phone'].forEach(k => { if (prof[k]) $('#' + k).value = prof[k]; });
-
 // ----- ส่งข้อมูล -----
+// คืนค่า: true = ส่งสำเร็จ, 'perm' = ระบบปฏิเสธถาวร (เช่น เกินยอด), 'auth' = ต้องล็อกอินใหม่, false = ลองใหม่ภายหลัง
 async function send(r) {
-  if (!apiReady() || !navigator.onLine) return false;
+  if (!apiReady() || !navigator.onLine || !S) return false;
   try {
-    const res = await fetch(API_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-      body: JSON.stringify(r)
-    });
-    const j = await res.json();
-    if (j.ok) { r.synced = true; r.no = j.no; r.status = j.status; LS.set('reqs', reqs); render(); return true; }
+    const j = await api({ action: 'submit', token: S.token, cid: r.cid, type: r.type, start: r.start, end: r.end,
+      half: r.half, reason: r.reason, phone: r.phone });
+    if (j.ok) {
+      r.synced = true; r.no = j.no; r.status = j.status;
+      if (j.balances) { S.balances = j.balances; saveSession(); renderBalances(); renderHint(); }
+      saveReqs(); render(); return true;
+    }
+    if (j.error === 'auth') return 'auth';
+    if (/^(balance|invalid|missing)/.test(String(j.error))) {
+      r.synced = true; r.status = 'ส่งไม่สำเร็จ'; r.err = j.message || j.error;
+      saveReqs(); render();
+      toast(r.err);
+      return 'perm';
+    }
   } catch (e) {}
   return false;
 }
 async function flush() {
+  if (!S) return;
   for (const r of reqs.filter(x => !x.synced)) {
-    if (!(await send(r))) break;
+    const ok = await send(r);
+    if (ok === 'auth') { expire(); return; }
+    if (ok !== true && ok !== 'perm') break;
   }
 }
-async function refreshStatus(manual) {
+
+// ----- โหลดข้อมูลของฉันจากเซิร์ฟเวอร์ (ยอดวันลา + สถานะใบลา) -----
+function mergeRequests(list) {
+  (list || []).forEach(sr => {
+    const lr = reqs.find(x => x.cid === sr.cid);
+    if (lr) { lr.status = sr.status; lr.no = sr.no; lr.synced = true; return; }
+    reqs.push({ cid: sr.cid, type: sr.type, start: sr.start, end: sr.end, days: sr.days, status: sr.status,
+      no: sr.no, synced: true, createdAt: sr.ts || '' });
+  });
+  reqs.sort((a, b) => String(b.createdAt).localeCompare(String(a.createdAt)));
+  reqs = reqs.slice(0, 80);
+}
+function applyProfile(j) {
+  S.emp = j.emp; S.year = j.year; S.balances = j.balances;
+  saveSession();
+  mergeRequests(j.requests);
+  saveReqs();
+  showApp();
+}
+async function loadMe(manual) {
+  if (!S) return;
   if (!apiReady() || !navigator.onLine) { if (manual) toast('ออฟไลน์อยู่'); return; }
-  const ids = reqs.filter(r => r.synced && r.status === 'รออนุมัติ').map(r => r.cid);
-  if (!ids.length) { if (manual) toast('ไม่มีใบลาที่รออนุมัติ'); return; }
   try {
-    const res = await fetch(API_URL + '?action=status&ids=' + encodeURIComponent(ids.join(',')));
-    const j = await res.json();
-    if (j.ok) {
-      reqs.forEach(r => { const it = j.items[r.cid]; if (it) { r.status = it.status; r.no = it.no; } });
-      LS.set('reqs', reqs); render();
-      if (manual) toast('อัปเดตสถานะแล้ว');
-    }
+    const j = await api({ action: 'me', token: S.token });
+    if (j.ok) { applyProfile(j); if (manual) toast('อัปเดตแล้ว'); }
+    else if (j.error === 'auth') expire();
   } catch (e) { if (manual) toast('อัปเดตไม่สำเร็จ ลองใหม่อีกครั้ง'); }
 }
+function expire() {
+  LS.del('session'); S = null; reqs = [];
+  showLogin('เซสชันหมดอายุหรือ PIN ถูกเปลี่ยน กรุณาเข้าสู่ระบบใหม่');
+}
 
+// ----- ล็อกอิน / ออกจากระบบ -----
+$('#loginForm').addEventListener('submit', async ev => {
+  ev.preventDefault();
+  const id = $('#lgId').value.trim(), pin = $('#lgPin').value.trim();
+  if (!id || !pin) { $('#lgErr').textContent = 'กรอกรหัสพนักงานและ PIN'; return; }
+  if (!apiReady()) { $('#lgErr').textContent = 'ยังไม่ได้ตั้งค่า API_URL ใน index.html'; return; }
+  if (!navigator.onLine) { $('#lgErr').textContent = 'ออฟไลน์อยู่ ต้องมีอินเทอร์เน็ตเพื่อเข้าสู่ระบบ'; return; }
+  $('#lgGo').disabled = true; $('#lgErr').textContent = '';
+  try {
+    const j = await api({ action: 'login', empId: id, pin: pin });
+    if (j.ok) {
+      S = { token: j.token, emp: j.emp, year: j.year, balances: j.balances };
+      saveSession(); LS.set('lastEmpId', id);
+      reqs = LS.get(reqKey(), []);
+      // ย้ายใบลาเก่าที่เคยเก็บไว้ในเครื่อง (ก่อนมีระบบล็อกอิน) ของคนนี้เข้ามา
+      const legacy = LS.get('reqs', []);
+      const mine = legacy.filter(r => String(r.empId) === id && !reqs.some(x => x.cid === r.cid));
+      if (legacy.length) {
+        reqs = reqs.concat(mine);
+        LS.set('reqs', legacy.filter(r => String(r.empId) !== id));
+      }
+      $('#lgPin').value = '';
+      mergeRequests(j.requests); saveReqs(); showApp();
+      if (j.emp.mustChange) openPin(true);
+      flush();
+    } else if (j.error === 'locked') {
+      $('#lgErr').textContent = 'กรอก PIN ผิดหลายครั้ง ลองใหม่ในอีก 15 นาที หรือติดต่อ HR';
+    } else if (j.error === 'auth') {
+      $('#lgErr').textContent = 'รหัสพนักงานหรือ PIN ไม่ถูกต้อง (ถ้ายังไม่มี PIN ติดต่อ HR)';
+    } else {
+      $('#lgErr').textContent = 'เกิดข้อผิดพลาด ลองใหม่อีกครั้ง';
+    }
+  } catch (e) { $('#lgErr').textContent = 'เชื่อมต่อไม่ได้ ลองใหม่อีกครั้ง'; }
+  $('#lgGo').disabled = false;
+});
+$('#logout').addEventListener('click', () => {
+  const pending = reqs.filter(r => !r.synced).length;
+  if (pending && !confirm('มีใบลา ' + pending + ' ฉบับที่ยังไม่ได้ส่ง ออกจากระบบแล้วจะส่งต่อเมื่อเข้าสู่ระบบอีกครั้ง ออกจากระบบ?')) return;
+  LS.del('session'); S = null; reqs = [];
+  $('#lgPin').value = '';
+  showLogin('');
+});
+
+// ----- เปลี่ยน PIN -----
+let pinForced = false;
+function openPin(forced) {
+  pinForced = !!forced;
+  $('#pinTitle').textContent = forced ? 'ตั้ง PIN ใหม่ก่อนใช้งาน' : 'เปลี่ยน PIN';
+  $('#pinNote').textContent = forced ? 'HR ตั้ง PIN เริ่มต้นให้ กรุณาเปลี่ยนเป็น PIN ของคุณเอง' : '';
+  $('#pinCancel').hidden = pinForced;
+  ['#pinOld', '#pinNew', '#pinNew2'].forEach(s => $(s).value = '');
+  $('#pinErr').textContent = '';
+  $('#pinDlg').showModal(); $('#pinOld').focus();
+}
+$('#chPin').addEventListener('click', () => openPin(false));
+$('#pinCancel').addEventListener('click', () => $('#pinDlg').close());
+$('#pinDlg').addEventListener('cancel', ev => { if (pinForced) ev.preventDefault(); });
+$('#pinForm').addEventListener('submit', async ev => {
+  ev.preventDefault();
+  const o = $('#pinOld').value.trim(), n = $('#pinNew').value.trim(), n2 = $('#pinNew2').value.trim();
+  if (!/^\d{4,8}$/.test(n)) { $('#pinErr').textContent = 'PIN ใหม่ต้องเป็นตัวเลข 4-8 หลัก'; return; }
+  if (n !== n2) { $('#pinErr').textContent = 'PIN ใหม่ทั้งสองช่องไม่ตรงกัน'; return; }
+  if (!navigator.onLine) { $('#pinErr').textContent = 'ออฟไลน์อยู่ ต้องมีอินเทอร์เน็ต'; return; }
+  $('#pinGo').disabled = true; $('#pinErr').textContent = '';
+  try {
+    const j = await api({ action: 'changePin', token: S.token, oldPin: o, newPin: n });
+    if (j.ok) {
+      S.token = j.token; S.emp.mustChange = false; saveSession();
+      pinForced = false; $('#pinDlg').close(); toast('เปลี่ยน PIN แล้ว');
+    } else if (j.error === 'oldpin') $('#pinErr').textContent = 'PIN ปัจจุบันไม่ถูกต้อง';
+    else if (j.error === 'auth') { pinForced = false; $('#pinDlg').close(); expire(); }
+    else $('#pinErr').textContent = 'บันทึกไม่สำเร็จ ลองใหม่อีกครั้ง';
+  } catch (e) { $('#pinErr').textContent = 'เชื่อมต่อไม่ได้ ลองใหม่อีกครั้ง'; }
+  $('#pinGo').disabled = false;
+});
+
+// ----- ส่งใบลา -----
 $('#f').addEventListener('submit', async ev => {
   ev.preventDefault();
+  if (!S) return;
   const days = calcDays();
   const v = id => $('#' + id).value.trim();
-  if (!v('empId') || !v('name') || !v('start') || !v('end') || !v('reason')) { toast('กรอกข้อมูลที่จำเป็นให้ครบ'); return; }
+  if (!v('start') || !v('end') || !v('reason')) { toast('กรอกข้อมูลที่จำเป็นให้ครบ'); return; }
   if (days === null) { toast('ตรวจสอบวันที่ลาอีกครั้ง'); return; }
   if (!apiReady()) { toast('ยังไม่ได้ตั้งค่า API_URL ใน index.html'); return; }
+  const b = balOf($('#type').value);
+  if (b && navigator.onLine && days > b.remaining - b.pending) {
+    toast('ขอลา ' + days + ' วัน แต่ยอด' + b.name + 'ที่ลาได้เหลือ ' + fmtN(b.remaining - b.pending) + ' วัน');
+    return;
+  }
   const r = {
-    cid: crypto.randomUUID(), empId: v('empId'), name: v('name'), dept: v('dept'), type: $('#type').value,
+    cid: crypto.randomUUID(), type: $('#type').value,
     start: v('start'), end: v('end'), days, half: $('#half').checked, reason: v('reason'), phone: v('phone'),
     createdAt: new Date().toISOString(), synced: false, status: 'รอส่ง', no: ''
   };
-  LS.set('profile', { empId: r.empId, name: r.name, dept: r.dept, phone: r.phone });
-  reqs.unshift(r); LS.set('reqs', reqs); render();
+  reqs.unshift(r); saveReqs(); render();
   $('#submit').disabled = true;
   const ok = await send(r);
   $('#submit').disabled = false;
-  toast(ok ? 'ส่งใบลาให้ HR แล้ว' : 'ยังส่งไม่ได้ เก็บไว้แล้ว จะส่งให้เมื่อมีสัญญาณ');
-  $('#start').value = $('#end').value = $('#reason').value = '';
-  $('#half').checked = false; calcDays();
+  if (ok === 'auth') { expire(); return; }
+  if (ok === true) toast('ส่งใบลาให้ HR แล้ว');
+  else if (ok === false) toast('ยังส่งไม่ได้ เก็บไว้แล้ว จะส่งให้เมื่อมีสัญญาณ');
+  if (ok !== 'perm') { $('#start').value = $('#end').value = $('#reason').value = ''; $('#half').checked = false; calcDays(); }
 });
 
 // ----- แสดงรายการ -----
 function render() {
+  if (!S) return;
   const el = $('#list');
   if (!reqs.length) { el.innerHTML = '<p class="empty">ยังไม่มีใบลา กรอกฟอร์มด้านบนเพื่อส่งใบลาฉบับแรก</p>'; return; }
-  const cls = { 'รออนุมัติ': 's-wait', 'อนุมัติ': 's-ok', 'ไม่อนุมัติ': 's-no', 'รอส่ง': 's-idle' };
+  const cls = { 'รออนุมัติ': 's-wait', 'อนุมัติ': 's-ok', 'ไม่อนุมัติ': 's-no', 'รอส่ง': 's-idle', 'ส่งไม่สำเร็จ': 's-no' };
   el.innerHTML = reqs.map(r => {
     const range = r.start === r.end ? fmtDate(r.start) : fmtDate(r.start) + ' - ' + fmtDate(r.end);
     return '<div class="item"><div class="top"><div><div class="t">' + esc(r.type) + ' ' + r.days + ' วัน</div>' +
-      '<div class="m">' + range + '</div>' + (r.no ? '<div class="m">เลขที่ ' + esc(r.no) + '</div>' : '') + '</div>' +
+      '<div class="m">' + range + '</div>' + (r.no ? '<div class="m">เลขที่ ' + esc(r.no) + '</div>' : '') +
+      (r.err ? '<div class="m" style="color:var(--no)">' + esc(r.err) + '</div>' : '') + '</div>' +
       '<span class="chip ' + (cls[r.status] || 's-idle') + '">' + esc(r.status) + '</span></div></div>';
   }).join('');
 }
-$('#refresh').addEventListener('click', () => refreshStatus(true));
+$('#refresh').addEventListener('click', () => loadMe(true));
 
 // ----- ออนไลน์/ออฟไลน์ -----
 function net() { $('#netBanner').style.display = navigator.onLine ? 'none' : 'block'; }
-window.addEventListener('online', () => { net(); flush().then(() => refreshStatus(false)); });
+window.addEventListener('online', () => { net(); flush().then(() => loadMe(false)); });
 window.addEventListener('offline', net);
 
 // ----- เข้าสู่ระบบ HR (ปุ่มมุมขวาบน) -----
@@ -257,11 +485,7 @@ $('#hrForm').addEventListener('submit', async ev => {
   if (!navigator.onLine) { $('#hrErr').textContent = 'ออฟไลน์อยู่ ต้องมีอินเทอร์เน็ตเพื่อเข้าสู่ระบบ HR'; return; }
   $('#hrGo').disabled = true; $('#hrErr').textContent = '';
   try {
-    const res = await fetch(API_URL, {
-      method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-      body: JSON.stringify({ action: 'hrList', passcode: pass })
-    });
-    const j = await res.json();
+    const j = await api({ action: 'hrList', passcode: pass });
     if (j.ok) {
       try { sessionStorage.setItem('hrpass', pass); } catch (e) {}
       location.href = 'hr/index.html';
@@ -280,7 +504,16 @@ $('#installBtn').addEventListener('click', async () => {
 });
 if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js');
 
-net(); calcDays(); render(); flush().then(() => refreshStatus(false));
+// ----- เริ่มต้น -----
+net(); calcDays();
+if (S && S.token && S.emp) {
+  reqs = LS.get(reqKey(), []);
+  showApp();
+  if (S.emp.mustChange && navigator.onLine) openPin(true);
+  flush().then(() => loadMe(false));
+} else {
+  S = null; showLogin('');
+}
 </script>
 </body>
 </html>
