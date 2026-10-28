@@ -139,11 +139,21 @@ dialog h2{margin:0 0 4px;font-size:18px}
       <div style="display:flex;gap:8px"><input id="ePin" inputmode="numeric" autocomplete="off"><button class="btn ghost" id="eRand" type="button">สุ่ม</button></div>
       <div class="sub">พนักงานจะถูกบังคับให้เปลี่ยน PIN ตอนเข้าสู่ระบบครั้งแรก</div>
     </div>
-    <label for="eLevel">ระดับ</label>
-    <select id="eLevel">
-      <option value="พนักงาน">พนักงาน</option>
-      <option value="Leader">Leader (อนุมัติใบลาของพนักงาน)</option>
-      <option value="Manager">Manager (อนุมัติใบลาของพนักงานและ Leader)</option>
+    <div class="row2">
+      <div><label for="eEmail">อีเมล (รับแจ้งเตือนเมื่อมีใบลารออนุมัติ)</label><input id="eEmail" type="email" autocomplete="off"></div>
+      <div><label for="eStart">วันเริ่มงาน</label><input id="eStart" type="date"></div>
+    </div>
+    <label for="eSup">หัวหน้างาน (อนุมัติขั้นที่ 1)</label>
+    <select id="eSup"></select>
+    <label for="eGm">Group Mgr (อนุมัติขั้นที่ 2)</label>
+    <select id="eGm"></select>
+    <label for="eFm">FM/MD (อนุมัติขั้นที่ 3)</label>
+    <select id="eFm"></select>
+    <div class="sub">เว้นว่างขั้นใดก็ได้ ระบบจะข้ามขั้นนั้น และทุกใบลาจะจบที่ HR เสมอ</div>
+    <label for="eRole">บทบาทในระบบ</label>
+    <select id="eRole">
+      <option value="">พนักงานทั่วไป</option>
+      <option value="HR">HR (อนุมัติขั้นสุดท้าย)</option>
     </select>
     <label class="chk" for="eActive" style="margin-top:12px"><input id="eActive" type="checkbox" checked> ใช้งาน (ปิดเมื่อพนักงานลาออก จะล็อกอินไม่ได้)</label>
     <div class="derr" id="empErr" role="alert"></div>
@@ -174,9 +184,9 @@ dialog h2{margin:0 0 4px;font-size:18px}
 <dialog id="impDlg">
   <form id="impForm" method="dialog">
     <h2>นำเข้าพนักงานหลายคน</h2>
-    <label for="iText">วางรายชื่อ 1 บรรทัดต่อ 1 คน: รหัส, ชื่อ-นามสกุล, แผนก, ระดับ (ไม่บังคับ)</label>
-    <textarea id="iText" placeholder="1001, สมชาย ใจดี, Lathe&#10;1002, สมหญิง รักงาน, Grinding, Leader"></textarea>
-    <div class="sub">คั่นด้วยคอมมาหรือแท็บ (วางจาก Excel ได้เลย) ระดับใส่ได้: พนักงาน / Leader / Manager (เว้นว่าง = พนักงาน) รหัสที่มีอยู่แล้วจะถูกข้าม</div>
+    <label for="iText">วางรายชื่อ 1 บรรทัดต่อ 1 คน: รหัส, ชื่อ-นามสกุล, แผนก, รหัสหัวหน้างาน, รหัส Group Mgr, รหัส FM/MD, อีเมล (4 ช่องหลังไม่บังคับ)</label>
+    <textarea id="iText" placeholder="1001, สมชาย ใจดี, Lathe, 2001, 3001, 4001, somchai@mail.com&#10;2001, สมหญิง รักงาน, Lathe, , 3001, 4001"></textarea>
+    <div class="sub">คั่นด้วยคอมมาหรือแท็บ (วางจาก Excel ได้เลย) รหัสผู้อนุมัติต้องเป็นพนักงานที่มีอยู่ในระบบ (นำเข้าหัวหน้าก่อน แล้วค่อยนำเข้าลูกน้องอีกรอบ หรือแก้ทีหลังได้) รหัสที่มีอยู่แล้วจะถูกข้าม</div>
     <label for="iPin">PIN เริ่มต้นของทุกคน (ตัวเลข 4-8 หลัก)</label>
     <input id="iPin" inputmode="numeric" autocomplete="off">
     <div class="derr" id="impErr" role="alert"></div>
@@ -193,8 +203,7 @@ dialog h2{margin:0 0 4px;font-size:18px}
 const API_URL = 'https://script.google.com/macros/s/AKfycbyohtDVshSFXMEmf93Q893hA7kYBVBzjWcWqc0KPb1Z6YiWIpd6rdmrMHg5GjermPCuUw/exec';
 const $ = s => document.querySelector(s);
 const esc = s => { const d = document.createElement('div'); d.textContent = s == null ? '' : s; return d.innerHTML; };
-const LEVELS = ['พนักงาน', 'Leader', 'Manager'];
-const lvChip = l => l === 'Manager' ? '<span class="chip lv-manager">Manager</span>' : l === 'Leader' ? '<span class="chip lv-leader">Leader</span>' : '';
+const hrChip = r => r === 'HR' ? '<span class="chip lv-manager">HR</span>' : '';
 const fmtN = n => String(+Number(n).toFixed(2));
 
 let PASS = '';
@@ -276,20 +285,19 @@ function renderBal() {
       const rem = b.total - b.used;
       return '<td class="num"><span class="rem' + (rem <= 0 ? ' low' : '') + '">' + fmtN(rem) + '</span> <span class="sub">(' + fmtN(b.used) + '/' + fmtN(b.total) + ')</span></td>';
     }).join('');
-    return '<tr><td>' + esc(e.id) + '</td><td>' + esc(e.name) + (e.level && e.level !== 'พนักงาน' ? ' ' + lvChip(e.level) : '') + (e.active ? '' : ' <span class="chip s-idle">ไม่ใช้งาน</span>') + '</td><td>' + esc(e.dept) + '</td>' + cells +
+    return '<tr><td>' + esc(e.id) + '</td><td>' + esc(e.name) + (e.role === 'HR' ? ' ' + hrChip(e.role) : '') + (e.active ? '' : ' <span class="chip s-idle">ไม่ใช้งาน</span>') + '</td><td>' + esc(e.dept) + '</td>' + cells +
       '<td><button class="btn sm" data-bal="' + esc(e.id) + '" type="button">แก้ไข</button></td></tr>';
   }).join('');
 }
 
 function renderEmp() {
   const list = filtered(true);
-  const th = '<tr><th>รหัส</th><th>ชื่อ-นามสกุล</th><th>แผนก</th><th>ระดับ</th><th>สถานะ</th><th>PIN</th><th></th></tr>';
+  const th = '<tr><th>รหัส</th><th>ชื่อ-นามสกุล</th><th>แผนก</th><th>สายอนุมัติ</th><th>สถานะ</th><th>PIN</th><th></th></tr>';
   if (!list.length) { $('#empTable').innerHTML = th + '<tr><td colspan="7"><p class="empty">ยังไม่มีพนักงาน กด "เพิ่มพนักงาน" หรือ "นำเข้าหลายคน"</p></td></tr>'; return; }
   $('#empTable').innerHTML = th + list.map(e => {
     const pin = !e.hasPin ? '<span class="chip s-no">ยังไม่ตั้ง</span>' : (e.mustChange ? '<span class="chip s-wait">รอเปลี่ยนครั้งแรก</span>' : '<span class="chip s-ok">ตั้งแล้ว</span>');
     return '<tr><td>' + esc(e.id) + '</td><td>' + esc(e.name) + '</td><td>' + esc(e.dept) + '</td>' +
-      '<td><select class="lvsel" data-lv="' + esc(e.id) + '" aria-label="ระดับของ ' + esc(e.name) + '">' +
-      LEVELS.map(l => '<option value="' + l + '"' + ((e.level || 'พนักงาน') === l ? ' selected' : '') + '>' + l + '</option>').join('') + '</select></td>' +
+      '<td>' + chainText(e) + '</td>' +
       '<td><span class="chip ' + (e.active ? 's-ok' : 's-idle') + '">' + (e.active ? 'ใช้งาน' : 'ไม่ใช้งาน') + '</span></td><td>' + pin + '</td>' +
       '<td style="white-space:nowrap"><button class="btn ghost sm" data-edit="' + esc(e.id) + '" type="button">แก้ไข</button> ' +
       '<button class="btn ghost sm" data-pin="' + esc(e.id) + '" type="button">รีเซ็ต PIN</button></td></tr>';
@@ -297,6 +305,20 @@ function renderEmp() {
 }
 
 const emp = id => DATA.employees.find(e => e.id === id);
+const nm = id => { const x = id && emp(id); return x ? x.name : (id ? id + ' (ไม่พบ)' : ''); };
+function chainText(e) {
+  const p = [];
+  if (e.sup) p.push('หัวหน้า: ' + esc(nm(e.sup)));
+  if (e.gm) p.push('GM: ' + esc(nm(e.gm)));
+  if (e.fm) p.push('FM/MD: ' + esc(nm(e.fm)));
+  return p.length ? '<div class="sub">' + p.join(' → ') + '</div>' : '<span class="sub">ไม่ได้กำหนด (ส่งตรง HR)</span>';
+}
+function fillApprovers(e) {
+  const opts = '<option value="">— ไม่มี (ข้ามขั้นนี้) —</option>' + DATA.employees
+    .filter(x => x.active && (!e || x.id !== e.id))
+    .map(x => '<option value="' + esc(x.id) + '">' + esc(x.id + ' · ' + x.name) + '</option>').join('');
+  ['eSup', 'eGm', 'eFm'].forEach(k => $('#' + k).innerHTML = opts);
+}
 document.addEventListener('click', ev => {
   const t = ev.target.closest('button'); if (!t) return;
   if (t.dataset.bal) openBal(t.dataset.bal);
@@ -304,17 +326,6 @@ document.addEventListener('click', ev => {
   else if (t.dataset.pin) openPin(t.dataset.pin);
 });
 
-document.addEventListener('change', async ev => {
-  const s = ev.target.closest('select[data-lv]'); if (!s) return;
-  const e = emp(s.dataset.lv), prev = e.level || 'พนักงาน';
-  s.disabled = true;
-  try {
-    const j = await api('hrLevelSave', { empId: e.id, level: s.value });
-    if (j.ok) { e.level = j.level; toast(e.name + ' เป็น ' + j.level + ' แล้ว'); renderBal(); }
-    else { s.value = prev; toast('บันทึกระดับไม่สำเร็จ: ' + (j.error || '')); }
-  } catch (err) { s.value = prev; toast('เชื่อมต่อไม่ได้ ลองใหม่อีกครั้ง'); }
-  s.disabled = false;
-});
 
 // ----- แก้ยอดวันลา -----
 let balEmp = null;
@@ -388,7 +399,10 @@ function openEmp(id) {
   $('#eId').value = e ? e.id : ''; $('#eId').readOnly = !empNew;
   $('#eName').value = e ? e.name : ''; $('#eDept').value = e ? e.dept : ''; $('#ePhone').value = e ? e.phone : '';
   $('#eActive').checked = e ? e.active : true;
-  $('#eLevel').value = e ? (e.level || 'พนักงาน') : 'พนักงาน';
+  fillApprovers(e);
+  $('#eSup').value = e ? e.sup || '' : ''; $('#eGm').value = e ? e.gm || '' : ''; $('#eFm').value = e ? e.fm || '' : '';
+  $('#eEmail').value = e ? e.email || '' : ''; $('#eStart').value = e ? e.startDate || '' : '';
+  $('#eRole').value = e ? e.role || '' : '';
   $('#ePinBox').hidden = !empNew; $('#ePin').value = empNew ? randPin() : '';
   $('#empErr').textContent = '';
   $('#empDlg').showModal();
@@ -401,12 +415,15 @@ $('#empForm').addEventListener('submit', async ev => {
   const id = $('#eId').value.trim(), name = $('#eName').value.trim(), pin = $('#ePin').value.trim();
   if (!id || !name) { $('#empErr').textContent = 'กรอกรหัสพนักงานและชื่อ'; return; }
   if (/[|.]/.test(id)) { $('#empErr').textContent = 'รหัสพนักงานห้ามมีเครื่องหมาย | หรือ .'; return; }
+  if ([$('#eSup').value, $('#eGm').value, $('#eFm').value].includes(id)) { $('#empErr').textContent = 'ผู้อนุมัติต้องไม่ใช่ตัวพนักงานเอง'; return; }
   if (empNew && emp(id)) { $('#empErr').textContent = 'มีรหัสพนักงานนี้อยู่แล้ว'; return; }
   if (empNew && !/^\d{4,8}$/.test(pin)) { $('#empErr').textContent = 'PIN ต้องเป็นตัวเลข 4-8 หลัก'; return; }
   $('#empSave').disabled = true; $('#empErr').textContent = '';
   try {
     const j = await api('hrEmpSave', { empId: id, name: name, dept: $('#eDept').value.trim(), phone: $('#ePhone').value.trim(),
-      active: $('#eActive').checked, level: $('#eLevel').value, pin: pin });
+      active: $('#eActive').checked, pin: pin,
+      sup: $('#eSup').value, gm: $('#eGm').value, fm: $('#eFm').value,
+      email: $('#eEmail').value.trim(), role: $('#eRole').value, startDate: $('#eStart').value });
     if (j.ok) {
       $('#empDlg').close();
       toast(empNew ? 'เพิ่มพนักงานแล้ว PIN เริ่มต้น: ' + pin : 'บันทึกแล้ว');
