@@ -39,6 +39,21 @@ main{max-width:1280px;margin:0 auto;padding:20px}
 .tab[aria-selected=true]{background:var(--brand);color:#fff;border-color:var(--brand)}
 .wrap{background:var(--card);border:1px solid var(--line);border-radius:10px;overflow-x:auto}
 table{border-collapse:collapse;width:100%;min-width:980px}
+
+/* Leave list: clean, scannable cards instead of a crowded wide table */
+.leave-list{display:grid;gap:12px;padding:12px;background:transparent}
+.leave-card{background:#fff;border:1px solid #dfe7ea;border-radius:14px;overflow:hidden;box-shadow:0 2px 8px rgba(20,38,43,.035)}
+.leave-head{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;padding:15px 18px;background:#f8fafb;border-bottom:1px solid #e7edef}
+.leave-number{font-weight:600;color:var(--brand);font-size:16px;overflow-wrap:anywhere}
+.leave-sub{font-size:12px;color:var(--muted);margin-top:2px}
+.leave-body{display:grid;grid-template-columns:1.1fr .8fr 1.4fr;gap:18px;padding:16px 18px}
+.leave-field{min-width:0}.leave-label{font-size:12px;color:var(--muted);margin-bottom:4px}.leave-value{font-weight:500;overflow-wrap:anywhere}.leave-reason{white-space:pre-wrap;overflow-wrap:anywhere}
+.leave-foot{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;padding:12px 18px;border-top:1px solid #edf1f2;background:#fff}
+.leave-progress{display:flex;align-items:center;gap:6px;flex-wrap:wrap}.leave-actions{display:flex;gap:8px;flex-wrap:wrap}
+.leave-attachments{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}.leave-attachments .btn{max-width:100%;overflow-wrap:anywhere;white-space:normal;text-align:left}
+@media(max-width:900px){.leave-body{grid-template-columns:1fr 1fr}.leave-reason-field{grid-column:1/-1}}
+@media(max-width:560px){.leave-list{padding:8px}.leave-head{padding:12px;flex-direction:column}.leave-body{grid-template-columns:1fr 1fr;gap:12px;padding:12px}.leave-foot{padding:12px;align-items:flex-start}.leave-progress{width:100%}.leave-actions{width:100%}.leave-actions .btn{flex:1}}
+
 th,td{padding:9px 12px;text-align:left;border-bottom:1px solid var(--line);vertical-align:top}
 td.nw{white-space:nowrap}td.wrapt{min-width:180px}
 th{background:#f6f8f9;font-weight:600;white-space:nowrap}
@@ -484,20 +499,24 @@ function renderReq() {
     '<div class="card"><b>' + items.length + '</b><span>ใบลาทั้งหมด</span></div>';
   const rows = filtered();
   if (!rows.length) { $('#view').innerHTML = '<div class="empty">ไม่พบใบลาตามตัวกรองที่เลือก</div>'; return; }
-  $('#view').innerHTML = '<table><thead><tr><th>เลขที่ / เวลายื่น</th><th>พนักงาน</th><th>ประเภท</th><th>วันที่ลา</th><th class="num">วัน</th><th>เหตุผล</th><th>ความคืบหน้า</th><th>ใบลา</th><th>จัดการ</th></tr></thead><tbody>' +
-    rows.map(r => {
-      const c = cat(r);
-      const tag = c === 'done' ? '<span class="chip s-ok">ออกใบลาแล้ว</span><div class="m">' + fmtTs(r.issuedAt) + '</div>'
-        : c === 'hr' ? '<span class="chip s-wait">ยังไม่ออก</span>' : '<span class="m">-</span>';
-      const act = c === 'hr' ? '<button class="btn sm ok" data-a="issue" data-n="' + esc(r.no) + '">ออกใบลาแล้ว</button>'
-        : c === 'done' ? '<button class="btn sm ghost" data-a="undo" data-n="' + esc(r.no) + '">ย้อนเป็นยังไม่ออก</button>' : '';
-      return '<tr><td class="nw">' + esc(r.no) + '<div class="m">' + fmtTs(r.ts) + '</div></td>' +
-        '<td>' + esc(r.name) + '<div class="m">' + esc(r.empId) + (r.dept ? ' · ' + esc(r.dept) : '') + '</div></td>' +
-        '<td>' + esc(r.type) + '</td><td class="nw">' + rangeTxt(r) + '</td><td class="num">' + esc(r.days) + '</td>' +
-        '<td class="wrapt">' + esc(r.reason) + (r.phone ? '<div class="m">โทร ' + esc(r.phone) + '</div>' : '') + (r.hrNote ? '<div class="m">หมายเหตุ HR: ' + esc(r.hrNote) + '</div>' : '') +
-        (r.files || []).map(f => '<div><button class="btn ghost sm" data-file="' + esc(f.id) + '" type="button">ไฟล์แนบ: ' + esc(f.name) + '</button></div>').join('') + '</td>' +
-        '<td>' + progress(r) + '</td><td>' + tag + '</td><td class="nw">' + act + '</td></tr>';
-    }).join('') + '</tbody></table>';
+  $('#view').innerHTML = '<div class="leave-list">' + rows.map(r => {
+    const c = cat(r);
+    const tag = c === 'done' ? '<span class="chip s-ok">ออกใบลาแล้ว</span><div class="m">' + fmtTs(r.issuedAt) + '</div>'
+      : c === 'hr' ? '<span class="chip s-wait">รอ HR ออกใบลา</span>'
+      : c === 'no' ? '<span class="chip s-no">ไม่อนุมัติ</span>'
+      : c === 'cancel' ? '<span class="chip s-idle">ยกเลิก</span>'
+      : '<span class="chip s-wait">กำลังดำเนินการ</span>';
+    const act = c === 'hr' ? '<button class="btn sm ok" data-a="issue" data-n="' + esc(r.no) + '">ยืนยันออกใบลา</button>'
+      : c === 'done' ? '<button class="btn sm ghost" data-a="undo" data-n="' + esc(r.no) + '">ย้อนสถานะ</button>' : '';
+    const attachments = (r.files || []).map(f => '<button class="btn ghost sm" data-file="' + esc(f.id) + '" type="button">ไฟล์แนบ: ' + esc(f.name) + '</button>').join('');
+    return '<article class="leave-card">' +
+      '<div class="leave-head"><div><div class="leave-number">' + esc(r.no) + '</div><div class="leave-sub">ยื่นเมื่อ ' + fmtTs(r.ts) + '</div></div><div>' + tag + '</div></div>' +
+      '<div class="leave-body">' +
+        '<div class="leave-field"><div class="leave-label">พนักงาน</div><div class="leave-value">' + esc(r.name) + '</div><div class="m">' + esc(r.empId) + (r.dept ? ' · ' + esc(r.dept) : '') + '</div></div>' +
+        '<div class="leave-field"><div class="leave-label">ประเภทการลา</div><div class="leave-value">' + esc(r.type) + '</div><div class="leave-label" style="margin-top:10px">จำนวนวัน</div><div class="leave-value">' + esc(r.days) + ' วัน</div></div>' +
+        '<div class="leave-field leave-reason-field"><div class="leave-label">วันที่ลา</div><div class="leave-value">' + rangeTxt(r) + '</div><div class="leave-label" style="margin-top:10px">เหตุผล</div><div class="leave-reason">' + esc(r.reason || '-') + '</div>' + (r.phone ? '<div class="m" style="margin-top:5px">โทร ' + esc(r.phone) + '</div>' : '') + (r.hrNote ? '<div class="m" style="margin-top:5px">หมายเหตุ HR: ' + esc(r.hrNote) + '</div>' : '') + (attachments ? '<div class="leave-attachments">' + attachments + '</div>' : '') + '</div>' +
+      '</div><div class="leave-foot"><div><div class="leave-label">ความคืบหน้าการอนุมัติ</div><div class="leave-progress">' + progress(r) + '</div></div><div class="leave-actions">' + act + '</div></div></article>';
+  }).join('') + '</div>';
 }
 $('#view').addEventListener('click', async ev => {
   const b = ev.target.closest('button[data-a]'); if (!b) return;
