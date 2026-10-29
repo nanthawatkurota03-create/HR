@@ -1,4 +1,4 @@
-const CACHE = 'leave-app-v4';
+const CACHE = 'leave-app-v5';
 const SHELL = ['./', './index.html', './card.html', './manifest.json', './icon.svg'];
 
 self.addEventListener('install', e => {
