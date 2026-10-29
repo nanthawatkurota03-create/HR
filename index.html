@@ -15,15 +15,13 @@
 --warn:#a86a00;--warn-bg:#fdf0d5;--ok:#1a7f4b;--ok-bg:#dcf3e6;--no:#b3261e;--no-bg:#fbe3e1;--idle-bg:#e4e8eb}
 *{box-sizing:border-box}
 html,body{margin:0}
-body{font-family:'IBM Plex Sans Thai',system-ui,sans-serif;background:var(--bg);color:var(--ink);font-size:16px;line-height:1.5;
-padding-bottom:env(safe-area-inset-bottom,0)}
+body{font-family:'IBM Plex Sans Thai',system-ui,sans-serif;background:var(--bg);color:var(--ink);font-size:16px;line-height:1.5;padding-bottom:env(safe-area-inset-bottom,0)}
 [hidden]{display:none!important}
 header{background:var(--brand);color:#fff;padding:calc(14px + env(safe-area-inset-top,0)) 16px 14px;display:flex;align-items:center;justify-content:space-between;gap:12px;position:sticky;top:0;z-index:5}
 header h1{font-size:19px;font-weight:600;margin:0}
 .hbtns{display:flex;gap:8px;align-items:center}
 #installBtn{display:none;background:#fff;color:var(--brand);border:0;border-radius:8px;padding:6px 12px;font:inherit;font-size:14px;font-weight:500}
-#hrBtn{background:transparent;color:#fff;border:1px solid #fff;border-radius:8px;padding:6px 12px;font:inherit;font-size:14px;font-weight:500}
-#hrBtn:focus-visible,#installBtn:focus-visible{outline:3px solid #fff;outline-offset:2px}
+#hrLink{color:#fff;border:1px solid #fff;border-radius:8px;padding:6px 12px;font-size:14px;font-weight:500;text-decoration:none}
 dialog{border:0;border-radius:12px;padding:20px;width:min(360px,92vw);color:var(--ink)}
 dialog::backdrop{background:rgba(20,38,43,.5)}
 dialog h2{margin:0 0 4px}
@@ -39,111 +37,53 @@ h2{font-size:17px;margin:0 0 12px;font-weight:600}
 label{display:block;font-size:14px;font-weight:500;margin:12px 0 4px}
 input,select,textarea{width:100%;font:inherit;color:var(--ink);background:#fff;border:1px solid #b8c3c9;border-radius:8px;padding:10px 12px;min-height:44px}
 textarea{min-height:84px;resize:vertical}
-input:focus,select:focus,textarea:focus,button:focus-visible{outline:3px solid #7fb8c6;outline-offset:1px}
+input:focus,select:focus,textarea:focus,button:focus-visible,a:focus-visible{outline:3px solid #7fb8c6;outline-offset:1px}
 .row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 .check{display:flex;align-items:center;gap:8px;margin-top:10px;font-weight:400}
 .check input{width:20px;min-height:20px;height:20px}
 .days{margin-top:12px;padding:10px 12px;background:var(--bg);border-radius:8px;font-weight:500}
 .btn{width:100%;margin-top:16px;background:var(--brand);color:#fff;border:0;border-radius:10px;padding:14px;font:inherit;font-weight:600;font-size:17px}
-.btn:active{background:var(--brand-d)}
 .btn:disabled{opacity:.6}
-.item{border-top:1px solid var(--line);padding:12px 0}
-.item:first-of-type{border-top:0;padding-top:0}
-.item .top{display:flex;justify-content:space-between;gap:8px;align-items:flex-start}
-.item .t{font-weight:600}
-.item .m{color:var(--muted);font-size:14px}
-.chip{font-size:13px;font-weight:500;padding:2px 10px;border-radius:99px;white-space:nowrap}
-.s-wait{background:var(--warn-bg);color:var(--warn)}
-.s-ok{background:var(--ok-bg);color:var(--ok)}
-.s-no{background:var(--no-bg);color:var(--no)}
-.s-idle{background:var(--idle-bg);color:var(--muted)}
-.empty{color:var(--muted);margin:0}
 .link{background:none;border:0;color:var(--brand);font:inherit;font-size:14px;font-weight:500;padding:4px 0}
 .m{color:var(--muted);font-size:14px}
+.empty{color:var(--muted);margin:0}
 .who{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
 .who .n{font-weight:600;font-size:17px}
 .who .acts{display:flex;flex-direction:column;align-items:flex-end;gap:2px}
-.bals{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
-.bal{border:1px solid var(--line);border-radius:10px;padding:10px 8px;text-align:center;background:#fff}
-.bal .bn{font-size:13px;color:var(--muted);line-height:1.3;min-height:34px}
-.bal .bv{font-size:26px;font-weight:600;line-height:1.2}
-.bal .bv small{font-size:13px;font-weight:400;color:var(--muted)}
-.bal .bm{font-size:12px;color:var(--muted)}
-.bal.low .bv{color:var(--no)}
-.bal .bp{font-size:12px;color:var(--warn);font-weight:500}
-#toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0));transform:translateX(-50%);background:var(--ink);color:#fff;padding:10px 16px;border-radius:8px;display:none;max-width:90%;font-size:15px;z-index:9}
-.hl{display:flex;align-items:center;gap:4px;min-width:0}
-.hamb{width:44px;height:44px;margin-left:-10px;border:0;background:transparent;color:#fff;display:flex;align-items:center;justify-content:center;position:relative}
-.dot{position:absolute;top:3px;right:1px;background:var(--no);color:#fff;border-radius:99px;min-width:18px;height:18px;font-size:11px;font-weight:600;display:flex;align-items:center;justify-content:center;padding:0 4px}
-#scrim{position:fixed;inset:0;background:rgba(20,38,43,.5);z-index:20}
-#drawer{position:fixed;left:0;top:0;bottom:0;width:min(300px,84vw);background:#fff;z-index:21;display:flex;flex-direction:column;padding-top:env(safe-area-inset-top,0)}
-.dh{background:var(--brand);color:#fff;padding:24px 20px 16px}
-.dn{font-size:18px;font-weight:600}.dm{font-size:14px;opacity:.9}
-.dl{flex:1;padding:8px 0;overflow-y:auto}
-.df{border-top:1px solid var(--line);padding:8px 0 calc(8px + env(safe-area-inset-bottom,0))}
-.mi{display:flex;justify-content:space-between;align-items:center;width:100%;min-height:56px;padding:0 20px;border:0;background:transparent;font:inherit;font-size:16px;color:var(--ink);text-align:left}
-.mi small{display:block;font-size:13px;color:var(--muted)}
-.mi.on{background:#e3eef1;font-weight:600}
-.bd{background:var(--no);color:#fff;border-radius:99px;min-width:24px;height:24px;display:inline-flex;align-items:center;justify-content:center;font-size:13px;font-weight:600}
-.thumbs{display:flex;gap:14px;flex-wrap:wrap;margin-top:6px}
-.th{position:relative;width:76px;height:76px}
-.th img{width:76px;height:76px;object-fit:cover;border-radius:8px;border:1px solid var(--line)}
-.th .x{position:absolute;top:-10px;right:-10px;width:32px;height:32px;border-radius:99px;border:0;background:var(--ink);color:#fff;font-size:16px;line-height:1}
-.add{width:76px;height:76px;border-radius:8px;border:2px dashed var(--brand);background:#fff;color:var(--brand);font:inherit;font-size:12px;font-weight:500;display:flex;flex-direction:column;align-items:center;justify-content:center}
-.add b{font-size:22px;line-height:1}
-.tb{width:76px;height:76px;border-radius:8px;border:1px solid var(--line);background:#d7eaf0;color:#3b4f55;font:inherit;font-size:11px;padding:4px;overflow:hidden}
-.st{font-size:13px;padding:2px 8px;border-radius:99px;background:var(--idle-bg);color:var(--muted);white-space:nowrap}
-.st-ok{background:var(--ok-bg);color:var(--ok)}.st-no{background:var(--no-bg);color:var(--no)}.st-wait{background:var(--warn-bg);color:var(--warn)}
-.ar{color:var(--muted);margin:0 2px}
-.steps{display:flex;flex-wrap:wrap;gap:4px;align-items:center;margin-top:6px}
-.ic{border-top:1px solid var(--line);padding:14px 0}
-.ic:first-child{border-top:0;padding-top:0}
+.tabs{display:flex;gap:4px;margin-bottom:12px;border-bottom:2px solid var(--line)}
+.tab{background:none;border:0;font:inherit;font-weight:500;color:var(--muted);padding:10px 16px;border-bottom:3px solid transparent;margin-bottom:-2px;min-height:44px}
+.tab[aria-selected=true]{color:var(--brand);border-bottom-color:var(--brand)}
+.bd{background:var(--no);color:#fff;border-radius:99px;min-width:22px;height:22px;display:inline-flex;align-items:center;justify-content:center;font-size:12px;padding:0 6px;margin-left:4px}
+.item{border-top:1px solid var(--line);padding:14px 0}
+.item:first-child{border-top:0;padding-top:0}
+.item .top{display:flex;justify-content:space-between;gap:8px;align-items:flex-start}
+.item .t{font-weight:600}
+.chip{font-size:13px;font-weight:500;padding:2px 10px;border-radius:99px;white-space:nowrap}
+.s-wait{background:var(--warn-bg);color:var(--warn)}.s-ok{background:var(--ok-bg);color:var(--ok)}.s-no{background:var(--no-bg);color:var(--no)}.s-idle{background:var(--idle-bg);color:var(--muted)}
+.tl{list-style:none;margin:12px 0 0;padding:0}
+.tl li{position:relative;padding:0 0 12px 24px;font-size:14px}
+.tl li::before{content:"";position:absolute;left:5px;top:14px;bottom:-2px;width:2px;background:var(--line)}
+.tl li:last-child{padding-bottom:0}.tl li:last-child::before{display:none}
+.tl i{position:absolute;left:0;top:4px;width:12px;height:12px;border-radius:50%;border:2px solid #b8c3c9;background:#fff}
+.tl b{display:block;font-weight:600}.tl span{color:var(--muted)}
+.tl .d i{background:var(--ok);border-color:var(--ok)}
+.tl .c i{background:var(--warn);border-color:var(--warn)}.tl .c span{color:var(--warn);font-weight:500}
+.tl .n i{background:var(--no);border-color:var(--no)}.tl .n span{color:var(--no)}
 .acts2{display:flex;gap:12px;margin-top:12px}
 .bt{flex:1;height:52px;border-radius:10px;font:inherit;font-weight:600;font-size:17px}
 .bt.ok{border:0;background:var(--ok);color:#fff}
 .bt.no{border:2px solid var(--no);background:#fff;color:var(--no)}
-.yrs{display:flex;gap:6px;flex-wrap:wrap}
-.yb{height:36px;min-width:64px;border-radius:8px;border:1px solid var(--brand);background:#fff;color:var(--brand);font:inherit;font-size:13px;font-weight:500;padding:0 12px}
-.yb[aria-selected=true]{background:var(--brand);color:#fff}
-.cs{overflow-x:auto;margin-bottom:16px}
-table.lc{border-collapse:collapse;table-layout:fixed;width:100%;min-width:1046px;font-size:11px;background:#fff}
-table.lc td,table.lc th{border:1px solid #2b5560;padding:0 2px;text-align:center;overflow:hidden;white-space:nowrap}
-table.lc th{background:#d7eaf0;font-weight:600;height:24px;line-height:1.2}
-table.lc td{height:26px}
-table.lc td.rs{text-align:left;padding-left:6px}
-.cok{color:var(--ok);font-weight:700}.cno{color:var(--no);font-weight:700}.cwt{color:var(--warn);font-weight:600}
-.void td{text-decoration:line-through;color:var(--no)}
-.cinfo{display:flex;flex-wrap:wrap;gap:4px 20px;margin-top:8px;font-size:14px}
-@media print{.pr-card header,.pr-card .noprint,.pr-card #drawer,.pr-card #scrim,.pr-card #netBanner,.pr-card .view:not(#v-card),.pr-card #toast{display:none!important}.pr-card main{max-width:none;padding:0}.pr-card section{border:0;padding:0}.pr-card table.lc{min-width:0;font-size:8px}@page{size:A4 landscape;margin:8mm}}
+#toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0));transform:translateX(-50%);background:var(--ink);color:#fff;padding:10px 16px;border-radius:8px;display:none;max-width:90%;font-size:15px;z-index:9}
 </style>
 </head>
 <body>
 <header>
-  <div class="hl">
-    <button class="hamb" id="hamb" type="button" aria-label="เมนู" aria-controls="drawer" hidden>
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
-      <span class="dot" id="hDot" hidden></span>
-    </button>
-    <h1 id="hTitle">ขอใบลา</h1>
-  </div>
+  <h1>ขอใบลา</h1>
   <div class="hbtns">
     <button id="installBtn" type="button">ติดตั้งแอป</button>
-    <button id="hrBtn" type="button">เข้าสู่ระบบ HR</button>
+    <a id="hrLink" href="hr/index.html">สำหรับ HR</a>
   </div>
 </header>
-
-<dialog id="hrDlg">
-  <form id="hrForm" method="dialog">
-    <h2>เข้าสู่ระบบ HR</h2>
-    <label for="hrPass">รหัสผ่าน HR</label>
-    <input id="hrPass" type="password" autocomplete="current-password">
-    <div id="hrErr" class="derr" role="alert"></div>
-    <div class="dact">
-      <button class="dbtn ghost" id="hrCancel" type="button">ยกเลิก</button>
-      <button class="dbtn" id="hrGo" type="submit">เข้าสู่ระบบ</button>
-    </div>
-  </form>
-</dialog>
 
 <dialog id="pinDlg">
   <form id="pinForm" method="dialog">
@@ -163,16 +103,9 @@ table.lc td.rs{text-align:left;padding-left:6px}
   </form>
 </dialog>
 
-<div id="scrim" hidden></div>
-<nav id="drawer" aria-label="เมนูหลัก" hidden>
-  <div class="dh"><div class="dn" id="dName"></div><div class="dm" id="dMeta"></div></div>
-  <div class="dl" id="dItems"></div>
-  <div class="df"><button class="mi" id="dPin" type="button">เปลี่ยน PIN</button><button class="mi" id="dOut" type="button">ออกจากระบบ</button></div>
-</nav>
 <main>
-  <div id="netBanner">ออฟไลน์อยู่ ใบลาจะถูกเก็บไว้และส่งให้อัตโนมัติเมื่อมีสัญญาณ</div>
+  <div id="netBanner">ออฟไลน์อยู่ ต้องมีอินเทอร์เน็ตเพื่อส่งใบลาและดูสถานะ</div>
 
-  <!-- ล็อกอินพนักงาน -->
   <section id="loginBox" hidden>
     <h2>เข้าสู่ระบบ</h2>
     <form id="loginForm" novalidate>
@@ -187,12 +120,9 @@ table.lc td.rs{text-align:left;padding-left:6px}
   </section>
 
   <div id="app" hidden>
-    <section class="noprint">
+    <section>
       <div class="who">
-        <div>
-          <div class="n" id="whoName"></div>
-          <div class="m" id="whoMeta"></div>
-        </div>
+        <div><div class="n" id="whoName"></div><div class="m" id="whoMeta"></div><div class="m" id="chainInfo"></div></div>
         <div class="acts">
           <button class="link" id="chPin" type="button">เปลี่ยน PIN</button>
           <button class="link" id="logout" type="button">ออกจากระบบ</button>
@@ -200,82 +130,52 @@ table.lc td.rs{text-align:left;padding-left:6px}
       </div>
     </section>
 
-    <div class="view" id="v-old">
-    <section>
-      <h2 id="balTitle">ยอดวันลาคงเหลือ</h2>
-      <div class="bals" id="bals"></div>
-      <div class="m" id="balMeta" style="margin-top:8px"></div>
-    </section>
-
-    <section>
-      <h2>กรอกใบลา</h2>
-      <form id="f" novalidate>
-        <label for="type">ประเภทการลา</label>
-        <select id="type">
-          <option>01 ลาป่วย</option>
-          <option>02 ลากิจ</option>
-          <option>03 วันหยุดพักผ่อนประจำปี</option>
-          <option>04 ลาเพื่อทหาร</option>
-          <option>05 ลาเพื่อทำหมัน</option>
-          <option>06 ขาดงานหัก 1 เท่า</option>
-          <option>07 ลาอุปสมบท</option>
-          <option>08 ลาคลอด</option>
-          <option>09 ลาสมรส</option>
-          <option>10 ขาดงานหัก 2 เท่า</option>
-          <option>11 ลาฌาปนกิจ</option>
-          <option>12 วันหยุดพักผ่อนประจำปีตามแผน</option>
-          <option>13 หยุดพิเศษ</option>
-        </select>
-        <div class="m" id="typeHint"></div>
-        <div class="row">
-          <div><label for="start">ตั้งแต่วันที่</label><input id="start" type="date" required></div>
-          <div><label for="end">ถึงวันที่</label><input id="end" type="date" required></div>
-        </div>
-        <label class="check" for="half"><input id="half" type="checkbox" disabled> ลาครึ่งวัน (เลือกได้เมื่อลาวันเดียว)</label>
-        <div class="days" id="days">จำนวนวันลา: -</div>
-        <label for="reason">เหตุผลการลา</label><textarea id="reason" required></textarea>
-        <label for="phone">เบอร์ติดต่อระหว่างลา</label><input id="phone" type="tel" inputmode="tel" autocomplete="tel">
-        <button class="btn" id="submit" type="submit">ส่งใบลาให้ HR</button>
-      </form>
-    </section>
-
-    <section>
-      <div class="top" style="display:flex;justify-content:space-between;align-items:center">
-        <h2 style="margin:0">ใบลาของฉัน</h2>
-        <button class="link" id="refresh" type="button">อัปเดตสถานะ</button>
-      </div>
-      <div id="list" style="margin-top:12px"></div>
-    </section>
+    <div class="tabs" role="tablist">
+      <button class="tab" role="tab" id="tReq" aria-selected="true" type="button">ขอใบลา</button>
+      <button class="tab" role="tab" id="tInbox" aria-selected="false" type="button" hidden>รออนุมัติ<span class="bd" id="tBadge" hidden></span></button>
     </div>
 
-    <div class="view" id="v-online" hidden>
+    <div id="vReq">
       <section>
-        <h2>ลางานออนไลน์</h2>
-        <div class="m" id="chainInfo"></div>
-        <form id="of" novalidate>
-          <label for="oType">ประเภทการลา</label><select id="oType"></select>
-          <div class="m" id="oHint"></div>
+        <h2>กรอกใบลา</h2>
+        <form id="f" novalidate>
+          <label for="type">ประเภทการลา</label>
+          <select id="type">
+            <option>01 ลาป่วย</option>
+            <option>02 ลากิจ</option>
+            <option>03 วันหยุดพักผ่อนประจำปี</option>
+            <option>04 ลาเพื่อทหาร</option>
+            <option>05 ลาเพื่อทำหมัน</option>
+            <option>06 ขาดงานหัก 1 เท่า</option>
+            <option>07 ลาอุปสมบท</option>
+            <option>08 ลาคลอด</option>
+            <option>09 ลาสมรส</option>
+            <option>10 ขาดงานหัก 2 เท่า</option>
+            <option>11 ลาฌาปนกิจ</option>
+            <option>12 วันหยุดพักผ่อนประจำปีตามแผน</option>
+            <option>13 หยุดพิเศษ</option>
+          </select>
           <div class="row">
-            <div><label for="oStart">ตั้งแต่วันที่</label><input id="oStart" type="date" required></div>
-            <div><label for="oEnd">ถึงวันที่</label><input id="oEnd" type="date" required></div>
+            <div><label for="start">ตั้งแต่วันที่</label><input id="start" type="date" required></div>
+            <div><label for="end">ถึงวันที่</label><input id="end" type="date" required></div>
           </div>
-          <label class="check" for="oHalf"><input id="oHalf" type="checkbox" disabled> ลาครึ่งวัน (เลือกได้เมื่อลาวันเดียว)</label>
-          <div class="days" id="oDays">จำนวนวันลา: -</div>
-          <label for="oReason">เหตุผลการลา</label><textarea id="oReason" required></textarea>
-          <label for="oPhone">เบอร์ติดต่อระหว่างลา</label><input id="oPhone" type="tel" inputmode="tel" autocomplete="tel">
-          <label id="oAttLbl" style="margin-top:14px">แนบรูป</label>
-          <div class="thumbs" id="oThumbs"></div>
-          <input id="oFile" type="file" accept="image/*" multiple hidden>
-          <button class="btn" id="oSubmit" type="submit">ส่งใบลาถึงผู้อนุมัติ</button>
+          <label class="check" for="half"><input id="half" type="checkbox" disabled> ลาครึ่งวัน (เลือกได้เมื่อลาวันเดียว)</label>
+          <div class="days" id="days">จำนวนวันลา: -</div>
+          <label for="reason">เหตุผลการลา</label><textarea id="reason" required></textarea>
+          <label for="phone">เบอร์ติดต่อระหว่างลา</label><input id="phone" type="tel" inputmode="tel" autocomplete="tel">
+          <button class="btn" id="submit" type="submit">ส่งใบลา</button>
         </form>
       </section>
       <section>
-        <h2>ใบลาออนไลน์ของฉัน</h2>
-        <div id="oList"><p class="empty">ยังไม่มีใบลาออนไลน์</p></div>
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <h2 style="margin:0">ใบลาของฉัน</h2>
+          <button class="link" id="refresh" type="button">อัปเดตสถานะ</button>
+        </div>
+        <div id="list" style="margin-top:12px"></div>
       </section>
     </div>
 
-    <div class="view" id="v-inbox" hidden>
+    <div id="vInbox" hidden>
       <section>
         <div style="display:flex;justify-content:space-between;align-items:center">
           <h2 style="margin:0">รอการอนุมัติของฉัน</h2>
@@ -284,27 +184,12 @@ table.lc td.rs{text-align:left;padding-left:6px}
         <div id="iList" style="margin-top:12px"></div>
       </section>
     </div>
-
-    <div class="view" id="v-card" hidden>
-      <section class="noprint">
-        <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap">
-          <div class="yrs" id="yrs" role="tablist" aria-label="เลือกปี"></div>
-          <button class="yb" id="cPrint" type="button">พิมพ์ / PDF</button>
-        </div>
-      </section>
-      <div id="cardHead"></div>
-      <div class="cs" id="cardBox"></div>
-    </div>
   </div>
 </main>
-<dialog id="imgDlg" style="width:min(92vw,640px)">
-  <img id="imgView" alt="รูปแนบ" style="max-width:100%;display:block;border-radius:8px">
-  <div class="dact"><button class="dbtn" id="imgClose" type="button">ปิด</button></div>
-</dialog>
 <div id="toast" role="status"></div>
 
 <script>
-// วาง URL ของ Apps Script Web App ตรงนี้ (ลงท้ายด้วย /exec)
+// URL ของ Apps Script Web App (ลงท้ายด้วย /exec) ใช้ตัวเดียวกันในทุกไฟล์
 const API_URL = 'https://script.google.com/macros/s/AKfycbw89zZuaEeZe6lNygue9yl1wb2W8u3opwFwKdAgDyYOuSwtv2Trpi6hZIxzDiq-EtH59w/exec';
 
 const $ = s => document.querySelector(s);
@@ -313,38 +198,27 @@ const LS = {
   set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} },
   del(k) { try { localStorage.removeItem(k); } catch (e) {} }
 };
-const apiReady = () => !API_URL.includes('PASTE_');
-
-// S = เซสชันที่ล็อกอินอยู่ { token, emp:{id,name,dept,phone,mustChange}, year, balances:[...] }
-let S = LS.get('session', null);
-let reqs = [];
-const reqKey = () => 'reqs:' + S.emp.id;
-const saveReqs = () => LS.set(reqKey(), reqs);
-const saveSession = () => LS.set('session', S);
+let S = LS.get('session', null); // { token, emp, chain, isApprover, inbox }
+let sendCid = null;
 
 function toast(msg) {
   const t = $('#toast'); t.textContent = msg; t.style.display = 'block';
   clearTimeout(toast.t); toast.t = setTimeout(() => t.style.display = 'none', 3600);
 }
-function esc(s) { const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
-function fmtDate(s) {
-  const [y, m, d] = s.split('-').map(Number);
-  return d + '/' + m + '/' + (y + 543);
-}
-const fmtN = n => String(+Number(n).toFixed(2));
-
+const esc = s => { const d = document.createElement('div'); d.textContent = s == null ? '' : s; return d.innerHTML; };
+function fmtDate(s) { const [y, m, d] = String(s).slice(0, 10).split('-').map(Number); return d + '/' + m + '/' + (y + 543); }
+function fmtTs(s) { const d = new Date(s); return isNaN(d) ? '' : d.toLocaleString('th-TH', { dateStyle: 'short', timeStyle: 'short' }); }
+const rangeTxt = r => r.start === r.end ? fmtDate(r.start) : fmtDate(r.start) + ' - ' + fmtDate(r.end);
+const isOpen = st => String(st).indexOf('รอ') === 0;
 async function api(body) {
-  const res = await fetch(API_URL, {
-    method: 'POST',
-    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-    body: JSON.stringify(body)
-  });
+  const res = await fetch(API_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(body) });
   return res.json();
 }
+const save = () => LS.set('session', S);
 
-// ----- แสดง/ซ่อนหน้า -----
+// ----- แสดงหน้า -----
 function showLogin(msg) {
-  $('#loginBox').hidden = false; $('#app').hidden = true; $('#hamb').hidden = true; closeMenu();
+  $('#loginBox').hidden = false; $('#app').hidden = true;
   $('#lgErr').textContent = msg || '';
   const last = LS.get('lastEmpId', '');
   if (last && !$('#lgId').value) $('#lgId').value = last;
@@ -353,109 +227,27 @@ function showApp() {
   $('#loginBox').hidden = true; $('#app').hidden = false;
   $('#whoName').textContent = S.emp.name;
   $('#whoMeta').textContent = 'รหัส ' + S.emp.id + (S.emp.dept ? ' · แผนก ' + S.emp.dept : '');
+  $('#chainInfo').textContent = S.chain ? 'ลำดับอนุมัติ: ' + S.chain.map(c => c.role === 'HR' ? 'HR' : c.role + ' (' + c.name + ')').join(' → ') : '';
   if (S.emp.phone && !$('#phone').value) $('#phone').value = S.emp.phone;
-  renderBalances(); renderHint(); render();
-  $('#hamb').hidden = false; renderMenu();
+  $('#tInbox').hidden = !S.isApprover;
+  const b = $('#tBadge'); b.hidden = !(S.inbox > 0); b.textContent = S.inbox;
+  if (!S.isApprover) tab('req');
 }
-
-// ----- ยอดวันลา -----
-function renderBalances() {
-  const el = $('#bals');
-  const b = S.balances || [];
-  $('#balTitle').textContent = 'ยอดวันลาคงเหลือ ปี ' + (S.year ? S.year + 543 : '');
-  if (!b.length) { el.innerHTML = '<p class="empty" style="grid-column:1/-1">ยังไม่มีข้อมูลยอดวันลา (ต้องออนไลน์เพื่อดึงข้อมูล)</p>'; $('#balMeta').textContent = ''; return; }
-  el.innerHTML = b.map(x => {
-    const avail = x.remaining - x.pending;
-    return '<div class="bal' + (avail <= 0 ? ' low' : '') + '"><div class="bn">' + esc(x.name) + '</div>' +
-      '<div class="bv">' + fmtN(x.remaining) + ' <small>วัน</small></div>' +
-      '<div class="bm">ใช้ไป ' + fmtN(x.used) + ' / สิทธิ์ ' + fmtN(x.total) + '</div>' +
-      (x.pending > 0 ? '<div class="bp">รออนุมัติ ' + fmtN(x.pending) + ' วัน</div>' : '') + '</div>';
-  }).join('');
-  $('#balMeta').textContent = 'ยอดคงเหลือหักเมื่อ HR อนุมัติใบลาแล้ว';
+function tab(w) {
+  $('#tReq').setAttribute('aria-selected', w === 'req'); $('#tInbox').setAttribute('aria-selected', w === 'inbox');
+  $('#vReq').hidden = w !== 'req'; $('#vInbox').hidden = w !== 'inbox';
+  if (w === 'inbox') loadInbox(); else loadMine();
 }
-function balOf(type) { return (S.balances || []).find(x => x.code === type.slice(0, 2)); }
-function renderHint() {
-  const b = balOf($('#type').value);
-  $('#typeHint').textContent = b ? 'คงเหลือที่ลาได้ ' + fmtN(b.remaining - b.pending) + ' วัน' + (b.pending > 0 ? ' (หักใบที่รออนุมัติแล้ว)' : '') : '';
+$('#tReq').addEventListener('click', () => tab('req'));
+$('#tInbox').addEventListener('click', () => tab('inbox'));
+function expire() { LS.del('session'); S = null; showLogin('เซสชันหมดอายุหรือ PIN ถูกเปลี่ยน กรุณาเข้าสู่ระบบใหม่'); }
+const authFail = j => { if (j && j.error === 'auth') { expire(); return true; } return false; };
+function setProfile(j) {
+  S.emp = j.emp; S.chain = j.chain; S.isApprover = j.isApprover; S.inbox = j.inbox; save(); showApp();
 }
-$('#type').addEventListener('input', renderHint);
-
-// ----- คำนวณจำนวนวัน -----
-function calcDays() {
-  const s = $('#start').value, e = $('#end').value;
-  const half = $('#half');
-  half.disabled = !(s && e && s === e);
-  if (half.disabled) half.checked = false;
-  if (!s || !e) { $('#days').textContent = 'จำนวนวันลา: -'; return null; }
-  if (e < s) { $('#days').textContent = 'วันที่สิ้นสุดต้องไม่ก่อนวันที่เริ่ม'; return null; }
-  const n = (new Date(e) - new Date(s)) / 86400000 + 1;
-  const days = half.checked ? 0.5 : n;
-  $('#days').textContent = 'จำนวนวันลา: ' + days + ' วัน';
-  return days;
-}
-['start', 'end', 'half'].forEach(id => $('#' + id).addEventListener('input', calcDays));
-
-// ----- ส่งข้อมูล -----
-// คืนค่า: true = ส่งสำเร็จ, 'perm' = ระบบปฏิเสธถาวร (เช่น เกินยอด), 'auth' = ต้องล็อกอินใหม่, false = ลองใหม่ภายหลัง
-async function send(r) {
-  if (!apiReady() || !navigator.onLine || !S) return false;
-  try {
-    const j = await api({ action: 'submit', token: S.token, cid: r.cid, type: r.type, start: r.start, end: r.end,
-      half: r.half, reason: r.reason, phone: r.phone });
-    if (j.ok) {
-      r.synced = true; r.no = j.no; r.status = j.status;
-      if (j.balances) { S.balances = j.balances; saveSession(); renderBalances(); renderHint(); }
-      saveReqs(); render(); return true;
-    }
-    if (j.error === 'auth') return 'auth';
-    if (/^(balance|invalid|missing)/.test(String(j.error))) {
-      r.synced = true; r.status = 'ส่งไม่สำเร็จ'; r.err = j.message || j.error;
-      saveReqs(); render();
-      toast(r.err);
-      return 'perm';
-    }
-  } catch (e) {}
-  return false;
-}
-async function flush() {
-  if (!S) return;
-  for (const r of reqs.filter(x => !x.synced)) {
-    const ok = await send(r);
-    if (ok === 'auth') { expire(); return; }
-    if (ok !== true && ok !== 'perm') break;
-  }
-}
-
-// ----- โหลดข้อมูลของฉันจากเซิร์ฟเวอร์ (ยอดวันลา + สถานะใบลา) -----
-function mergeRequests(list) {
-  (list || []).forEach(sr => {
-    const lr = reqs.find(x => x.cid === sr.cid);
-    if (lr) { lr.status = sr.status; lr.no = sr.no; lr.synced = true; return; }
-    reqs.push({ cid: sr.cid, type: sr.type, start: sr.start, end: sr.end, days: sr.days, status: sr.status,
-      no: sr.no, synced: true, createdAt: sr.ts || '' });
-  });
-  reqs.sort((a, b) => String(b.createdAt).localeCompare(String(a.createdAt)));
-  reqs = reqs.slice(0, 80);
-}
-function applyProfile(j) {
-  S.emp = j.emp; S.year = j.year; S.balances = j.balances; S.chain = j.chain; S.isApprover = j.isApprover; S.inbox = j.inbox; S.startDate = j.startDate;
-  saveSession();
-  mergeRequests(j.requests);
-  saveReqs();
-  showApp();
-}
-async function loadMe(manual) {
-  if (!S) return;
-  if (!apiReady() || !navigator.onLine) { if (manual) toast('ออฟไลน์อยู่'); return; }
-  try {
-    const j = await api({ action: 'me', token: S.token });
-    if (j.ok) { applyProfile(j); if (manual) toast('อัปเดตแล้ว'); }
-    else if (j.error === 'auth') expire();
-  } catch (e) { if (manual) toast('อัปเดตไม่สำเร็จ ลองใหม่อีกครั้ง'); }
-}
-function expire() {
-  LS.del('session'); S = null; reqs = [];
-  showLogin('เซสชันหมดอายุหรือ PIN ถูกเปลี่ยน กรุณาเข้าสู่ระบบใหม่');
+async function loadMe() {
+  if (!S || !navigator.onLine) return;
+  try { const j = await api({ action: 'me', token: S.token }); if (j.ok) setProfile(j); else authFail(j); } catch (e) {}
 }
 
 // ----- ล็อกอิน / ออกจากระบบ -----
@@ -463,44 +255,21 @@ $('#loginForm').addEventListener('submit', async ev => {
   ev.preventDefault();
   const id = $('#lgId').value.trim(), pin = $('#lgPin').value.trim();
   if (!id || !pin) { $('#lgErr').textContent = 'กรอกรหัสพนักงานและ PIN'; return; }
-  if (!apiReady()) { $('#lgErr').textContent = 'ยังไม่ได้ตั้งค่า API_URL ใน index.html'; return; }
   if (!navigator.onLine) { $('#lgErr').textContent = 'ออฟไลน์อยู่ ต้องมีอินเทอร์เน็ตเพื่อเข้าสู่ระบบ'; return; }
   $('#lgGo').disabled = true; $('#lgErr').textContent = '';
   try {
     const j = await api({ action: 'login', empId: id, pin: pin });
     if (j.ok) {
-      S = { token: j.token, emp: j.emp, year: j.year, balances: j.balances, chain: j.chain, isApprover: j.isApprover, inbox: j.inbox, startDate: j.startDate };
-      saveSession(); LS.set('lastEmpId', id);
-      reqs = LS.get(reqKey(), []);
-      // ย้ายใบลาเก่าที่เคยเก็บไว้ในเครื่อง (ก่อนมีระบบล็อกอิน) ของคนนี้เข้ามา
-      const legacy = LS.get('reqs', []);
-      const mine = legacy.filter(r => String(r.empId) === id && !reqs.some(x => x.cid === r.cid));
-      if (legacy.length) {
-        reqs = reqs.concat(mine);
-        LS.set('reqs', legacy.filter(r => String(r.empId) !== id));
-      }
-      $('#lgPin').value = '';
-      mergeRequests(j.requests); saveReqs(); showApp();
+      S = { token: j.token }; LS.set('lastEmpId', id); $('#lgPin').value = '';
+      setProfile(j); loadMine();
       if (j.emp.mustChange) openPin(true);
-      if (GO && VIEWS[GO]) { setView(GO); GO = null; }
-      flush();
-    } else if (j.error === 'locked') {
-      $('#lgErr').textContent = 'กรอก PIN ผิดหลายครั้ง ลองใหม่ในอีก 15 นาที หรือติดต่อ HR';
-    } else if (j.error === 'auth') {
-      $('#lgErr').textContent = 'รหัสพนักงานหรือ PIN ไม่ถูกต้อง (ถ้ายังไม่มี PIN ติดต่อ HR)';
-    } else {
-      $('#lgErr').textContent = 'เกิดข้อผิดพลาด ลองใหม่อีกครั้ง';
-    }
+    } else if (j.error === 'locked') $('#lgErr').textContent = 'กรอก PIN ผิดหลายครั้ง ลองใหม่ในอีก 15 นาที หรือติดต่อ HR';
+    else if (j.error === 'auth') $('#lgErr').textContent = 'รหัสพนักงานหรือ PIN ไม่ถูกต้อง (ถ้ายังไม่มี PIN ติดต่อ HR)';
+    else $('#lgErr').textContent = 'เกิดข้อผิดพลาด ลองใหม่อีกครั้ง';
   } catch (e) { $('#lgErr').textContent = 'เชื่อมต่อไม่ได้ ลองใหม่อีกครั้ง'; }
   $('#lgGo').disabled = false;
 });
-$('#logout').addEventListener('click', () => {
-  const pending = reqs.filter(r => !r.synced).length;
-  if (pending && !confirm('มีใบลา ' + pending + ' ฉบับที่ยังไม่ได้ส่ง ออกจากระบบแล้วจะส่งต่อเมื่อเข้าสู่ระบบอีกครั้ง ออกจากระบบ?')) return;
-  LS.del('session'); S = null; reqs = [];
-  $('#lgPin').value = '';
-  showLogin('');
-});
+$('#logout').addEventListener('click', () => { LS.del('session'); S = null; $('#lgPin').value = ''; showLogin(''); });
 
 // ----- เปลี่ยน PIN -----
 let pinForced = false;
@@ -510,8 +279,7 @@ function openPin(forced) {
   $('#pinNote').textContent = forced ? 'HR ตั้ง PIN เริ่มต้นให้ กรุณาเปลี่ยนเป็น PIN ของคุณเอง' : '';
   $('#pinCancel').hidden = pinForced;
   ['#pinOld', '#pinNew', '#pinNew2'].forEach(s => $(s).value = '');
-  $('#pinErr').textContent = '';
-  $('#pinDlg').showModal(); $('#pinOld').focus();
+  $('#pinErr').textContent = ''; $('#pinDlg').showModal(); $('#pinOld').focus();
 }
 $('#chPin').addEventListener('click', () => openPin(false));
 $('#pinCancel').addEventListener('click', () => $('#pinDlg').close());
@@ -525,89 +293,130 @@ $('#pinForm').addEventListener('submit', async ev => {
   $('#pinGo').disabled = true; $('#pinErr').textContent = '';
   try {
     const j = await api({ action: 'changePin', token: S.token, oldPin: o, newPin: n });
-    if (j.ok) {
-      S.token = j.token; S.emp.mustChange = false; saveSession();
-      pinForced = false; $('#pinDlg').close(); toast('เปลี่ยน PIN แล้ว');
-    } else if (j.error === 'oldpin') $('#pinErr').textContent = 'PIN ปัจจุบันไม่ถูกต้อง';
+    if (j.ok) { S.token = j.token; S.emp.mustChange = false; save(); pinForced = false; $('#pinDlg').close(); toast('เปลี่ยน PIN แล้ว'); }
+    else if (j.error === 'oldpin') $('#pinErr').textContent = 'PIN ปัจจุบันไม่ถูกต้อง';
     else if (j.error === 'auth') { pinForced = false; $('#pinDlg').close(); expire(); }
     else $('#pinErr').textContent = 'บันทึกไม่สำเร็จ ลองใหม่อีกครั้ง';
   } catch (e) { $('#pinErr').textContent = 'เชื่อมต่อไม่ได้ ลองใหม่อีกครั้ง'; }
   $('#pinGo').disabled = false;
 });
 
-// ----- ส่งใบลา -----
+// ----- กรอกใบลา -----
+function calcDays() {
+  const s = $('#start').value, e = $('#end').value, half = $('#half');
+  half.disabled = !(s && e && s === e); if (half.disabled) half.checked = false;
+  if (!s || !e) { $('#days').textContent = 'จำนวนวันลา: -'; return null; }
+  if (e < s) { $('#days').textContent = 'วันที่สิ้นสุดต้องไม่ก่อนวันที่เริ่ม'; return null; }
+  const days = half.checked ? 0.5 : (new Date(e) - new Date(s)) / 86400000 + 1;
+  $('#days').textContent = 'จำนวนวันลา: ' + days + ' วัน';
+  return days;
+}
+['start', 'end', 'half'].forEach(id => $('#' + id).addEventListener('input', calcDays));
 $('#f').addEventListener('submit', async ev => {
   ev.preventDefault();
   if (!S) return;
-  const days = calcDays();
-  const v = id => $('#' + id).value.trim();
+  const days = calcDays(), v = id => $('#' + id).value.trim();
   if (!v('start') || !v('end') || !v('reason')) { toast('กรอกข้อมูลที่จำเป็นให้ครบ'); return; }
   if (days === null) { toast('ตรวจสอบวันที่ลาอีกครั้ง'); return; }
-  if (!apiReady()) { toast('ยังไม่ได้ตั้งค่า API_URL ใน index.html'); return; }
-  const b = balOf($('#type').value);
-  if (b && navigator.onLine && days > b.remaining - b.pending) {
-    toast('ขอลา ' + days + ' วัน แต่ยอด' + b.name + 'ที่ลาได้เหลือ ' + fmtN(b.remaining - b.pending) + ' วัน');
-    return;
-  }
-  const r = {
-    cid: crypto.randomUUID(), type: $('#type').value,
-    start: v('start'), end: v('end'), days, half: $('#half').checked, reason: v('reason'), phone: v('phone'),
-    createdAt: new Date().toISOString(), synced: false, status: 'รอส่ง', no: ''
-  };
-  reqs.unshift(r); saveReqs(); render();
-  $('#submit').disabled = true;
-  const ok = await send(r);
-  $('#submit').disabled = false;
-  if (ok === 'auth') { expire(); return; }
-  if (ok === true) toast('ส่งใบลาให้ HR แล้ว');
-  else if (ok === false) toast('ยังส่งไม่ได้ เก็บไว้แล้ว จะส่งให้เมื่อมีสัญญาณ');
-  if (ok !== 'perm') { $('#start').value = $('#end').value = $('#reason').value = ''; $('#half').checked = false; calcDays(); }
-});
-
-// ----- แสดงรายการ -----
-function render() {
-  if (!S) return;
-  const el = $('#list');
-  if (!reqs.length) { el.innerHTML = '<p class="empty">ยังไม่มีใบลา กรอกฟอร์มด้านบนเพื่อส่งใบลาฉบับแรก</p>'; return; }
-  const cls = { 'รออนุมัติ': 's-wait', 'อนุมัติ': 's-ok', 'ไม่อนุมัติ': 's-no', 'รอส่ง': 's-idle', 'ส่งไม่สำเร็จ': 's-no' };
-  el.innerHTML = reqs.map(r => {
-    const range = r.start === r.end ? fmtDate(r.start) : fmtDate(r.start) + ' - ' + fmtDate(r.end);
-    return '<div class="item"><div class="top"><div><div class="t">' + esc(r.type) + ' ' + r.days + ' วัน</div>' +
-      '<div class="m">' + range + '</div>' + (r.no ? '<div class="m">เลขที่ ' + esc(r.no) + '</div>' : '') +
-      (r.err ? '<div class="m" style="color:var(--no)">' + esc(r.err) + '</div>' : '') + '</div>' +
-      '<span class="chip ' + (cls[r.status] || 's-idle') + '">' + esc(r.status) + '</span></div></div>';
-  }).join('');
-}
-$('#refresh').addEventListener('click', () => loadMe(true));
-
-// ----- ออนไลน์/ออฟไลน์ -----
-function net() { $('#netBanner').style.display = navigator.onLine ? 'none' : 'block'; }
-window.addEventListener('online', () => { net(); flush().then(() => loadMe(false)); });
-window.addEventListener('offline', net);
-
-// ----- เข้าสู่ระบบ HR (ปุ่มมุมขวาบน) -----
-$('#hrBtn').addEventListener('click', () => { $('#hrErr').textContent = ''; $('#hrPass').value = ''; $('#hrDlg').showModal(); $('#hrPass').focus(); });
-$('#hrCancel').addEventListener('click', () => $('#hrDlg').close());
-$('#hrForm').addEventListener('submit', async ev => {
-  ev.preventDefault();
-  const pass = $('#hrPass').value;
-  if (!pass) { $('#hrErr').textContent = 'กรอกรหัสผ่าน'; return; }
-  if (!apiReady()) { $('#hrErr').textContent = 'ยังไม่ได้ตั้งค่า API_URL ใน index.html'; return; }
-  if (!navigator.onLine) { $('#hrErr').textContent = 'ออฟไลน์อยู่ ต้องมีอินเทอร์เน็ตเพื่อเข้าสู่ระบบ HR'; return; }
-  $('#hrGo').disabled = true; $('#hrErr').textContent = '';
+  if (!navigator.onLine) { toast('ต้องมีอินเทอร์เน็ตเพื่อส่งใบลา'); return; }
+  if (!sendCid) sendCid = crypto.randomUUID(); // ส่งซ้ำด้วยรหัสเดิม กันใบลาซ้ำถ้าเน็ตหลุด
+  $('#submit').disabled = true; $('#submit').textContent = 'กำลังส่ง...';
   try {
-    const j = await api({ action: 'hrList', passcode: pass });
+    const j = await api({ action: 'submit', token: S.token, cid: sendCid, type: $('#type').value, start: v('start'), end: v('end'),
+      half: $('#half').checked, reason: v('reason'), phone: v('phone') });
     if (j.ok) {
-      try { sessionStorage.setItem('hrpass', pass); } catch (e) {}
-      location.href = 'hr/index.html';
-      return;
-    }
-    $('#hrErr').textContent = j.error === 'auth' ? 'รหัสผ่านไม่ถูกต้อง' : 'เกิดข้อผิดพลาด ลองใหม่อีกครั้ง';
-  } catch (e) { $('#hrErr').textContent = 'เชื่อมต่อไม่ได้ ลองใหม่อีกครั้ง'; }
-  $('#hrGo').disabled = false;
+      toast('ส่งใบลาแล้ว เลขที่ ' + j.no);
+      $('#start').value = $('#end').value = $('#reason').value = ''; $('#half').checked = false; sendCid = null; calcDays(); loadMine();
+    } else if (!authFail(j)) { toast(j.message || 'ส่งไม่สำเร็จ: ' + j.error); sendCid = null; }
+  } catch (e) { toast('เชื่อมต่อไม่ได้ ลองส่งใหม่อีกครั้ง'); }
+  $('#submit').disabled = false; $('#submit').textContent = 'ส่งใบลา';
 });
 
-// ----- PWA -----
+// ----- แสดงสถานะใบลา: ไทม์ไลน์ว่าถึงขั้นไหนแล้ว -----
+function timeline(r) {
+  const open = isOpen(r.status), stopped = r.status === 'ไม่อนุมัติ' || r.status === 'ยกเลิก';
+  let h = '<li class="d"><i></i><b>ส่งใบลาแล้ว</b><span>' + fmtTs(r.ts) + '</span></li>';
+  r.steps.forEach((s, i) => {
+    let cls = 'w', txt = stopped ? '-' : 'ยังไม่ถึงขั้นนี้';
+    if (s.role === 'HR') {
+      if (r.issued) { cls = 'd'; txt = 'ออกใบลาแล้ว ' + fmtTs(s.at); }
+      else if (open && i === r.cur) { cls = 'c'; txt = 'รอ HR ออกใบลา'; }
+    } else if (s.decision === 'ok') { cls = 'd'; txt = 'อนุมัติแล้ว ' + fmtTs(s.at); }
+    else if (s.decision === 'no') { cls = 'n'; txt = 'ไม่อนุมัติ ' + fmtTs(s.at) + (s.note ? ' · ' + s.note : ''); }
+    else if (open && i === r.cur) { cls = 'c'; txt = 'รออนุมัติ'; }
+    const who = s.role === 'HR' ? 'HR (ฝ่ายบุคคล)' : s.role + (s.name ? ' · ' + s.name : '');
+    h += '<li class="' + cls + '"><i></i><b>' + esc(who) + '</b><span>' + esc(txt) + '</span></li>';
+  });
+  if (r.status === 'ยกเลิก') h += '<li class="n"><i></i><b>ยกเลิกใบลา</b><span>-</span></li>';
+  return '<ul class="tl">' + h + '</ul>';
+}
+const chipCls = st => st === 'ออกใบลาแล้ว' ? 's-ok' : st === 'ไม่อนุมัติ' ? 's-no' : st === 'ยกเลิก' ? 's-idle' : 's-wait';
+
+async function loadMine() {
+  if (!S || !navigator.onLine) return;
+  try {
+    const j = await api({ action: 'mine', token: S.token });
+    if (j.ok) renderMine(j.items); else authFail(j);
+  } catch (e) {}
+}
+function renderMine(items) {
+  const el = $('#list');
+  if (!items.length) { el.innerHTML = '<p class="empty">ยังไม่มีใบลา กรอกฟอร์มด้านบนเพื่อส่งใบลาฉบับแรก</p>'; return; }
+  el.innerHTML = items.map(r =>
+    '<div class="item" data-no="' + esc(r.no) + '"><div class="top"><div><div class="t">' + esc(r.type) + ' ' + r.days + ' วัน</div>' +
+    '<div class="m">' + rangeTxt(r) + ' · เลขที่ ' + esc(r.no) + '</div></div><span class="chip ' + chipCls(r.status) + '">' + esc(r.status) + '</span></div>' +
+    timeline(r) + (isOpen(r.status) ? '<button class="link" data-cancel="1" type="button" style="margin-top:8px">ยกเลิกใบลานี้</button>' : '') + '</div>').join('');
+}
+$('#refresh').addEventListener('click', async () => { if (!navigator.onLine) { toast('ออฟไลน์อยู่'); return; } await loadMine(); toast('อัปเดตสถานะแล้ว'); });
+$('#list').addEventListener('click', async ev => {
+  const b = ev.target.closest('[data-cancel]'); if (!b) return;
+  const no = b.closest('.item').dataset.no;
+  if (!confirm('ยกเลิกใบลา ' + no + ' ?')) return;
+  try {
+    const j = await api({ action: 'cancel', token: S.token, no: no });
+    if (j.ok) { toast('ยกเลิกใบลาแล้ว'); loadMine(); } else if (!authFail(j)) toast(j.message || 'ยกเลิกไม่สำเร็จ');
+  } catch (e) { toast('เชื่อมต่อไม่ได้ ลองใหม่อีกครั้ง'); }
+});
+
+// ----- ผู้อนุมัติ (หัวหน้า / MGR / FM) -----
+async function loadInbox() {
+  if (!S) return;
+  const el = $('#iList');
+  if (!navigator.onLine) { el.innerHTML = '<p class="empty">ออฟไลน์อยู่ ต้องมีอินเทอร์เน็ต</p>'; return; }
+  try {
+    const j = await api({ action: 'inbox', token: S.token });
+    if (j.ok) { S.inbox = j.count; save(); const b = $('#tBadge'); b.hidden = !(j.count > 0); b.textContent = j.count; renderInbox(j.items); } else authFail(j);
+  } catch (e) { el.innerHTML = '<p class="empty">โหลดไม่สำเร็จ ลองใหม่อีกครั้ง</p>'; }
+}
+function renderInbox(items) {
+  const el = $('#iList');
+  if (!items.length) { el.innerHTML = '<p class="empty">ไม่มีใบลาที่รอการอนุมัติของคุณ</p>'; return; }
+  el.innerHTML = items.map(r =>
+    '<div class="item" data-no="' + esc(r.no) + '"><div class="top"><div><div class="t">' + esc(r.name) + '</div><div class="m">' + esc(r.empId) + (r.dept ? ' · ' + esc(r.dept) : '') + '</div></div>' +
+    '<span class="chip s-wait">' + esc(r.status) + '</span></div>' +
+    '<div style="margin-top:8px"><b>' + esc(r.type) + '</b> ' + r.days + ' วัน<div class="m">' + rangeTxt(r) + '</div>' +
+    '<div style="margin-top:4px">' + esc(r.reason) + '</div>' + (r.phone ? '<div class="m">โทร ' + esc(r.phone) + '</div>' : '') + '</div>' + timeline(r) +
+    '<label for="n_' + esc(r.no) + '">หมายเหตุ / เหตุผลที่ไม่อนุมัติ (ไม่บังคับ)</label><input id="n_' + esc(r.no) + '" class="note" autocomplete="off">' +
+    '<div class="acts2"><button class="bt no" data-d="no" type="button">ไม่อนุมัติ</button><button class="bt ok" data-d="ok" type="button">อนุมัติ</button></div></div>').join('');
+}
+$('#iRefresh').addEventListener('click', loadInbox);
+$('#iList').addEventListener('click', async ev => {
+  const b = ev.target.closest('[data-d]'); if (!b) return;
+  const card = b.closest('.item'), dec = b.dataset.d;
+  if (dec === 'no' && !confirm('ยืนยันไม่อนุมัติใบลานี้?')) return;
+  card.querySelectorAll('button').forEach(x => x.disabled = true);
+  try {
+    const j = await api({ action: 'decide', token: S.token, no: card.dataset.no, decision: dec, note: card.querySelector('.note').value.trim() });
+    if (j.ok) { toast(dec === 'ok' ? 'อนุมัติแล้ว ส่งต่อขั้นถัดไป' : 'ไม่อนุมัติแล้ว'); loadInbox(); }
+    else if (!authFail(j)) { toast(j.message || 'ไม่สำเร็จ: ' + j.error); loadInbox(); }
+  } catch (e) { toast('เชื่อมต่อไม่ได้ ลองใหม่อีกครั้ง'); card.querySelectorAll('button').forEach(x => x.disabled = false); }
+});
+
+// ----- ออนไลน์/ออฟไลน์ + PWA -----
+function net() { $('#netBanner').style.display = navigator.onLine ? 'none' : 'block'; }
+window.addEventListener('online', () => { net(); loadMe(); loadMine(); });
+window.addEventListener('offline', net);
+document.addEventListener('visibilitychange', () => { if (!document.hidden) { loadMe(); if (S) loadMine(); } });
 let deferred;
 window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); deferred = e; $('#installBtn').style.display = 'block'; });
 $('#installBtn').addEventListener('click', async () => {
@@ -615,272 +424,10 @@ $('#installBtn').addEventListener('click', async () => {
 });
 if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js');
 
-// ===== เมนู hamburger และมุมมอง =====
-let GO = new URLSearchParams(location.search).get('go');
-const VIEWS = { old: 'ขอใบลา', online: 'ลางานออนไลน์', inbox: 'อนุมัติใบลา', card: 'ประวัติการลา' };
-const MENU = [
-  ['old', 'ขอใบลา', 'ส่งถึง HR โดยตรง'],
-  ['online', 'ลางานออนไลน์', 'อนุมัติหลายระดับ แนบรูปได้'],
-  ['inbox', 'อนุมัติใบลา', 'เฉพาะผู้อนุมัติ'],
-  ['card', 'ประวัติการลา', 'Leave Card ย้อนหลัง']
-];
-let view = 'old';
-function openMenu() { $('#scrim').hidden = false; $('#drawer').hidden = false; const f = $('#drawer .mi'); if (f) f.focus(); }
-function closeMenu() { $('#scrim').hidden = true; $('#drawer').hidden = true; }
-function renderMenu() {
-  if (!S) return;
-  $('#dName').textContent = S.emp.name;
-  $('#dMeta').textContent = 'รหัส ' + S.emp.id + (S.emp.dept ? ' · ' + S.emp.dept : '');
-  $('#dItems').innerHTML = MENU.filter(m => m[0] !== 'inbox' || S.isApprover).map(m =>
-    '<button class="mi' + (m[0] === view ? ' on' : '') + '" data-v="' + m[0] + '" type="button"><span>' + m[1] + '<small>' + m[2] + '</small></span>' +
-    (m[0] === 'inbox' && S.inbox > 0 ? '<b class="bd">' + S.inbox + '</b>' : '') + '</button>').join('');
-  const dot = $('#hDot'); dot.hidden = !(S.isApprover && S.inbox > 0); dot.textContent = S.inbox;
-}
-function setView(v) {
-  view = v;
-  document.querySelectorAll('.view').forEach(e => e.hidden = e.id !== 'v-' + v);
-  $('#hTitle').textContent = VIEWS[v];
-  closeMenu(); renderMenu(); window.scrollTo(0, 0);
-  if (v === 'online') loadOnline();
-  if (v === 'inbox') loadInbox();
-  if (v === 'card') loadCard();
-}
-$('#hamb').addEventListener('click', openMenu);
-$('#scrim').addEventListener('click', closeMenu);
-$('#dItems').addEventListener('click', ev => { const b = ev.target.closest('[data-v]'); if (b) setView(b.dataset.v); });
-$('#dPin').addEventListener('click', () => { closeMenu(); openPin(false); });
-$('#dOut').addEventListener('click', () => { closeMenu(); $('#logout').click(); });
-document.addEventListener('keydown', e => { if (e.key === 'Escape') closeMenu(); });
-document.addEventListener('visibilitychange', () => { if (!document.hidden) loadMe(false); });
-
-const stepsHtml = (steps, cur, status) => steps.map((s, i) => {
-  const st = s.decision === 'ok' ? 'ok' : s.decision === 'no' ? 'no' : (String(status).indexOf('รอ') === 0 && i === cur ? 'wait' : 'idle');
-  const mark = { ok: ' ✓', no: ' ✗', wait: ' (รอ)', idle: '' }[st];
-  return '<span class="st st-' + st + '">' + esc(s.role) + mark + '</span>';
-}).join('<span class="ar">→</span>');
-const rangeTxt = r => r.start === r.end ? fmtDate(r.start) : fmtDate(r.start) + ' - ' + fmtDate(r.end);
-const authFail = j => { if (j && j.error === 'auth') { expire(); return true; } return false; };
-
-// ===== ลางานออนไลน์ =====
-$('#oType').innerHTML = $('#type').innerHTML;
-let atts = [], oCid = null;
-const oCode = () => $('#oType').value.slice(0, 2);
-function oCalc() {
-  const s = $('#oStart').value, e = $('#oEnd').value, h = $('#oHalf');
-  h.disabled = !(s && e && s === e); if (h.disabled) h.checked = false;
-  if (!s || !e) { $('#oDays').textContent = 'จำนวนวันลา: -'; return null; }
-  if (e < s) { $('#oDays').textContent = 'วันที่สิ้นสุดต้องไม่ก่อนวันที่เริ่ม'; return null; }
-  const d = h.checked ? 0.5 : (new Date(e) - new Date(s)) / 86400000 + 1;
-  $('#oDays').textContent = 'จำนวนวันลา: ' + d + ' วัน'; return d;
-}
-['oStart', 'oEnd', 'oHalf'].forEach(id => $('#' + id).addEventListener('input', oCalc));
-function oHint() {
-  const b = balOf($('#oType').value), sick = oCode() === '01';
-  $('#oHint').textContent = (b ? 'คงเหลือที่ลาได้ ' + fmtN(b.remaining - b.pending) + ' วัน' : '') + (sick ? (b ? ' · ' : '') + 'ลาป่วยต้องมีใบรับรองแพทย์ ถ้าไม่แนบจะบันทึกเป็นลากิจ' : '');
-  $('#oAttLbl').textContent = sick ? 'แนบใบรับรองแพทย์ (ถ้าไม่แนบ ระบบบันทึกเป็นลากิจ)' : 'แนบรูปใบลา / เอกสาร (ไม่บังคับ สูงสุด 3 รูป)';
-}
-$('#oType').addEventListener('input', oHint);
-function renderAtts() {
-  $('#oThumbs').innerHTML = atts.map((a, i) =>
-    '<div class="th"><img src="' + a.url + '" alt="' + esc(a.name) + '"><button class="x" data-i="' + i + '" type="button" aria-label="ลบรูป ' + esc(a.name) + '">×</button></div>').join('') +
-    (atts.length < 3 ? '<button class="add" type="button"><b>+</b><span>เพิ่มรูป</span></button>' : '');
-}
-$('#oThumbs').addEventListener('click', ev => {
-  const x = ev.target.closest('.x');
-  if (x) { atts.splice(Number(x.dataset.i), 1); renderAtts(); return; }
-  if (ev.target.closest('.add')) $('#oFile').click();
-});
-function shrink(file) {
-  return new Promise((ok, no) => {
-    const u = URL.createObjectURL(file), im = new Image();
-    im.onload = () => {
-      const sc = Math.min(1, 1280 / Math.max(im.width, im.height)), c = document.createElement('canvas');
-      c.width = Math.round(im.width * sc); c.height = Math.round(im.height * sc);
-      c.getContext('2d').drawImage(im, 0, 0, c.width, c.height);
-      URL.revokeObjectURL(u);
-      const url = c.toDataURL('image/jpeg', .72);
-      ok({ name: file.name || 'รูป', url: url, data: url.split(',')[1] });
-    };
-    im.onerror = () => { URL.revokeObjectURL(u); no(); };
-    im.src = u;
-  });
-}
-$('#oFile').addEventListener('change', async ev => {
-  const fs = [...ev.target.files]; ev.target.value = '';
-  for (const f of fs) {
-    if (atts.length >= 3) { toast('แนบได้สูงสุด 3 รูป'); break; }
-    try { atts.push(await shrink(f)); } catch (e) { toast('เปิดรูปนี้ไม่ได้'); }
-  }
-  renderAtts();
-});
-$('#of').addEventListener('submit', async ev => {
-  ev.preventDefault();
-  if (!S) return;
-  const days = oCalc(), v = id => $('#' + id).value.trim();
-  if (!v('oStart') || !v('oEnd') || !v('oReason')) { toast('กรอกข้อมูลที่จำเป็นให้ครบ'); return; }
-  if (days === null) { toast('ตรวจสอบวันที่ลาอีกครั้ง'); return; }
-  if (!navigator.onLine) { toast('ต้องมีอินเทอร์เน็ตเพื่อส่งใบลาออนไลน์'); return; }
-  const noCert = oCode() === '01' && !atts.length; // ลาป่วยไม่มีใบรับรองแพทย์ -> นับเป็นลากิจ
-  const b = (S.balances || []).find(x => x.code === (noCert ? '02' : oCode()));
-  if (b && days > b.remaining - b.pending) { toast('ขอลา ' + days + ' วัน แต่ยอด' + b.name + 'ที่ลาได้เหลือ ' + fmtN(b.remaining - b.pending) + ' วัน'); return; }
-  if (noCert && !confirm('ไม่ได้แนบใบรับรองแพทย์ ระบบจะบันทึกเป็น "ลากิจ" และหักจากยอดลากิจ ต้องการส่งต่อหรือไม่?')) return;
-  if (!oCid) oCid = crypto.randomUUID(); // ส่งซ้ำด้วยรหัสเดิม กันใบลาซ้ำถ้าเน็ตหลุด
-  $('#oSubmit').disabled = true; $('#oSubmit').textContent = 'กำลังส่ง...';
-  try {
-    const j = await api({ action: 'olSubmit', token: S.token, cid: oCid, type: $('#oType').value, start: v('oStart'), end: v('oEnd'),
-      half: $('#oHalf').checked, reason: v('oReason'), phone: v('oPhone'), files: atts.map(a => ({ name: a.name, data: a.data })) });
-    if (j.ok) {
-      toast(j.converted ? 'ส่งแล้ว (บันทึกเป็นลากิจ เพราะไม่มีใบรับรองแพทย์) เลขที่ ' + j.no : 'ส่งใบลาถึงผู้อนุมัติแล้ว เลขที่ ' + j.no);
-      if (j.balances) { S.balances = j.balances; saveSession(); renderBalances(); }
-      ['oStart', 'oEnd', 'oReason'].forEach(id => $('#' + id).value = '');
-      $('#oHalf').checked = false; atts = []; oCid = null; renderAtts(); oCalc(); oHint(); loadOnline();
-    } else if (!authFail(j)) { toast(j.message || ('ส่งไม่สำเร็จ: ' + j.error)); if (j.error !== 'missing') oCid = null; }
-  } catch (e) { toast('เชื่อมต่อไม่ได้ ลองส่งใหม่อีกครั้ง'); }
-  $('#oSubmit').disabled = false; $('#oSubmit').textContent = 'ส่งใบลาถึงผู้อนุมัติ';
-});
-async function loadOnline() {
-  $('#chainInfo').textContent = S.chain ? 'ลำดับอนุมัติ: ' + S.chain.map(c => c.role === 'HR' ? 'HR' : c.role + ' (' + c.name + ')').join(' → ') : '';
-  oHint(); renderAtts();
-  if (!navigator.onLine) return;
-  try {
-    const j = await api({ action: 'olMine', token: S.token });
-    if (j.ok) renderOnlineList(j.items); else authFail(j);
-  } catch (e) {}
-}
-function renderOnlineList(items) {
-  const el = $('#oList');
-  if (!items.length) { el.innerHTML = '<p class="empty">ยังไม่มีใบลาออนไลน์</p>'; return; }
-  const cls = { 'อนุมัติ': 's-ok', 'ไม่อนุมัติ': 's-no', 'ยกเลิก': 's-idle' };
-  el.innerHTML = items.map(r => {
-    const rej = r.steps.find(s => s.decision === 'no');
-    const open = String(r.status).indexOf('รอ') === 0;
-    return '<div class="item" data-no="' + esc(r.no) + '"><div class="top"><div><div class="t">' + esc(r.type) + ' ' + r.days + ' วัน</div>' +
-      '<div class="m">' + rangeTxt(r) + ' · ' + esc(r.no) + '</div></div><span class="chip ' + (cls[r.status] || 's-wait') + '">' + esc(r.status) + '</span></div>' +
-      '<div class="steps">' + stepsHtml(r.steps, r.cur, r.status) + '</div>' +
-      (rej && rej.note ? '<div class="m" style="color:var(--no)">เหตุผลที่ไม่อนุมัติ: ' + esc(rej.note) + '</div>' : '') +
-      (open ? '<button class="link" data-cancel="1" type="button">ยกเลิกใบลานี้</button>' : '') + '</div>';
-  }).join('');
-}
-$('#oList').addEventListener('click', async ev => {
-  const b = ev.target.closest('[data-cancel]'); if (!b) return;
-  const no = b.closest('.item').dataset.no;
-  if (!confirm('ยกเลิกใบลา ' + no + ' ?')) return;
-  try {
-    const j = await api({ action: 'olCancel', token: S.token, no: no });
-    if (j.ok) { toast('ยกเลิกใบลาแล้ว'); loadOnline(); loadMe(false); } else if (!authFail(j)) toast(j.message || 'ยกเลิกไม่สำเร็จ');
-  } catch (e) { toast('เชื่อมต่อไม่ได้ ลองใหม่อีกครั้ง'); }
-});
-
-// ===== อนุมัติใบลา (สำหรับผู้อนุมัติ) =====
-async function loadInbox() {
-  const el = $('#iList');
-  if (!navigator.onLine) { el.innerHTML = '<p class="empty">ออฟไลน์อยู่ ต้องมีอินเทอร์เน็ตเพื่อดูใบลาที่รออนุมัติ</p>'; return; }
-  try {
-    const j = await api({ action: 'olInbox', token: S.token });
-    if (j.ok) { S.inbox = j.count; saveSession(); renderMenu(); renderInbox(j.items); } else authFail(j);
-  } catch (e) { el.innerHTML = '<p class="empty">โหลดไม่สำเร็จ ลองใหม่อีกครั้ง</p>'; }
-}
-function renderInbox(items) {
-  const el = $('#iList');
-  if (!items.length) { el.innerHTML = '<p class="empty">ไม่มีใบลาที่รอการอนุมัติของคุณ</p>'; return; }
-  el.innerHTML = items.map(r =>
-    '<div class="ic" data-no="' + esc(r.no) + '"><div style="display:flex;justify-content:space-between;gap:8px"><div><div style="font-weight:600">' + esc(r.name) + '</div>' +
-    '<div class="m">' + esc(r.empId) + (r.dept ? ' · ' + esc(r.dept) : '') + '</div></div><span class="chip s-wait">ขั้น ' + esc(r.role) + '</span></div>' +
-    '<div style="margin-top:8px"><b>' + esc(r.type) + '</b> ' + r.days + ' วัน<div class="m">' + rangeTxt(r) + '</div>' +
-    '<div style="margin-top:4px">' + esc(r.reason) + '</div>' + (r.phone ? '<div class="m">โทร ' + esc(r.phone) + '</div>' : '') + '</div>' +
-    (r.bal !== null && r.bal !== undefined ? '<div class="m" style="margin-top:6px">ยอดคงเหลือของประเภทนี้ ' + fmtN(r.bal) + ' วัน (ก่อนอนุมัติ)</div>' : '') +
-    '<div class="steps">' + stepsHtml(r.steps, r.cur, r.status) + '</div>' +
-    (r.files.length ? '<div class="m" style="margin-top:8px">รูปแนบ ' + r.files.length + ' รูป แตะเพื่อขยาย</div><div class="thumbs">' +
-      r.files.map((n, i) => '<button class="tb" data-f="' + i + '" type="button" aria-label="ดูรูป ' + esc(n) + '">' + esc(n) + '</button>').join('') + '</div>' : '') +
-    '<label for="n_' + esc(r.no) + '">หมายเหตุ / เหตุผลที่ไม่อนุมัติ (ไม่บังคับ)</label><input id="n_' + esc(r.no) + '" class="note" autocomplete="off">' +
-    '<div class="acts2"><button class="bt no" data-d="no" type="button">ไม่อนุมัติ</button><button class="bt ok" data-d="ok" type="button">อนุมัติ</button></div></div>').join('');
-}
-$('#iRefresh').addEventListener('click', loadInbox);
-$('#iList').addEventListener('click', async ev => {
-  const card = ev.target.closest('.ic'); if (!card) return;
-  const no = card.dataset.no, f = ev.target.closest('[data-f]');
-  if (f) { viewImage(no, Number(f.dataset.f)); return; }
-  const b = ev.target.closest('[data-d]'); if (!b) return;
-  const dec = b.dataset.d;
-  if (dec === 'no' && !confirm('ยืนยันไม่อนุมัติใบลานี้?')) return;
-  card.querySelectorAll('button').forEach(x => x.disabled = true);
-  try {
-    const j = await api({ action: 'olDecide', token: S.token, no: no, decision: dec, note: card.querySelector('.note').value.trim() });
-    if (j.ok) { toast('บันทึกแล้ว: ' + (dec === 'ok' ? 'อนุมัติ' : 'ไม่อนุมัติ')); loadInbox(); }
-    else if (!authFail(j)) { toast(j.message || ('ไม่สำเร็จ: ' + j.error)); loadInbox(); }
-  } catch (e) { toast('เชื่อมต่อไม่ได้ ลองใหม่อีกครั้ง'); card.querySelectorAll('button').forEach(x => x.disabled = false); }
-});
-async function viewImage(no, i) {
-  toast('กำลังโหลดรูป...');
-  try {
-    const j = await api({ action: 'olFile', token: S.token, no: no, idx: i });
-    if (j.ok) { $('#imgView').src = 'data:' + j.mime + ';base64,' + j.data; $('#imgDlg').showModal(); }
-    else if (!authFail(j)) toast(j.message || 'เปิดรูปไม่ได้');
-  } catch (e) { toast('เปิดรูปไม่ได้'); }
-}
-$('#imgClose').addEventListener('click', () => $('#imgDlg').close());
-
-// ===== ประวัติการลา (Leave Card) =====
-let cardYear = null;
-const dm = s => { const p = String(s || '').slice(0, 10).split('-'); return p.length === 3 ? p[2] + '/' + p[1] + '/' + p[0].slice(2) : ''; };
-const mk = c => c === 'ok' ? '<span class="cok">✓</span>' : c === 'no' ? '<span class="cno">✗</span>' : c === 'wait' ? '<span class="cwt">รอ</span>' : c === 'skip' ? '-' : '';
-function renderYears() {
-  const y = S.year;
-  $('#yrs').innerHTML = [y, y - 1, y - 2].map(v => '<button class="yb" role="tab" aria-selected="' + (v === cardYear) + '" data-y="' + v + '" type="button">' + v + '</button>').join('');
-}
-$('#yrs').addEventListener('click', ev => { const b = ev.target.closest('[data-y]'); if (b) loadCard(Number(b.dataset.y)); });
-$('#cPrint').addEventListener('click', () => {
-  document.body.classList.add('pr-card'); window.print();
-  setTimeout(() => document.body.classList.remove('pr-card'), 500);
-});
-async function loadCard(y) {
-  cardYear = y || cardYear || S.year; renderYears();
-  if (!navigator.onLine) { $('#cardBox').innerHTML = '<p class="empty">ออฟไลน์อยู่ ต้องมีอินเทอร์เน็ตเพื่อดูประวัติการลา</p>'; return; }
-  $('#cardBox').innerHTML = '<p class="empty">กำลังโหลด...</p>';
-  try {
-    const j = await api({ action: 'olCard', token: S.token, year: cardYear });
-    if (j.ok) renderCard(j); else authFail(j);
-  } catch (e) { $('#cardBox').innerHTML = '<p class="empty">โหลดไม่สำเร็จ ลองใหม่อีกครั้ง</p>'; }
-}
-function renderCard(j) {
-  const tot = { s: 0, p: 0, v: 0, o: 0 };
-  const W = [40, 62, 62, 62, 40, 44, 44, 52, 44, 150, 64, 32, 32, 64, 64, 66, 60, 64];
-  const th = (t, c, r) => '<th colspan="' + (c || 1) + '" rowspan="' + (r || 1) + '">' + t + '</th>';
-  const head = '<tr>' + th('ประเภท<br>TYPE', 1, 2) + th('ว.ด.ป.<br>DD/MM/YY', 1, 2) + th('ช่วงที่ลา', 2) + th('วันลา<br>DAYS', 1, 2) + th('ประวัติการลา', 4) +
-    th('สาเหตุการลา', 1, 2) + th('ผู้ขอลา', 1, 2) + th('ใบรับรองแพทย์', 2) + th('หัวหน้างาน', 1, 2) + th('Group Mgr', 1, 2) + th('วันที่อนุมัติ', 1, 2) + th('FM / MD', 1, 2) + th('ฝ่ายบุคคล', 1, 2) + '</tr>' +
-    '<tr>' + th('จากวันที่') + th('ถึงวันที่') + th('ป่วย') + th('กิจ') + th('พักร้อน') + th('อื่น ๆ') + th('มี') + th('ไม่มี') + '</tr>';
-  const body = j.rows.map(r => {
-    const code = String(r.type).slice(0, 2), gone = r.status === 'ยกเลิก' || r.status === 'ไม่อนุมัติ';
-    const col = code === '01' ? 's' : code === '02' ? 'p' : (code === '03' || code === '12') ? 'v' : 'o';
-    if (r.status === 'อนุมัติ') tot[col] += Number(r.days) || 0;
-    const c = k => '<td>' + (col === k ? esc(r.days) : '') + '</td>';
-    return '<tr' + (gone ? ' class="void"' : '') + '><td>' + esc(code) + '</td><td>' + dm(r.filed) + '</td><td>' + dm(r.start) + '</td><td>' + dm(r.end) + '</td><td>' + esc(r.days) + '</td>' +
-      c('s') + c('p') + c('v') + c('o') + '<td class="rs">' + esc(r.reason) + (gone ? ' (' + esc(r.status) + ')' : '') + '</td><td>' + mk('ok') + '</td>' +
-      '<td>' + (r.cert === 'มี' ? mk('ok') : '') + '</td><td>' + (r.cert === 'ไม่มี' ? mk('ok') : '') + '</td><td>' + mk(r.sup) + '</td><td>' + mk(r.gm) + '</td><td>' + dm(r.decided) + '</td><td>' + mk(r.fm) + '</td><td>' + mk(r.hr) + '</td></tr>';
-  }).join('');
-  const blank = '<tr>' + '<td></td>'.repeat(18) + '</tr>';
-  const sum = '<tr style="font-weight:600;background:#d7eaf0"><td colspan="4"></td><td>รวม</td><td>' + fmtN(tot.s) + '</td><td>' + fmtN(tot.p) + '</td><td>' + fmtN(tot.v) + '</td><td>' + fmtN(tot.o) + '</td><td class="rs" colspan="9">นับเฉพาะใบที่อนุมัติครบแล้ว</td></tr>';
-  $('#cardBox').innerHTML = '<table class="lc"><colgroup>' + W.map(w => '<col style="width:' + w + 'px">').join('') + '</colgroup><thead>' + head + '</thead><tbody>' +
-    body + blank.repeat(Math.max(0, 12 - j.rows.length)) + sum + '</tbody></table>';
-  const vac = j.vac, left = vac ? vac.total - vac.used : null, e = j.emp, now = new Date();
-  $('#cardHead').innerHTML = '<section style="background:#e9f4f7"><div style="font-weight:600;color:var(--brand)">สรุปวันลาพักร้อนคงเหลือ ' + (left === null ? '-' : fmtN(left)) +
-    ' วัน <span class="m">(Update ' + now.getDate() + '/' + (now.getMonth() + 1) + '/' + now.getFullYear() + ')</span></div>' +
-    '<div style="text-align:center;font-weight:600;margin-top:8px">KUROTA (THAILAND) CO.,LTD.<br>ใบลา / LEAVE CARD ประจำปี ' + j.year + '</div>' +
-    '<div class="cinfo"><span>ชื่อ / NAME: <b>' + esc(e.name) + '</b></span><span>รหัส / CODE: <b>' + esc(e.id) + '</b></span><span>แผนก / Section: <b>' + esc(e.dept) + '</b></span>' +
-    (e.startDate ? '<span>วันเริ่มงาน: <b>' + esc(e.startDate) + '</b></span>' : '') + (vac ? '<span>Annual Vacation: <b>' + fmtN(vac.total) + ' Days</b></span>' : '') + '</div></section>';
-}
-
 // ----- เริ่มต้น -----
 net(); calcDays();
-if (S && S.token && S.emp) {
-  reqs = LS.get(reqKey(), []);
-  showApp();
-  if (S.emp.mustChange && navigator.onLine) openPin(true);
-  if (GO && VIEWS[GO]) { setView(GO); GO = null; }
-  flush().then(() => loadMe(false));
-} else {
-  S = null; showLogin('');
-}
+if (S && S.token && S.emp) { showApp(); if (S.emp.mustChange && navigator.onLine) openPin(true); loadMe(); loadMine(); }
+else { S = null; showLogin(''); }
 </script>
 </body>
 </html>
