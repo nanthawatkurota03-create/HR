@@ -168,6 +168,27 @@ input:focus, select:focus, textarea:focus {
   body, header, main, section, .tile, .wrap { animation: none !important; }
 }
 
+
+/* Desktop workspace refinement: keep the mobile layout unchanged */
+@media (min-width: 761px) {
+  main { max-width: 1680px; padding: 24px clamp(20px, 2.2vw, 36px); }
+  #app { grid-template-columns: 248px minmax(0, 1fr); gap: clamp(20px, 2vw, 30px); }
+  #appContent { max-width: 1120px; }
+  #employeeSidebar { top: 88px; min-height: calc(100vh - 112px); padding: 16px 12px; }
+  #appContent > section { padding: 20px 22px; border-radius: 14px; margin-bottom: 18px; }
+  #profileCard { box-shadow: 0 5px 18px rgba(20, 38, 43, .045); }
+  #requestSection h2, #appContent section h2 { margin-bottom: 16px; }
+  #appContent .tabs { gap: 8px; margin: 2px 0 18px; }
+  #appContent .tab { padding: 11px 20px; border-radius: 10px 10px 0 0; }
+  #appContent .btn { max-width: 360px; }
+  #appContent #f > .btn { max-width: none; }
+  .side-link { min-height: 48px; }
+}
+@media (min-width: 1200px) {
+  #app { grid-template-columns: 256px minmax(0, 1fr); }
+  #appContent { max-width: 1160px; }
+}
+
 </style>
 </head>
 <body>
