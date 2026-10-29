@@ -601,6 +601,32 @@ function openEmp(id) {
 $('#btnAddEmp').addEventListener('click', () => openEmp(null));
 $('#eRand').addEventListener('click', () => $('#ePin').value = randPin());
 $('#empCancel').addEventListener('click', () => $('#empDlg').close());
+// อ่านและย่อรูปเป็น JPEG Base64 ก่อนส่งไป Apps Script (ไม่ส่ง data:image/... นำหน้า)
+async function photoFileToBase64(file) {
+  if (!file) return '';
+  if (!file.type || !file.type.startsWith('image/')) throw new Error('กรุณาเลือกไฟล์รูปภาพ');
+  const dataUrl = await new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = () => reject(new Error('อ่านไฟล์รูปไม่สำเร็จ'));
+    reader.readAsDataURL(file);
+  });
+  const img = await new Promise((resolve, reject) => {
+    const image = new Image();
+    image.onload = () => resolve(image);
+    image.onerror = () => reject(new Error('เปิดรูปภาพไม่สำเร็จ'));
+    image.src = dataUrl;
+  });
+  const scale = Math.min(1, 1000 / Math.max(img.naturalWidth, img.naturalHeight));
+  const canvas = document.createElement('canvas');
+  canvas.width = Math.max(1, Math.round(img.naturalWidth * scale));
+  canvas.height = Math.max(1, Math.round(img.naturalHeight * scale));
+  canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+  let result = canvas.toDataURL('image/jpeg', 0.82).split(',')[1];
+  if (result.length > 1300000) result = canvas.toDataURL('image/jpeg', 0.62).split(',')[1];
+  if (!result || result.length > 1400000) throw new Error('รูปมีขนาดใหญ่เกินไป กรุณาเลือกรูปอื่น');
+  return result;
+}
 $('#empForm').addEventListener('submit', async ev => {
   ev.preventDefault();
   const id = $('#eId').value.trim(), name = $('#eName').value.trim(), pin = $('#ePin').value.trim();
@@ -610,11 +636,14 @@ $('#empForm').addEventListener('submit', async ev => {
   if (empNew && !/^\d{4,8}$/.test(pin)) { $('#empErr').textContent = 'PIN ต้องเป็นตัวเลข 4-8 หลัก'; return; }
   $('#empSave').disabled = true; $('#empErr').textContent = '';
   try {
+    const selectedPhoto = $('#ePhoto').files && $('#ePhoto').files[0];
+    const photo = await photoFileToBase64(selectedPhoto);
     const j = await call('hrEmpSave', { empId: id, name: name, dept: $('#eDept').value.trim(), phone: $('#ePhone').value.trim(), email: $('#eEmail').value.trim(),
-      sup: $('#eSup').value, mgr: $('#eMgr').value, fm: $('#eFm').value, active: $('#eActive').checked, pin: pin });
+      sup: $('#eSup').value, mgr: $('#eMgr').value, fm: $('#eFm').value, active: $('#eActive').checked, pin: pin,
+      photo: photo, removePhoto: !photo && $('#eRmPhoto').checked });
     if (j.ok) { $('#empDlg').close(); toast(empNew ? 'เพิ่มพนักงานแล้ว PIN เริ่มต้น: ' + pin : 'บันทึกแล้ว'); await loadEmps(); }
     else $('#empErr').textContent = 'บันทึกไม่สำเร็จ: ' + (j.message || j.error || '');
-  } catch (e) { $('#empErr').textContent = 'เชื่อมต่อไม่ได้ ลองใหม่อีกครั้ง'; }
+  } catch (e) { $('#empErr').textContent = e.message || 'เชื่อมต่อไม่ได้ ลองใหม่อีกครั้ง'; }
   $('#empSave').disabled = false;
 });
 let pinEmp = null;
