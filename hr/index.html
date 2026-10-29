@@ -40,19 +40,22 @@ main{max-width:1280px;margin:0 auto;padding:20px}
 .wrap{background:var(--card);border:1px solid var(--line);border-radius:10px;overflow-x:auto}
 table{border-collapse:collapse;width:100%;min-width:980px}
 
-/* Leave list: clean, scannable cards instead of a crowded wide table */
-.leave-list{display:grid;gap:12px;padding:12px;background:transparent}
-.leave-card{background:#fff;border:1px solid #dfe7ea;border-radius:14px;overflow:hidden;box-shadow:0 2px 8px rgba(20,38,43,.035)}
-.leave-head{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;padding:15px 18px;background:#f8fafb;border-bottom:1px solid #e7edef}
-.leave-number{font-weight:600;color:var(--brand);font-size:16px;overflow-wrap:anywhere}
-.leave-sub{font-size:12px;color:var(--muted);margin-top:2px}
-.leave-body{display:grid;grid-template-columns:1.1fr .8fr 1.4fr;gap:18px;padding:16px 18px}
+/* Compact, expandable leave cards: easy to scan when request volume grows */
+.leave-list{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,480px),1fr));align-items:start;gap:10px;padding:10px;background:transparent}
+.leave-card{background:#fff;border:1px solid #dfe7ea;border-radius:12px;overflow:hidden;box-shadow:0 2px 8px rgba(20,38,43,.035);min-width:0}
+.leave-compact{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1.2fr) minmax(0,1fr) auto;gap:12px;align-items:center;padding:12px 14px}
+.leave-compact-field{min-width:0}.leave-compact-label{font-size:11px;color:var(--muted);margin-bottom:3px}.leave-compact-value{font-size:14px;font-weight:600;overflow-wrap:anywhere;line-height:1.35}.leave-emp-name{font-weight:600}.leave-emp-id{font-size:12px;color:var(--muted);margin-top:2px}
+.leave-compact-actions{display:flex;align-items:center;justify-content:flex-end;gap:7px;flex-wrap:wrap}.leave-compact-actions .btn{white-space:nowrap}
+.leave-toggle{border:1px solid #d5e1e5;background:#f8fafb;color:var(--brand);border-radius:8px;padding:7px 9px;cursor:pointer;font-size:12px;white-space:nowrap}.leave-toggle:hover{background:#eaf3f5}
+.leave-expanded{border-top:1px solid #e7edef;background:#fff}.leave-head{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;padding:12px 15px;background:#f8fafb;border-bottom:1px solid #e7edef}
+.leave-number{font-weight:600;color:var(--brand);font-size:15px;overflow-wrap:anywhere}.leave-sub{font-size:12px;color:var(--muted);margin-top:2px}
+.leave-body{display:grid;grid-template-columns:1fr 1fr 1.2fr;gap:14px;padding:14px 15px}
 .leave-field{min-width:0}.leave-label{font-size:12px;color:var(--muted);margin-bottom:4px}.leave-value{font-weight:500;overflow-wrap:anywhere}.leave-reason{white-space:pre-wrap;overflow-wrap:anywhere}
-.leave-foot{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;padding:12px 18px;border-top:1px solid #edf1f2;background:#fff}
+.leave-foot{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;padding:11px 15px;border-top:1px solid #edf1f2;background:#fff}
 .leave-progress{display:flex;align-items:center;gap:6px;flex-wrap:wrap}.leave-actions{display:flex;gap:8px;flex-wrap:wrap}
 .leave-attachments{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}.leave-attachments .btn{max-width:100%;overflow-wrap:anywhere;white-space:normal;text-align:left}
-@media(max-width:900px){.leave-body{grid-template-columns:1fr 1fr}.leave-reason-field{grid-column:1/-1}}
-@media(max-width:560px){.leave-list{padding:8px}.leave-head{padding:12px;flex-direction:column}.leave-body{grid-template-columns:1fr 1fr;gap:12px;padding:12px}.leave-foot{padding:12px;align-items:flex-start}.leave-progress{width:100%}.leave-actions{width:100%}.leave-actions .btn{flex:1}}
+@media(max-width:900px){.leave-list{grid-template-columns:1fr}.leave-body{grid-template-columns:1fr 1fr}.leave-reason-field{grid-column:1/-1}}
+@media(max-width:560px){.leave-list{padding:8px;gap:9px}.leave-compact{grid-template-columns:1fr 1fr;gap:10px;padding:12px}.leave-compact-actions{grid-column:1/-1;justify-content:stretch}.leave-compact-actions .btn{flex:1}.leave-head{padding:12px}.leave-body{grid-template-columns:1fr 1fr;gap:12px;padding:12px}.leave-foot{padding:12px;align-items:flex-start}.leave-progress{width:100%}.leave-actions{width:100%}.leave-actions .btn{flex:1}}
 
 th,td{padding:9px 12px;text-align:left;border-bottom:1px solid var(--line);vertical-align:top}
 td.nw{white-space:nowrap}td.wrapt{min-width:180px}
@@ -509,15 +512,34 @@ function renderReq() {
     const act = c === 'hr' ? '<button class="btn sm ok" data-a="issue" data-n="' + esc(r.no) + '">ยืนยันออกใบลา</button>'
       : c === 'done' ? '<button class="btn sm ghost" data-a="undo" data-n="' + esc(r.no) + '">ย้อนสถานะ</button>' : '';
     const attachments = (r.files || []).map(f => '<button class="btn ghost sm" data-file="' + esc(f.id) + '" type="button">ไฟล์แนบ: ' + esc(f.name) + '</button>').join('');
+    const typeCode = String(r.type || '').match(/^\s*(\d+)/);
+    const compactType = typeCode ? typeCode[1] : (r.type || '-');
     return '<article class="leave-card">' +
-      '<div class="leave-head"><div><div class="leave-number">' + esc(r.no) + '</div><div class="leave-sub">ยื่นเมื่อ ' + fmtTs(r.ts) + '</div></div><div>' + tag + '</div></div>' +
-      '<div class="leave-body">' +
-        '<div class="leave-field"><div class="leave-label">พนักงาน</div><div class="leave-value">' + esc(r.name) + '</div><div class="m">' + esc(r.empId) + (r.dept ? ' · ' + esc(r.dept) : '') + '</div></div>' +
-        '<div class="leave-field"><div class="leave-label">ประเภทการลา</div><div class="leave-value">' + esc(r.type) + '</div><div class="leave-label" style="margin-top:10px">จำนวนวัน</div><div class="leave-value">' + esc(r.days) + ' วัน</div></div>' +
-        '<div class="leave-field leave-reason-field"><div class="leave-label">วันที่ลา</div><div class="leave-value">' + rangeTxt(r) + '</div><div class="leave-label" style="margin-top:10px">เหตุผล</div><div class="leave-reason">' + esc(r.reason || '-') + '</div>' + (r.phone ? '<div class="m" style="margin-top:5px">โทร ' + esc(r.phone) + '</div>' : '') + (r.hrNote ? '<div class="m" style="margin-top:5px">หมายเหตุ HR: ' + esc(r.hrNote) + '</div>' : '') + (attachments ? '<div class="leave-attachments">' + attachments + '</div>' : '') + '</div>' +
-      '</div><div class="leave-foot"><div><div class="leave-label">ความคืบหน้าการอนุมัติ</div><div class="leave-progress">' + progress(r) + '</div></div><div class="leave-actions">' + act + '</div></div></article>';
+      '<div class="leave-compact">' +
+        '<div class="leave-compact-field"><div class="leave-compact-label">พนักงาน</div><div class="leave-compact-value leave-emp-name">' + esc(r.name) + '</div><div class="leave-emp-id">' + esc(r.empId) + '</div></div>' +
+        '<div class="leave-compact-field"><div class="leave-compact-label">เลขประเภทการลา</div><div class="leave-compact-value">' + esc(compactType) + '</div></div>' +
+        '<div class="leave-compact-field"><div class="leave-compact-label">ระยะเวลาการลา</div><div class="leave-compact-value">' + rangeTxt(r) + '</div><div class="leave-emp-id">' + esc(r.days) + ' วัน</div></div>' +
+        '<div class="leave-compact-actions">' + act + '<button class="leave-toggle" type="button" data-toggle="' + esc(r.no) + '" aria-expanded="false">ดูรายละเอียด ＋</button></div>' +
+      '</div>' +
+      '<div class="leave-expanded" data-details="' + esc(r.no) + '" hidden>' +
+        '<div class="leave-head"><div><div class="leave-number">' + esc(r.no) + '</div><div class="leave-sub">ยื่นเมื่อ ' + fmtTs(r.ts) + '</div></div><div>' + tag + '</div></div>' +
+        '<div class="leave-body">' +
+          '<div class="leave-field"><div class="leave-label">พนักงาน</div><div class="leave-value">' + esc(r.name) + '</div><div class="m">' + esc(r.empId) + (r.dept ? ' · ' + esc(r.dept) : '') + '</div></div>' +
+          '<div class="leave-field"><div class="leave-label">ประเภทการลา</div><div class="leave-value">' + esc(r.type) + '</div><div class="leave-label" style="margin-top:10px">จำนวนวัน</div><div class="leave-value">' + esc(r.days) + ' วัน</div></div>' +
+          '<div class="leave-field leave-reason-field"><div class="leave-label">เหตุผล</div><div class="leave-reason">' + esc(r.reason || '-') + '</div>' + (r.phone ? '<div class="m" style="margin-top:5px">โทร ' + esc(r.phone) + '</div>' : '') + (r.hrNote ? '<div class="m" style="margin-top:5px">หมายเหตุ HR: ' + esc(r.hrNote) + '</div>' : '') + (attachments ? '<div class="leave-attachments">' + attachments + '</div>' : '') + '</div>' +
+        '</div><div class="leave-foot"><div><div class="leave-label">ความคืบหน้าการอนุมัติ</div><div class="leave-progress">' + progress(r) + '</div></div><div class="leave-actions">' + (c === 'hr' ? act : c === 'done' ? act : '') + '</div></div>' +
+      '</div></article>';
   }).join('') + '</div>';
 }
+$('#view').addEventListener('click', ev => {
+  const b = ev.target.closest('button[data-toggle]'); if (!b) return;
+  const no = b.dataset.toggle, panel = $('#view').querySelector('[data-details="' + CSS.escape(no) + '"]');
+  if (!panel) return;
+  const open = panel.hidden;
+  panel.hidden = !open;
+  b.setAttribute('aria-expanded', String(open));
+  b.textContent = open ? 'ซ่อนรายละเอียด −' : 'ดูรายละเอียด ＋';
+});
 $('#view').addEventListener('click', async ev => {
   const b = ev.target.closest('button[data-a]'); if (!b) return;
   const issue = b.dataset.a === 'issue';
