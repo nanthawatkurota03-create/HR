@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0f4c5c">
+<title>ใบลา / Leave Card</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--ink:#14262b;--muted:#5b6b70;--bg:#e8f2f4;--card:#fff;--line:#7aa1ab;--brand:#0f4c5c;--head:#d6e8ec;
+--warn:#a86a00;--warn-bg:#fdf0d5;--ok:#1a7f4b;--no:#b3261e}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{font-family:'IBM Plex Sans Thai',system-ui,sans-serif;background:var(--bg);color:var(--ink);font-size:15px;line-height:1.5;padding:16px}
+[hidden]{display:none!important}
+.top{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:12px}
+.sum{color:var(--brand);font-weight:600;font-size:16px}
+.sum small{font-weight:400;color:var(--muted);font-size:14px}
+.yrs{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.yrs .m{color:var(--muted);font-size:14px}
+.yb,.back{border:1px solid var(--brand);background:#fff;color:var(--brand);border-radius:10px;padding:8px 18px;font:inherit;font-weight:500;min-height:40px;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center}
+.yb[aria-pressed=true]{background:var(--brand);color:#fff}
+.head{display:grid;grid-template-columns:100px 1fr 230px;gap:16px;align-items:start;margin-bottom:12px}
+.ph{width:86px;height:105px;border:1px solid var(--brand);background:#fff;display:flex;align-items:center;justify-content:center;text-align:center;color:var(--muted);font-size:14px;overflow:hidden}
+.ph img{width:100%;height:100%;object-fit:cover}
+.mid{text-align:center}
+.mid .co{font-weight:600;font-size:16px;letter-spacing:.3px}
+.mid .tt{font-weight:600;font-size:20px;margin:6px 0 10px}
+.info{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;text-align:left;font-size:14px;color:var(--muted)}
+.info b{color:var(--ink);font-size:15px}
+.nm{text-align:left;margin-top:10px;font-size:14px;color:var(--muted)}.nm b{color:var(--ink);font-size:16px}
+.tile{background:#fff;border:1px solid var(--brand);border-radius:12px;padding:14px 16px;text-align:center}
+.tile .l{color:var(--muted);font-size:14px}
+.tile .v{font-size:30px;font-weight:600}.tile .v small{font-size:15px;font-weight:400;color:var(--muted)}
+.tile .u{color:var(--muted);font-size:14px}
+.wrap{overflow-x:auto}
+table{border-collapse:collapse;width:100%;min-width:1000px;background:var(--bg)}
+th,td{border:1px solid var(--brand);padding:5px 6px;text-align:center;font-size:13px;vertical-align:middle}
+th{background:var(--head);font-weight:600;line-height:1.3}
+th small{display:block;font-weight:500;font-size:11px}
+td.l{text-align:left}
+tr.e td{height:31px}
+tr.tot td{background:var(--head);font-weight:600}
+tr.cx td{color:var(--no);text-decoration:line-through}
+.ck{color:var(--ok);font-weight:700}.x{color:var(--no);font-weight:700}
+.wt{background:var(--warn-bg);color:var(--warn);border-radius:99px;padding:1px 8px;font-size:12px;font-weight:500}
+.foot{font-size:13px;margin-top:12px}
+.foot p{margin:2px 0}
+.foot .c{text-align:center;font-weight:600;margin-top:10px}
+#msg{padding:24px;text-align:center;color:var(--muted)}
+@media (max-width:760px){.head{grid-template-columns:100px 1fr}.tile{grid-column:1/-1}}
+@page{size:A4 landscape;margin:10mm}
+@media print{
+  body{background:#fff;padding:0}
+  .noprint{display:none!important}
+  .wrap{overflow:visible}
+  table{min-width:0;background:#fff}
+  th,td{font-size:10px;padding:3px 4px}
+  tr.e td{height:22px}
+}
+</style>
+</head>
+<body>
+<div class="top noprint">
+  <div class="sum" id="sum"></div>
+  <div class="yrs" id="yrs"></div>
+</div>
+
+<div id="msg">กำลังโหลด...</div>
+
+<div id="card" hidden>
+  <div class="head">
+    <div class="ph" id="ph">รูปถ่าย<br>พนักงาน</div>
+    <div class="mid">
+      <div class="co">KUROTA (THAILAND) CO.,LTD.</div>
+      <div class="tt" id="tt"></div>
+      <div class="info">
+        <div>เริ่มงาน / Start Date: <b id="iStart"></b></div>
+        <div>รหัส / CODE: <b id="iCode"></b></div>
+        <div>แผนก / Section: <b id="iDept"></b></div>
+      </div>
+      <div class="nm">ชื่อ / NAME: <b id="iName"></b></div>
+    </div>
+    <div class="tile">
+      <div class="l">Annual Vacation</div>
+      <div class="v" id="tV"></div>
+      <div class="u" id="tU"></div>
+    </div>
+  </div>
+
+  <div class="wrap">
+    <table>
+      <thead>
+        <tr>
+          <th rowspan="2">ประเภท<small>TYPE</small></th>
+          <th rowspan="2">ว.ด.ป.<small>DD/MM/YY</small></th>
+          <th colspan="2">ช่วงที่ลา<small>LEAVE PERIOD</small></th>
+          <th rowspan="2">วันลา<small>DAYS</small></th>
+          <th colspan="4">ประวัติการลา<small>History Leave</small></th>
+          <th rowspan="2">สาเหตุการลา<small>Reasons of Leave</small></th>
+          <th rowspan="2">ผู้ขอลา<small>Request By</small></th>
+          <th colspan="2">Health Cert.</th>
+          <th rowspan="2">Superior<small>หัวหน้างาน</small></th>
+          <th rowspan="2">Group Mgr<small>Approved</small></th>
+          <th rowspan="2">Date<small>วันที่อนุมัติ</small></th>
+          <th rowspan="2">FM / MD</th>
+          <th rowspan="2">ฝ่ายบุคคล<small>Personnel</small></th>
+        </tr>
+        <tr>
+          <th>จากวันที่</th><th>ถึงวันที่</th>
+          <th>ป่วย</th><th>กิจ</th><th>พักร้อน</th><th>อื่น ๆ</th>
+          <th>มี</th><th>ไม่มี</th>
+        </tr>
+      </thead>
+      <tbody id="rows"></tbody>
+    </table>
+  </div>
+
+  <div class="foot">
+    <p>ประเภท : 01.ลาป่วย 02.ลากิจ 03.วันหยุดพักผ่อนประจำปี 04.ลาเพื่อทหาร 05.ลาเพื่อทำหมัน 06.ขาดงานหัก 1 เท่า 07.ลาอุปสมบท 08.ลาคลอด 09.ลาสมรส 10.ขาดงานหัก 2 เท่า 11.ลาฌาปนกิจ 12.วันหยุดพักผ่อนประจำปีตามแผน 13.หยุดพิเศษ</p>
+    <p><b>หมายเหตุ :</b> ตั้งแต่ประเภทที่ 04 เป็นต้นไป ให้ทำเครื่องหมายถูกในช่องอื่น ๆ</p>
+    <p class="c">สำหรับพนักงานที่ไม่ครบปีมีสิทธิ์ลาพักร้อนได้ 2 วัน หลังจากผ่านทดลองงานแล้วเท่านั้น</p>
+  </div>
+</div>
+
+<script>
+// URL ของ Apps Script Web App (ตัวเดียวกับหน้าอื่น)
+const API_URL = 'https://script.google.com/macros/s/AKfycbw89zZuaEeZe6lNygue9yl1wb2W8u3opwFwKdAgDyYOuSwtv2Trpi6hZIxzDiq-EtH59w/exec';
+const $ = s => document.querySelector(s);
+const esc = s => { const d = document.createElement('div'); d.textContent = s == null ? '' : s; return d.innerHTML; };
+const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+const f1 = n => Number(n).toFixed(1);
+
+// ----- ผู้ใช้: พนักงาน (token) หรือ HR (?emp=รหัส + รหัสผ่าน HR) -----
+const HR_EMP = new URLSearchParams(location.search).get('emp');
+let auth = null;
+if (HR_EMP) {
+  let p = ''; try { p = sessionStorage.getItem('hrpass') || ''; } catch (e) {}
+  if (p) auth = { passcode: p, empId: HR_EMP }; else location.replace('hr/index.html');
+} else {
+  let s = null; try { s = JSON.parse(localStorage.getItem('session')); } catch (e) {}
+  if (s && s.token) auth = { token: s.token }; else location.replace('index.html');
+}
+const HOME = HR_EMP ? 'hr/index.html' : 'index.html';
+
+async function api(action, extra) {
+  const res = await fetch(API_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+    body: JSON.stringify(Object.assign({ action: action }, auth, extra || {})) });
+  return res.json();
+}
+
+// ----- ปุ่มปี -----
+const Y = new Date().getFullYear();
+let year = Y;
+function renderYears() {
+  $('#yrs').innerHTML = '<span class="m">ดูย้อนหลัง</span>' + [Y, Y - 1, Y - 2].map(y =>
+    '<button class="yb" data-y="' + y + '" aria-pressed="' + (y === year) + '" type="button">' + y + '</button>').join('') +
+    '<button class="yb" id="prn" type="button">พิมพ์ / PDF</button><a class="back" href="' + HOME + '">กลับ</a>';
+}
+$('#yrs').addEventListener('click', ev => {
+  const b = ev.target.closest('button'); if (!b) return;
+  if (b.id === 'prn') { window.print(); return; }
+  year = Number(b.dataset.y); renderYears(); load();
+});
+
+// ----- แสดงผล -----
+const ck = '<span class="ck">&#10003;</span>';
+const st = v => v === 'ok' ? ck : v === 'no' ? '<span class="x">&#10007;</span>' : v === 'wait' ? '<span class="wt">รอ</span>' : '-';
+function longDate(s) { const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(s || ''); return m ? m[3] + ' ' + MONTHS[+m[2] - 1] + ' ' + m[1] : '-'; }
+
+function render(j) {
+  const e = j.emp, hasVac = e.vac !== '' && e.vac != null, used = j.tot.vac;
+  $('#sum').innerHTML = hasVac ? 'สรุปวันลาพักร้อนคงเหลือ ' + f1(e.vac - used) + ' วัน <small>(Update ' + esc(j.today) + ')</small>'
+    : 'สรุปวันลาพักร้อน <small>(ยังไม่ได้กำหนดสิทธิ์ ติดต่อ HR)</small>';
+  $('#tt').textContent = 'ใบลา / LEAVE CARD ประจำปี ' + j.year;
+  $('#iStart').textContent = longDate(e.startDate); $('#iCode').textContent = e.id; $('#iDept').textContent = e.dept || '-'; $('#iName').textContent = e.name;
+  $('#tV').innerHTML = hasVac ? f1(e.vac) + ' <small>Days</small>' : '-';
+  $('#tU').textContent = hasVac ? 'ใช้ไป ' + f1(used) + ' · คงเหลือ ' + f1(e.vac - used) : '';
+
+  const cat = (r, c) => r.cat === c ? r.days : '';
+  let h = j.rows.map(r =>
+    '<tr' + (r.cancelled ? ' class="cx"' : '') + '><td>' + esc(r.code) + '</td><td>' + esc(r.filed) + '</td><td>' + esc(r.start) + '</td><td>' + esc(r.end) + '</td><td>' + r.days + '</td>' +
+    '<td>' + cat(r, 'sick') + '</td><td>' + cat(r, 'biz') + '</td><td>' + cat(r, 'vac') + '</td><td>' + cat(r, 'other') + '</td>' +
+    '<td class="l">' + esc(r.reason) + '</td><td>' + ck + '</td>' +
+    '<td>' + (r.health === 'yes' ? ck : '') + '</td><td>' + (r.health === 'no' ? ck : '') + '</td>' +
+    '<td>' + st(r.sup) + '</td><td>' + st(r.mgr) + '</td><td>' + esc(r.approvedOn) + '</td><td>' + st(r.fm) + '</td><td>' + st(r.hr) + '</td></tr>').join('');
+  for (let i = j.rows.length; i < 10; i++) h += '<tr class="e">' + '<td></td>'.repeat(18) + '</tr>';
+  h += '<tr class="tot"><td colspan="4"></td><td>รวม</td><td>' + j.tot.sick + '</td><td>' + j.tot.biz + '</td><td>' + j.tot.vac + '</td><td>' + j.tot.other + '</td><td class="l">อนุมัติแล้วเท่านั้น</td><td colspan="8"></td></tr>';
+  $('#rows').innerHTML = h;
+  $('#msg').hidden = true; $('#card').hidden = false;
+  loadPhoto(e);
+}
+
+async function loadPhoto(e) {
+  const box = $('#ph');
+  if (!e.photo) { box.innerHTML = 'รูปถ่าย<br>พนักงาน'; return; }
+  let url = null;
+  if (!HR_EMP) { try { const c = JSON.parse(localStorage.getItem('photo')); if (c && c.id === e.photo) url = c.url; } catch (x) {} }
+  if (!url) {
+    try {
+      const j = await api('photo');
+      if (j.ok) {
+        url = 'data:image/jpeg;base64,' + j.data;
+        if (!HR_EMP) { try { localStorage.setItem('photo', JSON.stringify({ id: j.id, url: url })); } catch (x) {} }
+      }
+    } catch (x) {}
+  }
+  box.innerHTML = url ? '<img src="' + url + '" alt="">' : 'รูปถ่าย<br>พนักงาน';
+}
+
+async function load() {
+  if (!auth) return;
+  $('#msg').hidden = false; $('#msg').textContent = 'กำลังโหลด...'; $('#card').hidden = true;
+  try {
+    const j = await api('card', { year: year });
+    if (j.ok) render(j);
+    else if (j.error === 'auth') location.replace(HOME);
+    else $('#msg').textContent = j.error === 'not found' ? 'ไม่พบพนักงาน' : 'โหลดไม่สำเร็จ: ' + (j.error || '');
+  } catch (e) { $('#msg').textContent = 'เชื่อมต่อไม่ได้ ลองใหม่อีกครั้ง'; }
+}
+renderYears(); load();
+</script>
+</body>
+</html>
