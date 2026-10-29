@@ -73,6 +73,10 @@ input:focus,select:focus,textarea:focus,button:focus-visible,a:focus-visible{out
 .bt{flex:1;height:52px;border-radius:10px;font:inherit;font-weight:600;font-size:17px}
 .bt.ok{border:0;background:var(--ok);color:#fff}
 .bt.no{border:2px solid var(--no);background:#fff;color:var(--no)}
+.fl{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:6px 0;font-size:14px;border-bottom:1px solid var(--line)}
+.fl span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.fl .link{flex:none}
+.att{margin-top:8px;display:flex;flex-direction:column;align-items:flex-start}
 #toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0));transform:translateX(-50%);background:var(--ink);color:#fff;padding:10px 16px;border-radius:8px;display:none;max-width:90%;font-size:15px;z-index:9}
 </style>
 </head>
@@ -163,6 +167,10 @@ input:focus,select:focus,textarea:focus,button:focus-visible,a:focus-visible{out
           <div class="days" id="days">จำนวนวันลา: -</div>
           <label for="reason">เหตุผลการลา</label><textarea id="reason" required></textarea>
           <label for="phone">เบอร์ติดต่อระหว่างลา</label><input id="phone" type="tel" inputmode="tel" autocomplete="tel">
+          <label>ไฟล์แนบ (รูป / PDF / Word สูงสุด 3 ไฟล์)</label>
+          <div id="fileList"></div>
+          <button class="link" id="addFile" type="button">+ เพิ่มไฟล์</button>
+          <input id="fileIn" type="file" multiple accept="image/*,.pdf,.doc,.docx" hidden>
           <button class="btn" id="submit" type="submit">ส่งใบลา</button>
         </form>
       </section>
@@ -301,6 +309,49 @@ $('#pinForm').addEventListener('submit', async ev => {
   $('#pinGo').disabled = false;
 });
 
+// ----- ไฟล์แนบ -----
+const MAX_FILES = 3, MAX_DOC = 4 * 1024 * 1024;
+let F = [];
+function renderFiles() {
+  $('#fileList').innerHTML = F.map((f, i) => '<div class="fl"><span>' + esc(f.name) + '</span><button class="link" data-rm="' + i + '" type="button">ลบ</button></div>').join('');
+  $('#addFile').hidden = F.length >= MAX_FILES;
+}
+$('#addFile').addEventListener('click', () => $('#fileIn').click());
+$('#fileIn').addEventListener('change', ev => {
+  for (const f of ev.target.files) {
+    if (F.length >= MAX_FILES) { toast('แนบได้สูงสุด ' + MAX_FILES + ' ไฟล์'); break; }
+    if (!f.type.startsWith('image/') && f.size > MAX_DOC) { toast(f.name + ' ใหญ่เกิน 4 MB'); continue; }
+    F.push(f);
+  }
+  ev.target.value = ''; renderFiles();
+});
+$('#fileList').addEventListener('click', ev => { const b = ev.target.closest('[data-rm]'); if (b) { F.splice(+b.dataset.rm, 1); renderFiles(); } });
+const b64 = blob => new Promise((ok, no) => { const r = new FileReader(); r.onload = () => ok(String(r.result).split(',')[1]); r.onerror = no; r.readAsDataURL(blob); });
+async function packFile(f) {
+  if (!f.type.startsWith('image/')) return { name: f.name, type: f.type, data: await b64(f) };
+  const bmp = await createImageBitmap(f, { imageOrientation: 'from-image' }); // ย่อรูปเหลือด้านยาวไม่เกิน 1600px
+  const k = Math.min(1, 1600 / Math.max(bmp.width, bmp.height));
+  const c = document.createElement('canvas'); c.width = Math.round(bmp.width * k); c.height = Math.round(bmp.height * k);
+  const x = c.getContext('2d'); x.fillStyle = '#fff'; x.fillRect(0, 0, c.width, c.height); x.drawImage(bmp, 0, 0, c.width, c.height);
+  const blob = await new Promise(r => c.toBlob(r, 'image/jpeg', 0.75));
+  return { name: f.name.replace(/\.[^.]+$/, '') + '.jpg', type: 'image/jpeg', data: await b64(blob) };
+}
+const attHtml = r => (r.files && r.files.length) ? '<div class="att">' + r.files.map(f => '<button class="link" data-file="' + esc(f.id) + '" type="button">ไฟล์แนบ: ' + esc(f.name) + '</button>').join('') + '</div>' : '';
+async function openFile(id) {
+  const w = window.open('', '_blank');
+  try {
+    const j = await api({ action: 'file', token: S.token, id: id });
+    if (!j.ok) { if (w) w.close(); if (!authFail(j)) toast(j.message || 'เปิดไฟล์ไม่สำเร็จ'); return; }
+    const bin = atob(j.data), u = new Uint8Array(bin.length);
+    for (let i = 0; i < bin.length; i++) u[i] = bin.charCodeAt(i);
+    const url = URL.createObjectURL(new Blob([u], { type: j.type }));
+    if (w && /^(image\/|application\/pdf)/.test(j.type)) w.location = url;
+    else { if (w) w.close(); const a = document.createElement('a'); a.href = url; a.download = j.name; a.click(); }
+    setTimeout(() => URL.revokeObjectURL(url), 60000);
+  } catch (e) { if (w) w.close(); toast('เชื่อมต่อไม่ได้ ลองใหม่อีกครั้ง'); }
+}
+document.addEventListener('click', ev => { const b = ev.target.closest('[data-file]'); if (b) openFile(b.dataset.file); });
+
 // ----- กรอกใบลา -----
 function calcDays() {
   const s = $('#start').value, e = $('#end').value, half = $('#half');
@@ -322,11 +373,14 @@ $('#f').addEventListener('submit', async ev => {
   if (!sendCid) sendCid = crypto.randomUUID(); // ส่งซ้ำด้วยรหัสเดิม กันใบลาซ้ำถ้าเน็ตหลุด
   $('#submit').disabled = true; $('#submit').textContent = 'กำลังส่ง...';
   try {
+    let files;
+    try { files = await Promise.all(F.map(packFile)); }
+    catch (e) { toast('อ่านไฟล์แนบไม่ได้ ลองเลือกไฟล์ใหม่'); $('#submit').disabled = false; $('#submit').textContent = 'ส่งใบลา'; return; }
     const j = await api({ action: 'submit', token: S.token, cid: sendCid, type: $('#type').value, start: v('start'), end: v('end'),
-      half: $('#half').checked, reason: v('reason'), phone: v('phone') });
+      half: $('#half').checked, reason: v('reason'), phone: v('phone'), files: files });
     if (j.ok) {
       toast('ส่งใบลาแล้ว เลขที่ ' + j.no);
-      $('#start').value = $('#end').value = $('#reason').value = ''; $('#half').checked = false; sendCid = null; calcDays(); loadMine();
+      $('#start').value = $('#end').value = $('#reason').value = ''; $('#half').checked = false; sendCid = null; F = []; renderFiles(); calcDays(); loadMine();
     } else if (!authFail(j)) { toast(j.message || 'ส่งไม่สำเร็จ: ' + j.error); sendCid = null; }
   } catch (e) { toast('เชื่อมต่อไม่ได้ ลองส่งใหม่อีกครั้ง'); }
   $('#submit').disabled = false; $('#submit').textContent = 'ส่งใบลา';
@@ -365,7 +419,7 @@ function renderMine(items) {
   el.innerHTML = items.map(r =>
     '<div class="item" data-no="' + esc(r.no) + '"><div class="top"><div><div class="t">' + esc(r.type) + ' ' + r.days + ' วัน</div>' +
     '<div class="m">' + rangeTxt(r) + ' · เลขที่ ' + esc(r.no) + '</div></div><span class="chip ' + chipCls(r.status) + '">' + esc(r.status) + '</span></div>' +
-    timeline(r) + (isOpen(r.status) ? '<button class="link" data-cancel="1" type="button" style="margin-top:8px">ยกเลิกใบลานี้</button>' : '') + '</div>').join('');
+    attHtml(r) + timeline(r) + (isOpen(r.status) ? '<button class="link" data-cancel="1" type="button" style="margin-top:8px">ยกเลิกใบลานี้</button>' : '') + '</div>').join('');
 }
 $('#refresh').addEventListener('click', async () => { if (!navigator.onLine) { toast('ออฟไลน์อยู่'); return; } await loadMine(); toast('อัปเดตสถานะแล้ว'); });
 $('#list').addEventListener('click', async ev => {
@@ -395,7 +449,7 @@ function renderInbox(items) {
     '<div class="item" data-no="' + esc(r.no) + '"><div class="top"><div><div class="t">' + esc(r.name) + '</div><div class="m">' + esc(r.empId) + (r.dept ? ' · ' + esc(r.dept) : '') + '</div></div>' +
     '<span class="chip s-wait">' + esc(r.status) + '</span></div>' +
     '<div style="margin-top:8px"><b>' + esc(r.type) + '</b> ' + r.days + ' วัน<div class="m">' + rangeTxt(r) + '</div>' +
-    '<div style="margin-top:4px">' + esc(r.reason) + '</div>' + (r.phone ? '<div class="m">โทร ' + esc(r.phone) + '</div>' : '') + '</div>' + timeline(r) +
+    '<div style="margin-top:4px">' + esc(r.reason) + '</div>' + (r.phone ? '<div class="m">โทร ' + esc(r.phone) + '</div>' : '') + '</div>' + attHtml(r) + timeline(r) +
     '<label for="n_' + esc(r.no) + '">หมายเหตุ / เหตุผลที่ไม่อนุมัติ (ไม่บังคับ)</label><input id="n_' + esc(r.no) + '" class="note" autocomplete="off">' +
     '<div class="acts2"><button class="bt no" data-d="no" type="button">ไม่อนุมัติ</button><button class="bt ok" data-d="ok" type="button">อนุมัติ</button></div></div>').join('');
 }
