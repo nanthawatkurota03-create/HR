@@ -73,6 +73,8 @@ input:focus,select:focus,textarea:focus,button:focus-visible,a:focus-visible{out
 .bt{flex:1;height:52px;border-radius:10px;font:inherit;font-weight:600;font-size:17px}
 .bt.ok{border:0;background:var(--ok);color:#fff}
 .bt.no{border:2px solid var(--no);background:#fff;color:var(--no)}
+a.link{text-decoration:none}
+.av{width:56px;height:70px;border-radius:8px;object-fit:cover;flex:none;background:var(--idle-bg)}
 .alert{display:block;width:100%;text-align:left;border:0;background:var(--warn-bg);color:var(--warn);border-radius:10px;padding:12px 16px;margin-bottom:16px;font:inherit;font-weight:500}
 .fl{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:6px 0;font-size:14px;border-bottom:1px solid var(--line)}
 .fl span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -127,8 +129,10 @@ input:focus,select:focus,textarea:focus,button:focus-visible,a:focus-visible{out
   <div id="app" hidden>
     <section>
       <div class="who">
-        <div><div class="n" id="whoName"></div><div class="m" id="whoMeta"></div><div class="m" id="chainInfo"></div></div>
+        <div style="display:flex;gap:12px;align-items:flex-start"><img class="av" id="whoImg" alt="" hidden>
+          <div><div class="n" id="whoName"></div><div class="m" id="whoMeta"></div><div class="m" id="chainInfo"></div></div></div>
         <div class="acts">
+          <a class="link" href="card.html">ใบลา (Leave Card)</a>
           <button class="link" id="chPin" type="button">เปลี่ยน PIN</button>
           <button class="link" id="logout" type="button">ออกจากระบบ</button>
         </div>
@@ -243,6 +247,21 @@ function showApp() {
   $('#tInbox').hidden = !S.isApprover;
   const b = $('#tBadge'); b.hidden = !(S.inbox > 0); b.textContent = S.inbox;
   if (!S.isApprover) tab('req'); else updAlert();
+  loadPhoto();
+}
+async function loadPhoto() {
+  const im = $('#whoImg'), id = S && S.emp && S.emp.photo;
+  if (!id) { im.hidden = true; return; }
+  let c = LS.get('photo', null);
+  if (!c || c.id !== id) {
+    if (!navigator.onLine) { im.hidden = true; return; }
+    try {
+      const j = await api({ action: 'photo', token: S.token });
+      if (!j.ok) { im.hidden = true; return; }
+      c = { id: j.id, url: 'data:image/jpeg;base64,' + j.data }; LS.set('photo', c);
+    } catch (e) { im.hidden = true; return; }
+  }
+  im.src = c.url; im.hidden = false;
 }
 function updAlert() {
   const n = S.inbox || 0, u = S.upcoming || 0, a = $('#alertBar');
@@ -258,7 +277,7 @@ function tab(w) {
 }
 $('#tReq').addEventListener('click', () => tab('req'));
 $('#tInbox').addEventListener('click', () => tab('inbox'));
-function expire() { LS.del('session'); S = null; showLogin('เซสชันหมดอายุหรือ PIN ถูกเปลี่ยน กรุณาเข้าสู่ระบบใหม่'); }
+function expire() { LS.del('session'); LS.del('photo'); S = null; showLogin('เซสชันหมดอายุหรือ PIN ถูกเปลี่ยน กรุณาเข้าสู่ระบบใหม่'); }
 const authFail = j => { if (j && j.error === 'auth') { expire(); return true; } return false; };
 function setProfile(j) {
   S.emp = j.emp; S.chain = j.chain; S.isApprover = j.isApprover; S.inbox = j.inbox; S.upcoming = j.upcoming; save(); showApp();
@@ -287,7 +306,7 @@ $('#loginForm').addEventListener('submit', async ev => {
   } catch (e) { $('#lgErr').textContent = 'เชื่อมต่อไม่ได้ ลองใหม่อีกครั้ง'; }
   $('#lgGo').disabled = false;
 });
-$('#logout').addEventListener('click', () => { LS.del('session'); S = null; $('#lgPin').value = ''; showLogin(''); });
+$('#logout').addEventListener('click', () => { LS.del('session'); LS.del('photo'); S = null; $('#lgPin').value = ''; showLogin(''); });
 
 // ----- เปลี่ยน PIN -----
 let pinForced = false;
