@@ -8,59 +8,58 @@
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
 :root{--ink:#14262b;--muted:#5b6b70;--bg:#eef1f4;--card:#fff;--line:#d5dce1;--brand:#0f4c5c;--brand-d:#0a3640;
---warn:#a86a00;--warn-bg:#fdf0d5;--ok:#1a7f4b;--ok-bg:#dcf3e6;--no:#b3261e;--no-bg:#fbe3e1}
+--warn:#a86a00;--warn-bg:#fdf0d5;--ok:#1a7f4b;--ok-bg:#dcf3e6;--no:#b3261e;--no-bg:#fbe3e1;--idle-bg:#e4e8eb}
 *{box-sizing:border-box}
+[hidden],.hidden{display:none!important}
 body{margin:0;font-family:'IBM Plex Sans Thai',system-ui,sans-serif;background:var(--bg);color:var(--ink);font-size:15px;line-height:1.5}
 header{background:var(--brand);color:#fff;padding:12px 20px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
 header h1{font-size:18px;font-weight:600;margin:0}
 button,input,select,textarea{font:inherit;color:var(--ink)}
 input,select,textarea{border:1px solid #b8c3c9;border-radius:8px;padding:8px 10px;background:#fff;min-height:40px;width:100%}
-textarea{min-height:70px}
 :focus-visible{outline:3px solid #7fb8c6;outline-offset:1px}
 .btn{background:var(--brand);color:#fff;border:0;border-radius:8px;padding:9px 16px;font-weight:500;cursor:pointer;min-height:40px}
 .btn:hover{background:var(--brand-d)}
 .btn.ghost{background:#fff;color:var(--brand);border:1px solid var(--brand)}
-.btn.sm{padding:4px 12px;min-height:32px;font-size:14px}
-.btn.ok{background:var(--ok)}.btn.no{background:var(--no)}
+.btn.sm{padding:4px 12px;min-height:34px;font-size:14px}
+.btn.ok{background:var(--ok)}
 .btn:disabled{opacity:.6;cursor:default}
-a.btn{display:inline-flex;align-items:center;text-decoration:none}
 header .btn.ghost{border-color:#fff;background:transparent;color:#fff}
 main{max-width:1280px;margin:0 auto;padding:20px}
 #login{max-width:340px;margin:12vh auto;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:24px}
-#login h2{margin:0 0 4px}
-#login p{color:var(--muted);margin:0 0 16px}
+#login h2{margin:0 0 4px}#login p{color:var(--muted);margin:0 0 16px}
 #err{color:var(--no);min-height:22px;margin:8px 0 0;font-size:14px}
 .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px;margin-bottom:16px}
 .card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px 16px}
-.card b{display:block;font-size:26px;font-weight:600}
-.card span{color:var(--muted);font-size:14px}
+.card b{display:block;font-size:26px;font-weight:600}.card span{color:var(--muted);font-size:14px}
 .bar{display:flex;flex-wrap:wrap;gap:10px;align-items:end;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:12px;margin-bottom:16px}
 .bar label{font-size:13px;color:var(--muted);display:block;margin-bottom:2px}
-.bar>div{min-width:140px;flex:1}
-.bar .grow{flex:2;min-width:200px}
+.bar>div{min-width:140px;flex:1}.bar .grow{flex:2;min-width:200px}
 .tabs{display:flex;gap:8px;margin-bottom:12px}
 .tab{background:#fff;border:1px solid var(--line);border-radius:8px;padding:8px 16px;cursor:pointer}
 .tab[aria-selected=true]{background:var(--brand);color:#fff;border-color:var(--brand)}
 .wrap{background:var(--card);border:1px solid var(--line);border-radius:10px;overflow-x:auto}
-table{border-collapse:collapse;width:100%;min-width:900px}
-th,td{padding:9px 12px;text-align:left;border-bottom:1px solid var(--line);vertical-align:top;white-space:nowrap}
-td.wrapt{white-space:normal;min-width:180px}
-th{background:#f6f8f9;font-weight:600;position:sticky;top:0}
+table{border-collapse:collapse;width:100%;min-width:980px}
+th,td{padding:9px 12px;text-align:left;border-bottom:1px solid var(--line);vertical-align:top}
+td.nw{white-space:nowrap}td.wrapt{min-width:180px}
+th{background:#f6f8f9;font-weight:600;white-space:nowrap}
 tr:last-child td{border-bottom:0}
 .chip{font-size:13px;font-weight:500;padding:2px 10px;border-radius:99px;white-space:nowrap}
-.s-wait{background:var(--warn-bg);color:var(--warn)}.s-ok{background:var(--ok-bg);color:var(--ok)}.s-no{background:var(--no-bg);color:var(--no)}
+.s-wait{background:var(--warn-bg);color:var(--warn)}.s-ok{background:var(--ok-bg);color:var(--ok)}.s-no{background:var(--no-bg);color:var(--no)}.s-idle{background:var(--idle-bg);color:var(--muted)}
 .m{color:var(--muted);font-size:13px}
-.low{color:var(--no);font-weight:500}
 .num{text-align:right}
 .empty{padding:28px;text-align:center;color:var(--muted)}
+.pg{display:flex;flex-wrap:wrap;gap:4px;align-items:center}
+.pg .ar{color:var(--muted)}
 dialog{border:0;border-radius:12px;padding:20px;width:min(480px,94vw)}
 dialog::backdrop{background:rgba(20,38,43,.5)}
 dialog h2{margin:0 0 8px;font-size:18px}
 dialog label{display:block;font-size:14px;font-weight:500;margin:10px 0 3px}
 .two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .actions{display:flex;justify-content:flex-end;gap:8px;margin-top:16px}
-#toast{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);background:var(--ink);color:#fff;padding:10px 16px;border-radius:8px;display:none;z-index:99}
-.hidden{display:none!important}
+.derr{color:var(--no);min-height:22px;margin-top:6px;font-size:14px}
+.chk{display:flex;align-items:center;gap:8px;font-weight:400}.chk input{width:20px;min-height:20px;height:20px}
+textarea{min-height:120px}
+#toast{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);background:var(--ink);color:#fff;padding:10px 16px;border-radius:8px;display:none;z-index:99;max-width:90%}
 </style>
 </head>
 <body>
@@ -72,118 +71,133 @@ dialog label{display:block;font-size:14px;font-weight:500;margin:10px 0 3px}
     <div id="err" role="alert"></div>
     <button class="btn" style="width:100%;margin-top:8px" id="loginBtn">เข้าสู่ระบบ</button>
   </form>
+  <p style="margin:16px 0 0"><a href="../index.html">กลับหน้าแอปพนักงาน</a></p>
 </div>
 
 <div id="app" class="hidden">
   <header>
     <h1>ระบบ HR - ใบลาพนักงาน</h1>
     <div style="display:flex;gap:8px;flex-wrap:wrap">
-      <a class="btn ghost sm" href="balance.html">พนักงานและยอดวันลา</a>
-      <button class="btn ghost sm" id="addBtn" type="button">บันทึกการลาแทนพนักงาน</button>
       <button class="btn ghost sm" id="csvBtn" type="button">ส่งออก CSV</button>
       <button class="btn ghost sm" id="reloadBtn" type="button">โหลดใหม่</button>
       <button class="btn ghost sm" id="logoutBtn" type="button">ออกจากระบบ</button>
     </div>
   </header>
   <main>
-    <div class="cards" id="cards"></div>
-    <div class="bar">
-      <div class="grow"><label for="q">ค้นหาชื่อ / รหัส / แผนก</label><input id="q"></div>
-      <div><label for="fStatus">สถานะ</label>
-        <select id="fStatus"><option value="">ทั้งหมด</option><option>รออนุมัติ</option><option>อนุมัติ</option><option>ไม่อนุมัติ</option></select></div>
-      <div><label for="fType">ประเภทการลา</label><select id="fType"><option value="">ทั้งหมด</option></select></div>
-      <div><label for="fMonth">เดือนที่ลา</label><input id="fMonth" type="month"></div>
-      <button class="btn ghost" id="clearBtn" type="button">ล้างตัวกรอง</button>
-    </div>
     <div class="tabs" role="tablist">
-      <button class="tab" role="tab" id="tabList" aria-selected="true" type="button">รายการใบลา</button>
-      <button class="tab" role="tab" id="tabSum" aria-selected="false" type="button">สรุปรายคน (เฉพาะที่อนุมัติ)</button>
+      <button class="tab" role="tab" id="tabReq" aria-selected="true" type="button">ใบลาทั้งหมด</button>
+      <button class="tab" role="tab" id="tabEmp" aria-selected="false" type="button">พนักงานและผู้อนุมัติ</button>
     </div>
-    <div class="wrap" id="view"></div>
+
+    <div id="paneReq">
+      <div class="cards" id="cards"></div>
+      <div class="bar">
+        <div class="grow"><label for="q">ค้นหาชื่อ / รหัส / แผนก</label><input id="q"></div>
+        <div><label for="fCat">สถานะ</label>
+          <select id="fCat"><option value="">ทั้งหมด</option><option value="flow">กำลังรออนุมัติ</option><option value="hr">รอ HR ออกใบลา</option><option value="done">ออกใบลาแล้ว</option><option value="no">ไม่อนุมัติ</option><option value="cancel">ยกเลิก</option></select></div>
+        <div><label for="fMonth">เดือนที่ลา</label><input id="fMonth" type="month"></div>
+        <button class="btn ghost" id="clearBtn" type="button">ล้างตัวกรอง</button>
+      </div>
+      <div class="wrap" id="view"></div>
+    </div>
+
+    <div id="paneEmp" hidden>
+      <div class="bar" style="margin-bottom:12px">
+        <div class="grow"><label for="eq">ค้นหารหัส / ชื่อ / แผนก</label><input id="eq"></div>
+        <button class="btn sm" id="btnAddEmp" type="button">เพิ่มพนักงาน</button>
+        <button class="btn ghost sm" id="btnImport" type="button">นำเข้าหลายคน</button>
+      </div>
+      <div class="wrap"><table id="empTable" style="min-width:860px"></table></div>
+      <p class="m">ลำดับอนุมัติของแต่ละคน: หัวหน้า → MGR → FM → HR ถ้าไม่กำหนดผู้อนุมัติขั้นไหน ระบบจะข้ามขั้นนั้น (เช่น หัวหน้าเอง ไม่ต้องกำหนดหัวหน้า)</p>
+    </div>
   </main>
 </div>
 
-<dialog id="dlg">
-  <form id="addForm" method="dialog">
-    <h2>บันทึกการลาแทนพนักงาน</h2>
-    <div class="m">บันทึกแล้วสถานะเป็น "อนุมัติ" ทันที เหมาะกับกรณีขาดงานหัก 1 เท่า / 2 เท่า</div>
+<dialog id="empDlg">
+  <form id="empForm" method="dialog">
+    <h2 id="empTitle">เพิ่มพนักงาน</h2>
     <div class="two">
-      <div><label for="aEmp">รหัสพนักงาน</label><input id="aEmp" required></div>
-      <div><label for="aDept">แผนก</label><input id="aDept"></div>
+      <div><label for="eId">รหัสพนักงาน</label><input id="eId" autocomplete="off"></div>
+      <div><label for="eDept">แผนก</label><input id="eDept" autocomplete="off"></div>
     </div>
-    <label for="aName">ชื่อ-นามสกุล</label><input id="aName" required>
-    <label for="aType">ประเภท</label><select id="aType"></select>
+    <label for="eName">ชื่อ-นามสกุล</label><input id="eName" autocomplete="off">
     <div class="two">
-      <div><label for="aStart">ตั้งแต่วันที่</label><input id="aStart" type="date" required></div>
-      <div><label for="aEnd">ถึงวันที่</label><input id="aEnd" type="date" required></div>
+      <div><label for="ePhone">เบอร์ติดต่อ</label><input id="ePhone" type="tel" autocomplete="off"></div>
+      <div><label for="eEmail">อีเมล (รับแจ้งเตือนเมื่อมีใบลารออนุมัติ)</label><input id="eEmail" type="email" autocomplete="off"></div>
     </div>
-    <label for="aNote">หมายเหตุ</label><textarea id="aNote"></textarea>
-    <div class="actions">
-      <button class="btn ghost" id="aCancel" type="button">ยกเลิก</button>
-      <button class="btn" id="aSave" type="submit">บันทึก</button>
+    <label for="eSup">หัวหน้า (อนุมัติขั้นที่ 1)</label><select id="eSup"></select>
+    <label for="eMgr">MGR (ขั้นที่ 2)</label><select id="eMgr"></select>
+    <label for="eFm">FM (ขั้นที่ 3)</label><select id="eFm"></select>
+    <div id="ePinBox">
+      <label for="ePin">PIN เริ่มต้น (ตัวเลข 4-8 หลัก)</label>
+      <div style="display:flex;gap:8px"><input id="ePin" inputmode="numeric" autocomplete="off"><button class="btn ghost" id="eRand" type="button">สุ่ม</button></div>
+      <div class="m">พนักงานจะถูกบังคับให้เปลี่ยน PIN ตอนเข้าสู่ระบบครั้งแรก</div>
     </div>
+    <label class="chk" for="eActive" style="margin-top:12px"><input id="eActive" type="checkbox" checked> ใช้งาน (ปิดเมื่อลาออก จะล็อกอินไม่ได้)</label>
+    <div class="derr" id="empErr" role="alert"></div>
+    <div class="actions"><button class="btn ghost" id="empCancel" type="button">ยกเลิก</button><button class="btn" id="empSave" type="submit">บันทึก</button></div>
+  </form>
+</dialog>
+
+<dialog id="pinDlg">
+  <form id="pinForm" method="dialog">
+    <h2>รีเซ็ต PIN</h2>
+    <div class="m" id="pinWho"></div>
+    <label for="pPin">PIN ใหม่ (ตัวเลข 4-8 หลัก)</label>
+    <div style="display:flex;gap:8px"><input id="pPin" inputmode="numeric" autocomplete="off"><button class="btn ghost" id="pRand" type="button">สุ่ม</button></div>
+    <div class="m">แจ้ง PIN นี้ให้พนักงาน เขาจะต้องเปลี่ยนเองตอนเข้าสู่ระบบครั้งแรก</div>
+    <div class="derr" id="pinErr" role="alert"></div>
+    <div class="actions"><button class="btn ghost" id="pinCancel" type="button">ยกเลิก</button><button class="btn" id="pinSave" type="submit">รีเซ็ต PIN</button></div>
+  </form>
+</dialog>
+
+<dialog id="impDlg">
+  <form id="impForm" method="dialog">
+    <h2>นำเข้าพนักงานหลายคน</h2>
+    <label for="iText">วางรายชื่อ 1 บรรทัดต่อ 1 คน: รหัส, ชื่อ-นามสกุล, แผนก, รหัสหัวหน้า, รหัส MGR, รหัส FM</label>
+    <textarea id="iText" placeholder="1001, สมชาย ใจดี, Lathe, 2001, 3001, 4001&#10;2001, สมหญิง รักงาน, Lathe, , 3001, 4001"></textarea>
+    <div class="m">คั่นด้วยคอมมาหรือแท็บ (วางจาก Excel ได้เลย) สามช่องท้ายเว้นว่างได้ รหัสที่มีอยู่แล้วจะถูกข้าม</div>
+    <label for="iPin">PIN เริ่มต้นของทุกคน (ตัวเลข 4-8 หลัก)</label>
+    <input id="iPin" inputmode="numeric" autocomplete="off">
+    <div class="derr" id="impErr" role="alert"></div>
+    <div class="actions"><button class="btn ghost" id="impCancel" type="button">ยกเลิก</button><button class="btn" id="impSave" type="submit">นำเข้า</button></div>
   </form>
 </dialog>
 <div id="toast" role="status"></div>
 
 <script>
-// วาง URL ของ Apps Script Web App ตรงนี้ (ตัวเดียวกับแอปพนักงาน ลงท้ายด้วย /exec)
-const API_URL = 'https://script.google.com/macros/s/AKfycbyohtDVshSFXMEmf93Q893hA7kYBVBzjWcWqc0KPb1Z6YiWIpd6rdmrMHg5GjermPCuUw/exec';
-
-const TYPES = ['01 ลาป่วย','02 ลากิจ','03 วันหยุดพักผ่อนประจำปี','04 ลาเพื่อทหาร','05 ลาเพื่อทำหมัน',
-  '06 ขาดงานหัก 1 เท่า','07 ลาอุปสมบท','08 ลาคลอด','09 ลาสมรส','10 ขาดงานหัก 2 เท่า',
-  '11 ลาฌาปนกิจ','12 วันหยุดพักผ่อนประจำปีตามแผน','13 หยุดพิเศษ'];
+// URL ของ Apps Script Web App (ตัวเดียวกับแอปพนักงาน ลงท้ายด้วย /exec)
+const API_URL = 'https://script.google.com/macros/s/AKfycbw89zZuaEeZe6lNygue9yl1wb2W8u3opwFwKdAgDyYOuSwtv2Trpi6hZIxzDiq-EtH59w/exec';
 
 const $ = s => document.querySelector(s);
 let pass = sessionStorage.getItem('hrpass') || '';
-let items = [];
-let tab = 'list';
-let BAL = { year: 0, map: {}, names: {} }; // ยอดวันลาของปีปัจจุบัน ใช้แสดงในใบที่รออนุมัติ
+let items = [], emps = [];
 
-function esc(s) { const d = document.createElement('div'); d.textContent = s == null ? '' : s; return d.innerHTML; }
-function toast(m) { const t = $('#toast'); t.textContent = m; t.style.display = 'block'; clearTimeout(toast.t); toast.t = setTimeout(() => t.style.display = 'none', 3000); }
+const esc = s => { const d = document.createElement('div'); d.textContent = s == null ? '' : s; return d.innerHTML; };
+function toast(m) { const t = $('#toast'); t.textContent = m; t.style.display = 'block'; clearTimeout(toast.t); toast.t = setTimeout(() => t.style.display = 'none', 3500); }
 function fmtDate(s) { const [y, m, d] = String(s).slice(0, 10).split('-').map(Number); return d + '/' + m + '/' + (y + 543); }
 function fmtTs(s) { const d = new Date(s); return isNaN(d) ? '' : d.toLocaleString('th-TH', { dateStyle: 'short', timeStyle: 'short' }); }
-const fmtN = n => String(+Number(n).toFixed(2));
+const rangeTxt = r => r.start === r.end ? fmtDate(r.start) : fmtDate(r.start) + ' - ' + fmtDate(r.end);
+function randPin() { const a = new Uint32Array(1); crypto.getRandomValues(a); return String(100000 + (a[0] % 900000)); }
 
 async function call(action, payload) {
-  const res = await fetch(API_URL, {
-    method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-    body: JSON.stringify(Object.assign({ action, passcode: pass }, payload || {}))
-  });
+  const res = await fetch(API_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+    body: JSON.stringify(Object.assign({ action, passcode: pass }, payload || {})) });
   return res.json();
 }
-
-// ---------- ยอดวันลา (แสดงในใบที่รออนุมัติ) ----------
-async function loadBal() {
-  try {
-    const j = await call('hrBalList', { year: new Date().getFullYear() });
-    if (!j.ok) return;
-    BAL = { year: j.year, map: {}, names: {} };
-    j.balances.forEach(b => BAL.map[b.empId + '|' + b.code] = b);
-    j.tracked.forEach(t => BAL.names[t.code] = t.name);
-  } catch (e) {}
-}
-function balLine(r) {
-  if (r.status !== 'รออนุมัติ') return '';
-  if (Number(String(r.start).slice(0, 4)) !== BAL.year) return '';
-  const code = String(r.type).slice(0, 2);
-  const b = BAL.map[String(r.empId).trim() + '|' + code];
-  if (!b) return '';
-  const rem = b.total - b.used, over = Number(r.days || 0) > rem;
-  return '<div class="m' + (over ? ' low' : '') + '">คงเหลือ' + esc(BAL.names[code] || '') + ' ' + fmtN(rem) +
-    ' วัน (ใช้ไป ' + fmtN(b.used) + '/' + fmtN(b.total) + ')' + (over ? ' · ขอลาเกินยอด' : '') + '</div>';
+function toLogin(msg) {
+  sessionStorage.removeItem('hrpass'); pass = '';
+  $('#app').classList.add('hidden'); $('#login').classList.remove('hidden'); $('#err').textContent = msg || '';
 }
 
-// ---------- เข้าสู่ระบบ ----------
+// ---------- เข้าสู่ระบบ HR ----------
 async function enter() {
-  if (API_URL.includes('PASTE_')) { $('#err').textContent = 'ยังไม่ได้ตั้งค่า API_URL ในไฟล์'; return false; }
   try {
     const j = await call('hrList');
-    if (!j.ok) { $('#err').textContent = j.error === 'auth' ? 'รหัสผ่านไม่ถูกต้อง' : 'เกิดข้อผิดพลาด: ' + j.error; return false; }
+    if (!j.ok) { toLogin(j.error === 'auth' ? 'รหัสผ่านไม่ถูกต้อง' : 'เกิดข้อผิดพลาด: ' + j.error); return false; }
     items = j.items; sessionStorage.setItem('hrpass', pass);
-    $('#login').classList.add('hidden'); $('#app').classList.remove('hidden'); render();
-    loadBal().then(render);
+    $('#login').classList.add('hidden'); $('#app').classList.remove('hidden'); renderReq();
+    loadEmps();
     return true;
   } catch (e) { $('#err').textContent = 'เชื่อมต่อไม่ได้ ตรวจสอบอินเทอร์เน็ตและ API_URL'; return false; }
 }
@@ -191,129 +205,174 @@ $('#loginForm').addEventListener('submit', async ev => {
   ev.preventDefault(); pass = $('#pass').value; $('#err').textContent = '';
   $('#loginBtn').disabled = true; await enter(); $('#loginBtn').disabled = false;
 });
-$('#logoutBtn').addEventListener('click', () => { sessionStorage.removeItem('hrpass'); location.href = '../index.html'; });
+$('#logoutBtn').addEventListener('click', () => { toLogin(''); $('#pass').value = ''; });
 $('#reloadBtn').addEventListener('click', async () => {
   const j = await call('hrList');
-  if (j.ok) { items = j.items; await loadBal(); render(); toast('โหลดข้อมูลล่าสุดแล้ว'); } else toast('โหลดไม่สำเร็จ');
+  if (j.ok) { items = j.items; renderReq(); await loadEmps(); toast('โหลดข้อมูลล่าสุดแล้ว'); } else toast('โหลดไม่สำเร็จ');
 });
+function tab(w) {
+  $('#tabReq').setAttribute('aria-selected', w === 'req'); $('#tabEmp').setAttribute('aria-selected', w === 'emp');
+  $('#paneReq').hidden = w !== 'req'; $('#paneEmp').hidden = w !== 'emp';
+}
+$('#tabReq').addEventListener('click', () => tab('req'));
+$('#tabEmp').addEventListener('click', () => tab('emp'));
 
-// ---------- ตัวกรอง ----------
-['fType', 'aType'].forEach(id => TYPES.forEach(t => $('#' + id).insertAdjacentHTML('beforeend', '<option>' + t + '</option>')));
-['q', 'fStatus', 'fType', 'fMonth'].forEach(id => $('#' + id).addEventListener('input', render));
-$('#clearBtn').addEventListener('click', () => { ['q', 'fStatus', 'fType', 'fMonth'].forEach(id => $('#' + id).value = ''); render(); });
-
-function filtered(ignoreStatus) {
-  const q = $('#q').value.trim().toLowerCase(), st = $('#fStatus').value, ty = $('#fType').value, mo = $('#fMonth').value;
+// ---------- ใบลาทั้งหมด ----------
+const cat = r => r.status === 'ออกใบลาแล้ว' ? 'done' : r.status === 'ไม่อนุมัติ' ? 'no' : r.status === 'ยกเลิก' ? 'cancel' : r.status === 'รอ HR ออกใบลา' ? 'hr' : 'flow';
+['q', 'fCat', 'fMonth'].forEach(id => $('#' + id).addEventListener('input', renderReq));
+$('#clearBtn').addEventListener('click', () => { ['q', 'fCat', 'fMonth'].forEach(id => $('#' + id).value = ''); renderReq(); });
+function filtered() {
+  const q = $('#q').value.trim().toLowerCase(), c = $('#fCat').value, mo = $('#fMonth').value;
   return items.filter(r => {
-    if (!ignoreStatus && st && r.status !== st) return false;
-    if (ty && r.type !== ty) return false;
+    if (c && cat(r) !== c) return false;
     if (mo && !(String(r.start).slice(0, 7) <= mo && mo <= String(r.end).slice(0, 7))) return false;
-    if (q && !(r.name + ' ' + r.empId + ' ' + r.dept).toLowerCase().includes(q)) return false;
-    return true;
+    return !q || (r.name + ' ' + r.empId + ' ' + r.dept).toLowerCase().includes(q);
   });
 }
-
-// ---------- แสดงผล ----------
-function render() {
-  const pending = items.filter(r => r.status === 'รออนุมัติ').length;
-  const mo = new Date().toISOString().slice(0, 7);
-  const okMonth = items.filter(r => r.status === 'อนุมัติ' && String(r.start).slice(0, 7) <= mo && mo <= String(r.end).slice(0, 7));
-  const daysMonth = okMonth.reduce((a, r) => a + Number(r.days || 0), 0);
-  $('#cards').innerHTML =
-    '<div class="card"><b>' + pending + '</b><span>รออนุมัติ</span></div>' +
-    '<div class="card"><b>' + okMonth.length + '</b><span>ใบลาที่อนุมัติ (เดือนนี้)</span></div>' +
-    '<div class="card"><b>' + daysMonth + '</b><span>วันลารวม (เดือนนี้)</span></div>' +
-    '<div class="card"><b>' + items.length + '</b><span>ใบลาทั้งหมด</span></div>';
-  tab === 'list' ? renderList() : renderSummary();
+function progress(r) {
+  const stopped = r.status === 'ไม่อนุมัติ' || r.status === 'ยกเลิก';
+  return '<div class="pg">' + r.steps.map((s, i) => {
+    let cls = 's-idle', mark = '';
+    if (s.role === 'HR') { if (r.issued) { cls = 's-ok'; mark = ' ✓'; } else if (!stopped && i === r.cur) { cls = 's-wait'; mark = ' (รอ)'; } }
+    else if (s.decision === 'ok') { cls = 's-ok'; mark = ' ✓'; }
+    else if (s.decision === 'no') { cls = 's-no'; mark = ' ✗'; }
+    else if (!stopped && i === r.cur) { cls = 's-wait'; mark = ' (รอ)'; }
+    return '<span class="chip ' + cls + '" title="' + esc(s.name) + '">' + esc(s.role) + mark + '</span>';
+  }).join('<span class="ar">→</span>') + '</div>' + (r.status === 'ไม่อนุมัติ' ? (r.steps.filter(s => s.decision === 'no').map(s => '<div class="m">เหตุผล: ' + esc(s.note || '-') + '</div>')[0] || '') : '');
 }
-
-function renderList() {
-  const rows = filtered(false);
+function renderReq() {
+  const n = c => items.filter(r => cat(r) === c).length;
+  $('#cards').innerHTML = '<div class="card"><b>' + n('flow') + '</b><span>กำลังรออนุมัติ</span></div>' +
+    '<div class="card"><b>' + n('hr') + '</b><span>รอ HR ออกใบลา</span></div>' +
+    '<div class="card"><b>' + n('done') + '</b><span>ออกใบลาแล้ว</span></div>' +
+    '<div class="card"><b>' + items.length + '</b><span>ใบลาทั้งหมด</span></div>';
+  const rows = filtered();
   if (!rows.length) { $('#view').innerHTML = '<div class="empty">ไม่พบใบลาตามตัวกรองที่เลือก</div>'; return; }
-  const cls = { 'รออนุมัติ': 's-wait', 'อนุมัติ': 's-ok', 'ไม่อนุมัติ': 's-no' };
-  $('#view').innerHTML = '<table><thead><tr><th>เลขที่ / เวลายื่น</th><th>พนักงาน</th><th>ประเภท</th><th>วันที่ลา</th>' +
-    '<th class="num">วัน</th><th>เหตุผล</th><th>สถานะ</th><th>จัดการ</th></tr></thead><tbody>' +
+  $('#view').innerHTML = '<table><thead><tr><th>เลขที่ / เวลายื่น</th><th>พนักงาน</th><th>ประเภท</th><th>วันที่ลา</th><th class="num">วัน</th><th>เหตุผล</th><th>ความคืบหน้า</th><th>ใบลา</th><th>จัดการ</th></tr></thead><tbody>' +
     rows.map(r => {
-      const range = String(r.start).slice(0, 10) === String(r.end).slice(0, 10) ? fmtDate(r.start) : fmtDate(r.start) + ' - ' + fmtDate(r.end);
-      const act = r.status === 'รออนุมัติ'
-        ? '<button class="btn sm ok" data-a="ok" data-c="' + esc(r.cid) + '">อนุมัติ</button> <button class="btn sm no" data-a="no" data-c="' + esc(r.cid) + '">ไม่อนุมัติ</button>'
-        : '<button class="btn sm ghost" data-a="re" data-c="' + esc(r.cid) + '">ย้อนเป็นรออนุมัติ</button>';
-      return '<tr><td>' + esc(r.no) + '<div class="m">' + fmtTs(r.ts) + '</div></td>' +
+      const c = cat(r);
+      const tag = c === 'done' ? '<span class="chip s-ok">ออกใบลาแล้ว</span><div class="m">' + fmtTs(r.issuedAt) + '</div>'
+        : c === 'hr' ? '<span class="chip s-wait">ยังไม่ออก</span>' : '<span class="m">-</span>';
+      const act = c === 'hr' ? '<button class="btn sm ok" data-a="issue" data-n="' + esc(r.no) + '">ออกใบลาแล้ว</button>'
+        : c === 'done' ? '<button class="btn sm ghost" data-a="undo" data-n="' + esc(r.no) + '">ย้อนเป็นยังไม่ออก</button>' : '';
+      return '<tr><td class="nw">' + esc(r.no) + '<div class="m">' + fmtTs(r.ts) + '</div></td>' +
         '<td>' + esc(r.name) + '<div class="m">' + esc(r.empId) + (r.dept ? ' · ' + esc(r.dept) : '') + '</div></td>' +
-        '<td>' + esc(r.type) + balLine(r) + '</td><td>' + range + '</td><td class="num">' + esc(r.days) + '</td>' +
-        '<td class="wrapt">' + esc(r.reason) + (r.phone ? '<div class="m">โทร ' + esc(r.phone) + '</div>' : '') +
-        (r.note ? '<div class="m">หมายเหตุ HR: ' + esc(r.note) + '</div>' : '') + '</td>' +
-        '<td><span class="chip ' + (cls[r.status] || '') + '">' + esc(r.status) + '</span></td><td>' + act + '</td></tr>';
+        '<td>' + esc(r.type) + '</td><td class="nw">' + rangeTxt(r) + '</td><td class="num">' + esc(r.days) + '</td>' +
+        '<td class="wrapt">' + esc(r.reason) + (r.phone ? '<div class="m">โทร ' + esc(r.phone) + '</div>' : '') + (r.hrNote ? '<div class="m">หมายเหตุ HR: ' + esc(r.hrNote) + '</div>' : '') + '</td>' +
+        '<td>' + progress(r) + '</td><td>' + tag + '</td><td class="nw">' + act + '</td></tr>';
     }).join('') + '</tbody></table>';
 }
-
-function renderSummary() {
-  const rows = filtered(true).filter(r => r.status === 'อนุมัติ');
-  if (!rows.length) { $('#view').innerHTML = '<div class="empty">ยังไม่มีใบลาที่อนุมัติตามตัวกรองที่เลือก</div>'; return; }
-  const by = {};
-  rows.forEach(r => {
-    const k = r.empId; by[k] = by[k] || { empId: r.empId, name: r.name, dept: r.dept, t: {}, total: 0 };
-    const c = String(r.type).slice(0, 2); const d = Number(r.days || 0);
-    by[k].t[c] = (by[k].t[c] || 0) + d; by[k].total += d;
-  });
-  const codes = TYPES.map(t => t.slice(0, 2));
-  $('#view').innerHTML = '<table><thead><tr><th>รหัส</th><th>ชื่อ</th><th>แผนก</th>' +
-    TYPES.map(t => '<th class="num" title="' + esc(t) + '">' + t.slice(0, 2) + '</th>').join('') + '<th class="num">รวม</th></tr></thead><tbody>' +
-    Object.values(by).sort((a, b) => b.total - a.total).map(e =>
-      '<tr><td>' + esc(e.empId) + '</td><td>' + esc(e.name) + '</td><td>' + esc(e.dept) + '</td>' +
-      codes.map(c => '<td class="num">' + (e.t[c] || '') + '</td>').join('') + '<td class="num"><b>' + e.total + '</b></td></tr>').join('') +
-    '</tbody></table><div class="m" style="padding:10px 12px">เลื่อนเมาส์ไปที่รหัสประเภท (01-13) เพื่อดูชื่อการลา</div>';
-}
-
-$('#tabList').addEventListener('click', () => { tab = 'list'; $('#tabList').setAttribute('aria-selected', 'true'); $('#tabSum').setAttribute('aria-selected', 'false'); render(); });
-$('#tabSum').addEventListener('click', () => { tab = 'sum'; $('#tabSum').setAttribute('aria-selected', 'true'); $('#tabList').setAttribute('aria-selected', 'false'); render(); });
-
-// ---------- อนุมัติ / ไม่อนุมัติ ----------
 $('#view').addEventListener('click', async ev => {
   const b = ev.target.closest('button[data-a]'); if (!b) return;
-  const cid = b.dataset.c, a = b.dataset.a;
-  let status = a === 'ok' ? 'อนุมัติ' : a === 'no' ? 'ไม่อนุมัติ' : 'รออนุมัติ', note = '';
-  if (a === 'no') { note = prompt('เหตุผลที่ไม่อนุมัติ (ไม่บังคับ)') ; if (note === null) return; }
+  const issue = b.dataset.a === 'issue';
+  if (!issue && !confirm('ย้อนใบลานี้เป็น "ยังไม่ออกใบลา" ?')) return;
   b.disabled = true;
   try {
-    const j = await call('hrDecide', { cid, status, note });
-    if (!j.ok) throw new Error(j.error);
-    const r = items.find(x => x.cid === cid); r.status = status; r.note = note; r.decidedAt = new Date().toISOString();
-    toast('บันทึกแล้ว: ' + status); render();
-    loadBal().then(render); // ยอดวันลาถูกหัก/คืนแล้ว โหลดยอดใหม่
+    const j = await call('hrIssue', { no: b.dataset.n, issued: issue });
+    if (!j.ok) { if (j.error === 'auth') { toLogin('รหัสผ่านไม่ถูกต้อง'); return; } toast(j.message || 'ไม่สำเร็จ: ' + j.error); b.disabled = false; return; }
+    toast(issue ? 'บันทึกแล้ว: ออกใบลาแล้ว' : 'บันทึกแล้ว: ยังไม่ออกใบลา');
+    const r = await call('hrList'); if (r.ok) { items = r.items; renderReq(); }
   } catch (e) { b.disabled = false; toast('บันทึกไม่สำเร็จ ลองใหม่อีกครั้ง'); }
 });
-
-// ---------- บันทึกแทนพนักงาน ----------
-$('#addBtn').addEventListener('click', () => $('#dlg').showModal());
-$('#aCancel').addEventListener('click', () => $('#dlg').close());
-$('#addForm').addEventListener('submit', async ev => {
-  ev.preventDefault();
-  const v = id => $('#' + id).value.trim();
-  if (v('aEnd') < v('aStart')) { toast('วันที่สิ้นสุดต้องไม่ก่อนวันที่เริ่ม'); return; }
-  const days = (new Date(v('aEnd')) - new Date(v('aStart'))) / 86400000 + 1;
-  $('#aSave').disabled = true;
-  try {
-    const j = await call('hrAdd', { empId: v('aEmp'), name: v('aName'), dept: v('aDept'), type: v('aType'), start: v('aStart'), end: v('aEnd'), days, note: v('aNote') });
-    if (!j.ok) throw new Error(j.error);
-    $('#dlg').close(); $('#addForm').reset(); toast('บันทึกแล้ว เลขที่ ' + j.no);
-    const r = await call('hrList'); if (r.ok) { items = r.items; render(); }
-    loadBal().then(render);
-  } catch (e) { toast('บันทึกไม่สำเร็จ ลองใหม่อีกครั้ง'); }
-  $('#aSave').disabled = false;
+$('#csvBtn').addEventListener('click', () => {
+  const rows = filtered();
+  if (!rows.length) { toast('ไม่มีข้อมูลให้ส่งออก'); return; }
+  const head = ['เลขที่', 'เวลายื่น', 'รหัสพนักงาน', 'ชื่อ-นามสกุล', 'แผนก', 'ประเภท', 'วันที่เริ่ม', 'วันที่สิ้นสุด', 'จำนวนวัน', 'เหตุผล', 'เบอร์ติดต่อ', 'สถานะ', 'ออกใบลา', 'หมายเหตุ HR'];
+  const q = s => '"' + String(s == null ? '' : s).replace(/"/g, '""') + '"';
+  const lines = [head.map(q).join(',')].concat(rows.map(r => [r.no, fmtTs(r.ts), r.empId, r.name, r.dept, r.type, r.start, r.end, r.days, r.reason, r.phone, r.status, r.issued ? 'ออกแล้ว' : 'ยังไม่ออก', r.hrNote].map(q).join(',')));
+  const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob(['\ufeff' + lines.join('\r\n')], { type: 'text/csv;charset=utf-8' }));
+  a.download = 'leave-' + new Date().toISOString().slice(0, 10) + '.csv'; a.click(); URL.revokeObjectURL(a.href);
 });
 
-// ---------- ส่งออก CSV ----------
-$('#csvBtn').addEventListener('click', () => {
-  const rows = filtered(false);
-  if (!rows.length) { toast('ไม่มีข้อมูลให้ส่งออก'); return; }
-  const head = ['เลขที่', 'เวลายื่น', 'รหัสพนักงาน', 'ชื่อ-นามสกุล', 'แผนก', 'ประเภท', 'วันที่เริ่ม', 'วันที่สิ้นสุด', 'จำนวนวัน', 'เหตุผล', 'เบอร์ติดต่อ', 'สถานะ', 'หมายเหตุ HR'];
-  const q = s => '"' + String(s == null ? '' : s).replace(/"/g, '""') + '"';
-  const lines = [head.map(q).join(',')].concat(rows.map(r =>
-    [r.no, fmtTs(r.ts), r.empId, r.name, r.dept, r.type, String(r.start).slice(0, 10), String(r.end).slice(0, 10), r.days, r.reason, r.phone, r.status, r.note].map(q).join(',')));
-  const blob = new Blob(['\ufeff' + lines.join('\r\n')], { type: 'text/csv;charset=utf-8' });
-  const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
-  a.download = 'leave-' + new Date().toISOString().slice(0, 10) + '.csv'; a.click(); URL.revokeObjectURL(a.href);
+// ---------- พนักงานและผู้อนุมัติ ----------
+async function loadEmps() {
+  try { const j = await call('hrEmpList'); if (j.ok) { emps = j.employees; renderEmp(); } } catch (e) {}
+}
+$('#eq').addEventListener('input', renderEmp);
+const nameOf = id => { const e = emps.find(x => x.id === id); return id ? (e ? e.name : id + ' (ไม่พบ)') : '-'; };
+function renderEmp() {
+  const q = $('#eq').value.trim().toLowerCase();
+  const list = emps.filter(e => !q || (e.id + ' ' + e.name + ' ' + e.dept).toLowerCase().includes(q));
+  const th = '<tr><th>รหัส</th><th>ชื่อ-นามสกุล</th><th>แผนก</th><th>หัวหน้า</th><th>MGR</th><th>FM</th><th>สถานะ</th><th>PIN</th><th></th></tr>';
+  if (!list.length) { $('#empTable').innerHTML = th + '<tr><td colspan="9"><div class="empty">ยังไม่มีพนักงาน กด "เพิ่มพนักงาน" หรือ "นำเข้าหลายคน"</div></td></tr>'; return; }
+  $('#empTable').innerHTML = th + list.map(e => {
+    const pin = !e.hasPin ? '<span class="chip s-no">ยังไม่ตั้ง</span>' : e.mustChange ? '<span class="chip s-wait">รอเปลี่ยนครั้งแรก</span>' : '<span class="chip s-ok">ตั้งแล้ว</span>';
+    return '<tr><td>' + esc(e.id) + '</td><td>' + esc(e.name) + '</td><td>' + esc(e.dept) + '</td><td>' + esc(nameOf(e.sup)) + '</td><td>' + esc(nameOf(e.mgr)) + '</td><td>' + esc(nameOf(e.fm)) + '</td>' +
+      '<td><span class="chip ' + (e.active ? 's-ok' : 's-idle') + '">' + (e.active ? 'ใช้งาน' : 'ไม่ใช้งาน') + '</span></td><td>' + pin + '</td>' +
+      '<td class="nw"><button class="btn ghost sm" data-edit="' + esc(e.id) + '" type="button">แก้ไข</button> <button class="btn ghost sm" data-pin="' + esc(e.id) + '" type="button">รีเซ็ต PIN</button></td></tr>';
+  }).join('');
+}
+const emp = id => emps.find(e => e.id === id);
+$('#empTable').addEventListener('click', ev => {
+  const b = ev.target.closest('button'); if (!b) return;
+  if (b.dataset.edit) openEmp(b.dataset.edit); else if (b.dataset.pin) openPin(b.dataset.pin);
+});
+let empNew = true;
+function fillApprovers(selfId) {
+  const opts = '<option value="">- ไม่มี (ข้ามขั้นนี้) -</option>' + emps.filter(e => e.active && e.id !== selfId)
+    .sort((a, b) => a.name.localeCompare(b.name, 'th')).map(e => '<option value="' + esc(e.id) + '">' + esc(e.name) + ' (' + esc(e.id) + ')</option>').join('');
+  ['eSup', 'eMgr', 'eFm'].forEach(id => $('#' + id).innerHTML = opts);
+}
+function openEmp(id) {
+  empNew = !id; const e = id ? emp(id) : null;
+  fillApprovers(id || '');
+  $('#empTitle').textContent = empNew ? 'เพิ่มพนักงาน' : 'แก้ไขพนักงาน';
+  $('#eId').value = e ? e.id : ''; $('#eId').readOnly = !empNew;
+  $('#eName').value = e ? e.name : ''; $('#eDept').value = e ? e.dept : ''; $('#ePhone').value = e ? e.phone : ''; $('#eEmail').value = e ? e.email : '';
+  $('#eSup').value = e ? e.sup : ''; $('#eMgr').value = e ? e.mgr : ''; $('#eFm').value = e ? e.fm : '';
+  $('#eActive').checked = e ? e.active : true;
+  $('#ePinBox').hidden = !empNew; $('#ePin').value = empNew ? randPin() : '';
+  $('#empErr').textContent = ''; $('#empDlg').showModal();
+}
+$('#btnAddEmp').addEventListener('click', () => openEmp(null));
+$('#eRand').addEventListener('click', () => $('#ePin').value = randPin());
+$('#empCancel').addEventListener('click', () => $('#empDlg').close());
+$('#empForm').addEventListener('submit', async ev => {
+  ev.preventDefault();
+  const id = $('#eId').value.trim(), name = $('#eName').value.trim(), pin = $('#ePin').value.trim();
+  if (!id || !name) { $('#empErr').textContent = 'กรอกรหัสพนักงานและชื่อ'; return; }
+  if (/[|.]/.test(id)) { $('#empErr').textContent = 'รหัสพนักงานห้ามมีเครื่องหมาย | หรือ .'; return; }
+  if (empNew && emp(id)) { $('#empErr').textContent = 'มีรหัสพนักงานนี้อยู่แล้ว'; return; }
+  if (empNew && !/^\d{4,8}$/.test(pin)) { $('#empErr').textContent = 'PIN ต้องเป็นตัวเลข 4-8 หลัก'; return; }
+  $('#empSave').disabled = true; $('#empErr').textContent = '';
+  try {
+    const j = await call('hrEmpSave', { empId: id, name: name, dept: $('#eDept').value.trim(), phone: $('#ePhone').value.trim(), email: $('#eEmail').value.trim(),
+      sup: $('#eSup').value, mgr: $('#eMgr').value, fm: $('#eFm').value, active: $('#eActive').checked, pin: pin });
+    if (j.ok) { $('#empDlg').close(); toast(empNew ? 'เพิ่มพนักงานแล้ว PIN เริ่มต้น: ' + pin : 'บันทึกแล้ว'); await loadEmps(); }
+    else $('#empErr').textContent = 'บันทึกไม่สำเร็จ: ' + (j.message || j.error || '');
+  } catch (e) { $('#empErr').textContent = 'เชื่อมต่อไม่ได้ ลองใหม่อีกครั้ง'; }
+  $('#empSave').disabled = false;
+});
+let pinEmp = null;
+function openPin(id) { pinEmp = id; const e = emp(id); $('#pinWho').textContent = e.id + ' · ' + e.name; $('#pPin').value = randPin(); $('#pinErr').textContent = ''; $('#pinDlg').showModal(); }
+$('#pRand').addEventListener('click', () => $('#pPin').value = randPin());
+$('#pinCancel').addEventListener('click', () => $('#pinDlg').close());
+$('#pinForm').addEventListener('submit', async ev => {
+  ev.preventDefault();
+  const pin = $('#pPin').value.trim();
+  if (!/^\d{4,8}$/.test(pin)) { $('#pinErr').textContent = 'PIN ต้องเป็นตัวเลข 4-8 หลัก'; return; }
+  $('#pinSave').disabled = true; $('#pinErr').textContent = '';
+  try {
+    const j = await call('hrPinReset', { empId: pinEmp, pin: pin });
+    if (j.ok) { $('#pinDlg').close(); toast('รีเซ็ต PIN แล้ว PIN ใหม่: ' + pin); await loadEmps(); } else $('#pinErr').textContent = 'ไม่สำเร็จ: ' + (j.error || '');
+  } catch (e) { $('#pinErr').textContent = 'เชื่อมต่อไม่ได้ ลองใหม่อีกครั้ง'; }
+  $('#pinSave').disabled = false;
+});
+$('#btnImport').addEventListener('click', () => { $('#iText').value = ''; $('#iPin').value = ''; $('#impErr').textContent = ''; $('#impDlg').showModal(); });
+$('#impCancel').addEventListener('click', () => $('#impDlg').close());
+$('#impForm').addEventListener('submit', async ev => {
+  ev.preventDefault();
+  const rows = $('#iText').value.split(/\r?\n/).map(l => l.split(/[,\t]/).map(x => x.trim())).filter(r => r[0] && r[1]);
+  const pin = $('#iPin').value.trim();
+  if (!rows.length) { $('#impErr').textContent = 'วางรายชื่ออย่างน้อย 1 คน'; return; }
+  if (!/^\d{4,8}$/.test(pin)) { $('#impErr').textContent = 'PIN เริ่มต้นต้องเป็นตัวเลข 4-8 หลัก'; return; }
+  $('#impSave').disabled = true; $('#impErr').textContent = '';
+  try {
+    const j = await call('hrEmpImport', { rows: rows, pin: pin });
+    if (j.ok) { $('#impDlg').close(); toast('นำเข้า ' + j.added + ' คน' + (j.skipped.length ? ' (ข้าม ' + j.skipped.length + ' รหัสที่ซ้ำหรือไม่ถูกต้อง)' : '')); await loadEmps(); }
+    else $('#impErr').textContent = 'นำเข้าไม่สำเร็จ: ' + (j.error || '');
+  } catch (e) { $('#impErr').textContent = 'เชื่อมต่อไม่ได้ ลองใหม่อีกครั้ง'; }
+  $('#impSave').disabled = false;
 });
 
 if (pass) enter();
