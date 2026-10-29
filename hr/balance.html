@@ -65,6 +65,64 @@ dialog h2{margin:0 0 4px;font-size:18px}
 .lvsel{width:auto;min-height:34px;padding:4px 8px;font-size:14px}
 .lv-leader{background:#e0ecf7;color:#1b5e9b}
 .lv-manager{background:#efe3f7;color:#6a2c91}
+
+/* KUROTA HR motion layer: lightweight CSS-only animations */
+@keyframes hrFadeUp {
+  from { opacity: 0; transform: translate3d(0, 8px, 0); }
+  to   { opacity: 1; transform: translate3d(0, 0, 0); }
+}
+@keyframes hrFadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@keyframes hrToastIn {
+  from { opacity: 0; transform: translate3d(-50%, 10px, 0); }
+  to   { opacity: 1; transform: translate3d(-50%, 0, 0); }
+}
+body { animation: hrFadeIn .22s ease-out both; }
+header { animation: hrFadeUp .28s ease-out both; }
+main { animation: hrFadeUp .32s ease-out both; }
+section, .tile, .wrap, dialog[open] {
+  animation: hrFadeUp .24s ease-out both;
+}
+button, .btn, .bt, .dbtn, .yb, .back, a.link {
+  transition: transform .16s ease, box-shadow .16s ease, background-color .16s ease, color .16s ease, opacity .16s ease;
+}
+button:not(:disabled):active, .btn:not(:disabled):active, .bt:not(:disabled):active,
+.dbtn:not(:disabled):active, .yb:active, .back:active {
+  transform: scale(.98);
+}
+button:focus-visible, a:focus-visible {
+  outline-offset: 3px;
+}
+input, select, textarea {
+  transition: border-color .16s ease, box-shadow .16s ease;
+}
+input:focus, select:focus, textarea:focus {
+  box-shadow: 0 0 0 3px rgba(15, 76, 92, .10);
+}
+.tab { transition: color .16s ease, border-color .16s ease, background-color .16s ease; }
+#toast { animation: hrToastIn .2s ease-out both; }
+@media (hover: hover) and (pointer: fine) {
+  button:not(:disabled):hover, .btn:not(:disabled):hover, .bt:not(:disabled):hover,
+  .dbtn:not(:disabled):hover, .yb:hover, .back:hover {
+    box-shadow: 0 3px 10px rgba(20, 38, 43, .10);
+  }
+  .tile { transition: transform .18s ease, box-shadow .18s ease; }
+  .tile:hover { transform: translateY(-2px); box-shadow: 0 6px 18px rgba(20, 38, 43, .08); }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: .01ms !important;
+  }
+}
+@media print {
+  body, header, main, section, .tile, .wrap { animation: none !important; }
+}
+
 </style>
 </head>
 <body>
