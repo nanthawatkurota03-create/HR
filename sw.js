@@ -1,5 +1,5 @@
-const CACHE = 'leave-app-v3';
-const SHELL = ['./', './index.html', './manifest.json', './icon.svg'];
+const CACHE = 'leave-app-v4';
+const SHELL = ['./', './index.html', './card.html', './manifest.json', './icon.svg'];
 
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(SHELL)).then(() => self.skipWaiting()));
