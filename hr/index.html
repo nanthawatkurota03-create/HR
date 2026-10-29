@@ -194,6 +194,37 @@ header h1{font-size:19px;letter-spacing:.1px}
 }
 @media(prefers-reduced-motion:reduce){.hr-sidebar,.hr-backdrop{transition:none}}
 
+
+/* Desktop workspace refinement: clearer hierarchy and more balanced use of space */
+@media (min-width: 851px) {
+  main { max-width: none; }
+  .hr-layout { min-height: calc(100vh - 68px); }
+  .hr-sidebar { position: sticky; top: 68px; align-self: flex-start; height: calc(100vh - 68px); min-height: calc(100vh - 68px); overflow-y: auto; border-right: 1px solid #e2e9ec; box-shadow: 3px 0 18px rgba(20, 38, 43, .025); }
+  .hr-layout main { padding: 28px clamp(24px, 2.5vw, 48px); }
+  .hr-layout main > .tabs { margin-bottom: 18px; }
+  .cards { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; }
+  .cards .card { min-height: 112px; padding: 20px 22px; border-radius: 14px; }
+  .cards .card b { font-size: 30px; line-height: 1.25; margin-bottom: 5px; }
+  .bar { gap: 16px; padding: 18px; border-radius: 14px; }
+  #paneReq > .bar { display: grid; grid-template-columns: minmax(250px, 2fr) repeat(2, minmax(160px, 1fr)) auto; align-items: end; }
+  #paneReq > .bar > div { min-width: 0; }
+  #paneReq > .bar .grow { min-width: 0; }
+  #paneReq > .bar > button { white-space: nowrap; }
+  #paneEmp > .bar { display: flex; align-items: end; }
+  #paneEmp > .bar .grow { flex: 1 1 420px; min-width: 280px; }
+  #paneEmp > .bar > button { flex: 0 0 auto; }
+  .tabs { gap: 8px; }
+  .tab { padding: 11px 20px; border-radius: 10px 10px 0 0; }
+  .wrap { border-radius: 14px; }
+  table { min-width: 980px; }
+  th, td { padding: 12px 14px; }
+  #paneEmp > p.m { max-width: 1050px; line-height: 1.7; margin-top: 14px; }
+}
+@media (min-width: 1500px) {
+  .hr-layout main { padding-left: 48px; padding-right: 48px; }
+  .cards .card { padding: 22px 24px; }
+}
+
 </style>
 </head>
 <body>
