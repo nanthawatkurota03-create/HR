@@ -258,7 +258,8 @@ function renderReq() {
       return '<tr><td class="nw">' + esc(r.no) + '<div class="m">' + fmtTs(r.ts) + '</div></td>' +
         '<td>' + esc(r.name) + '<div class="m">' + esc(r.empId) + (r.dept ? ' · ' + esc(r.dept) : '') + '</div></td>' +
         '<td>' + esc(r.type) + '</td><td class="nw">' + rangeTxt(r) + '</td><td class="num">' + esc(r.days) + '</td>' +
-        '<td class="wrapt">' + esc(r.reason) + (r.phone ? '<div class="m">โทร ' + esc(r.phone) + '</div>' : '') + (r.hrNote ? '<div class="m">หมายเหตุ HR: ' + esc(r.hrNote) + '</div>' : '') + '</td>' +
+        '<td class="wrapt">' + esc(r.reason) + (r.phone ? '<div class="m">โทร ' + esc(r.phone) + '</div>' : '') + (r.hrNote ? '<div class="m">หมายเหตุ HR: ' + esc(r.hrNote) + '</div>' : '') +
+        (r.files || []).map(f => '<div><button class="btn ghost sm" data-file="' + esc(f.id) + '" type="button">ไฟล์แนบ: ' + esc(f.name) + '</button></div>').join('') + '</td>' +
         '<td>' + progress(r) + '</td><td>' + tag + '</td><td class="nw">' + act + '</td></tr>';
     }).join('') + '</tbody></table>';
 }
@@ -273,6 +274,20 @@ $('#view').addEventListener('click', async ev => {
     toast(issue ? 'บันทึกแล้ว: ออกใบลาแล้ว' : 'บันทึกแล้ว: ยังไม่ออกใบลา');
     const r = await call('hrList'); if (r.ok) { items = r.items; renderReq(); }
   } catch (e) { b.disabled = false; toast('บันทึกไม่สำเร็จ ลองใหม่อีกครั้ง'); }
+});
+$('#view').addEventListener('click', async ev => {
+  const b = ev.target.closest('button[data-file]'); if (!b) return;
+  const w = window.open('', '_blank');
+  try {
+    const j = await call('file', { id: b.dataset.file });
+    if (!j.ok) { if (w) w.close(); toast(j.message || 'เปิดไฟล์ไม่สำเร็จ'); return; }
+    const bin = atob(j.data), u = new Uint8Array(bin.length);
+    for (let i = 0; i < bin.length; i++) u[i] = bin.charCodeAt(i);
+    const url = URL.createObjectURL(new Blob([u], { type: j.type }));
+    if (w && /^(image\/|application\/pdf)/.test(j.type)) w.location = url;
+    else { if (w) w.close(); const a = document.createElement('a'); a.href = url; a.download = j.name; a.click(); }
+    setTimeout(() => URL.revokeObjectURL(url), 60000);
+  } catch (e) { if (w) w.close(); toast('เชื่อมต่อไม่ได้ ลองใหม่อีกครั้ง'); }
 });
 $('#csvBtn').addEventListener('click', () => {
   const rows = filtered();
