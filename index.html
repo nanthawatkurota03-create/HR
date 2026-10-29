@@ -73,6 +73,7 @@ input:focus,select:focus,textarea:focus,button:focus-visible,a:focus-visible{out
 .bt{flex:1;height:52px;border-radius:10px;font:inherit;font-weight:600;font-size:17px}
 .bt.ok{border:0;background:var(--ok);color:#fff}
 .bt.no{border:2px solid var(--no);background:#fff;color:var(--no)}
+.alert{display:block;width:100%;text-align:left;border:0;background:var(--warn-bg);color:var(--warn);border-radius:10px;padding:12px 16px;margin-bottom:16px;font:inherit;font-weight:500}
 .fl{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:6px 0;font-size:14px;border-bottom:1px solid var(--line)}
 .fl span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .fl .link{flex:none}
@@ -133,6 +134,8 @@ input:focus,select:focus,textarea:focus,button:focus-visible,a:focus-visible{out
         </div>
       </div>
     </section>
+
+    <button class="alert" id="alertBar" type="button" hidden></button>
 
     <div class="tabs" role="tablist">
       <button class="tab" role="tab" id="tReq" aria-selected="true" type="button">ขอใบลา</button>
@@ -239,19 +242,26 @@ function showApp() {
   if (S.emp.phone && !$('#phone').value) $('#phone').value = S.emp.phone;
   $('#tInbox').hidden = !S.isApprover;
   const b = $('#tBadge'); b.hidden = !(S.inbox > 0); b.textContent = S.inbox;
-  if (!S.isApprover) tab('req');
+  if (!S.isApprover) tab('req'); else updAlert();
 }
+function updAlert() {
+  const n = S.inbox || 0, u = S.upcoming || 0, a = $('#alertBar');
+  a.hidden = !(S.isApprover && (n > 0 || u > 0)) || $('#tInbox').getAttribute('aria-selected') === 'true';
+  a.textContent = (n > 0 ? 'มีใบลารอการอนุมัติ ' + n + ' ใบ' : '') + (n > 0 && u > 0 ? ' · ' : '') + (u > 0 ? 'กำลังมาถึง ' + u + ' ใบ' : '') + ' (แตะเพื่อดู)';
+}
+$('#alertBar').addEventListener('click', () => tab('inbox'));
 function tab(w) {
   $('#tReq').setAttribute('aria-selected', w === 'req'); $('#tInbox').setAttribute('aria-selected', w === 'inbox');
   $('#vReq').hidden = w !== 'req'; $('#vInbox').hidden = w !== 'inbox';
   if (w === 'inbox') loadInbox(); else loadMine();
+  if (S) updAlert();
 }
 $('#tReq').addEventListener('click', () => tab('req'));
 $('#tInbox').addEventListener('click', () => tab('inbox'));
 function expire() { LS.del('session'); S = null; showLogin('เซสชันหมดอายุหรือ PIN ถูกเปลี่ยน กรุณาเข้าสู่ระบบใหม่'); }
 const authFail = j => { if (j && j.error === 'auth') { expire(); return true; } return false; };
 function setProfile(j) {
-  S.emp = j.emp; S.chain = j.chain; S.isApprover = j.isApprover; S.inbox = j.inbox; save(); showApp();
+  S.emp = j.emp; S.chain = j.chain; S.isApprover = j.isApprover; S.inbox = j.inbox; S.upcoming = j.upcoming; save(); showApp();
 }
 async function loadMe() {
   if (!S || !navigator.onLine) return;
@@ -439,19 +449,20 @@ async function loadInbox() {
   if (!navigator.onLine) { el.innerHTML = '<p class="empty">ออฟไลน์อยู่ ต้องมีอินเทอร์เน็ต</p>'; return; }
   try {
     const j = await api({ action: 'inbox', token: S.token });
-    if (j.ok) { S.inbox = j.count; save(); const b = $('#tBadge'); b.hidden = !(j.count > 0); b.textContent = j.count; renderInbox(j.items); } else authFail(j);
+    if (j.ok) { S.inbox = j.count; S.upcoming = j.upcoming.length; save(); const b = $('#tBadge'); b.hidden = !(j.count > 0); b.textContent = j.count; renderInbox(j.items, j.upcoming); updAlert(); } else authFail(j);
   } catch (e) { el.innerHTML = '<p class="empty">โหลดไม่สำเร็จ ลองใหม่อีกครั้ง</p>'; }
 }
-function renderInbox(items) {
+const upHtml = up => (up && up.length) ? '<h2 style="margin:16px 0 8px">กำลังมาถึง (เพื่อรับทราบ)</h2>' + up.map(r =>
+  '<div class="item"><div class="top"><div><div class="t">' + esc(r.name) + '</div><div class="m">' + esc(r.type) + ' ' + r.days + ' วัน · ' + rangeTxt(r) + '</div></div><span class="chip s-idle">' + esc(r.status) + '</span></div></div>').join('') : '';
+function renderInbox(items, up) {
   const el = $('#iList');
-  if (!items.length) { el.innerHTML = '<p class="empty">ไม่มีใบลาที่รอการอนุมัติของคุณ</p>'; return; }
-  el.innerHTML = items.map(r =>
+  el.innerHTML = (items.length ? '' : '<p class="empty">ไม่มีใบลาที่รอการอนุมัติของคุณ</p>') + items.map(r =>
     '<div class="item" data-no="' + esc(r.no) + '"><div class="top"><div><div class="t">' + esc(r.name) + '</div><div class="m">' + esc(r.empId) + (r.dept ? ' · ' + esc(r.dept) : '') + '</div></div>' +
     '<span class="chip s-wait">' + esc(r.status) + '</span></div>' +
     '<div style="margin-top:8px"><b>' + esc(r.type) + '</b> ' + r.days + ' วัน<div class="m">' + rangeTxt(r) + '</div>' +
     '<div style="margin-top:4px">' + esc(r.reason) + '</div>' + (r.phone ? '<div class="m">โทร ' + esc(r.phone) + '</div>' : '') + '</div>' + attHtml(r) + timeline(r) +
     '<label for="n_' + esc(r.no) + '">หมายเหตุ / เหตุผลที่ไม่อนุมัติ (ไม่บังคับ)</label><input id="n_' + esc(r.no) + '" class="note" autocomplete="off">' +
-    '<div class="acts2"><button class="bt no" data-d="no" type="button">ไม่อนุมัติ</button><button class="bt ok" data-d="ok" type="button">อนุมัติ</button></div></div>').join('');
+    '<div class="acts2"><button class="bt no" data-d="no" type="button">ไม่อนุมัติ</button><button class="bt ok" data-d="ok" type="button">อนุมัติ</button></div></div>').join('') + upHtml(up);
 }
 $('#iRefresh').addEventListener('click', loadInbox);
 $('#iList').addEventListener('click', async ev => {
