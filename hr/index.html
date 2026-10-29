@@ -118,6 +118,82 @@ input:focus, select:focus, textarea:focus {
   body, header, main, section, .tile, .wrap { animation: none !important; }
 }
 
+
+/* Responsive HR workspace + collapsible mini sidebar */
+:root{--sidebar-w:248px;--sidebar-mini-w:76px;--surface:#fff;--soft:#f5f8f9;--shadow:0 8px 28px rgba(20,38,43,.06)}
+body{background:#f3f6f8}
+header{position:sticky;top:0;z-index:30;min-height:68px;padding:12px 22px;background:linear-gradient(115deg,#0f4c5c,#176778);box-shadow:0 3px 14px rgba(10,54,64,.12)}
+header h1{font-size:19px;letter-spacing:.1px}
+.hr-layout{display:flex;align-items:stretch;min-height:calc(100vh - 68px)}
+.hr-sidebar{width:var(--sidebar-w);flex:0 0 var(--sidebar-w);background:#fff;border-right:1px solid #e2e9ec;padding:18px 12px;display:flex;flex-direction:column;gap:8px;transition:width .2s ease,flex-basis .2s ease;position:relative;z-index:20}
+.sidebar-brand{display:flex;align-items:center;gap:12px;padding:8px 10px 18px;border-bottom:1px solid #edf1f3;margin-bottom:6px;min-height:62px}
+.brand-mark{width:38px;height:38px;flex:0 0 38px;display:grid;place-items:center;border-radius:12px;background:#e3f1f3;color:var(--brand);font-size:20px;font-weight:700}
+.brand-copy{min-width:0}.brand-copy strong{display:block;font-size:14px;white-space:nowrap}.brand-copy span{font-size:12px;color:var(--muted);white-space:nowrap}
+.side-label{text-transform:uppercase;letter-spacing:.08em;font-size:11px;color:#89979c;font-weight:600;padding:12px 12px 4px}
+.side-link{display:flex;align-items:center;gap:13px;min-height:46px;padding:10px 12px;border:0;border-radius:10px;background:transparent;color:#42565c;text-decoration:none;font:inherit;font-size:14px;font-weight:500;cursor:pointer;text-align:left;width:100%;white-space:nowrap}
+.side-link:hover{background:#f1f7f8;color:var(--brand)}
+.side-link.active{background:#e7f3f5;color:#0f4c5c;font-weight:600}
+.side-icon{width:26px;flex:0 0 26px;text-align:center;font-size:19px;line-height:1}
+.side-text{overflow:hidden;text-overflow:ellipsis}
+.side-link .soon{margin-left:auto;font-size:10px;color:#718188;background:#edf1f3;border-radius:5px;padding:2px 5px}
+.side-link:disabled{opacity:.55;cursor:not-allowed}
+.sidebar-bottom{margin-top:auto;border-top:1px solid #edf1f3;padding-top:12px}
+.sidebar-toggle{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;min-height:42px;border:1px solid #e1e8eb;border-radius:10px;background:#fff;color:#52666c;font:inherit;cursor:pointer}
+.sidebar-toggle:hover{background:#f6f9fa}
+#app.sidebar-mini .hr-sidebar{width:var(--sidebar-mini-w);flex-basis:var(--sidebar-mini-w);padding-inline:10px}
+#app.sidebar-mini .brand-copy,#app.sidebar-mini .side-text,#app.sidebar-mini .side-label,#app.sidebar-mini .side-link .soon,#app.sidebar-mini .toggle-copy{display:none}
+#app.sidebar-mini .sidebar-brand{justify-content:center;padding-inline:0}
+#app.sidebar-mini .side-link{justify-content:center;padding-inline:0}
+#app.sidebar-mini .side-icon{width:auto;flex:0 0 auto}
+#app.sidebar-mini .sidebar-toggle{font-size:20px}
+.hr-layout main{flex:1;min-width:0;max-width:none;margin:0;padding:24px clamp(16px,2.5vw,36px)}
+.cards .card,.wrap,.bar{border-radius:14px;box-shadow:var(--shadow);border-color:#e4eaed}
+.cards .card{padding:18px 20px}
+.cards .card b{font-size:28px}
+.bar{padding:16px;margin-bottom:18px}
+.tabs{gap:8px}
+.tab{min-height:42px;padding:9px 17px;border-color:#e0e7ea;border-radius:10px;font-weight:500}
+.wrap{overflow:auto}
+.hr-mobile-menu{display:none}
+.hr-backdrop{display:none}
+:focus-visible{outline:3px solid #78bdc9;outline-offset:2px}
+@media(max-width:850px){
+  header{padding:10px 14px;gap:8px}
+  header h1{font-size:16px}
+  header>div{gap:5px!important}
+  header .btn{padding:7px 9px;font-size:12px}
+  .hr-layout main{padding:16px 12px}
+  .hr-mobile-menu{display:inline-flex;align-items:center;justify-content:center;width:42px;height:42px;flex:0 0 42px;border:1px solid rgba(255,255,255,.4);border-radius:10px;background:rgba(255,255,255,.1);color:#fff;font-size:22px;cursor:pointer}
+  header .header-title-wrap{display:flex;align-items:center;gap:10px;min-width:0}
+  header h1{white-space:normal}
+  .hr-sidebar{position:fixed;left:0;top:0;bottom:0;height:100dvh;width:min(290px,84vw);flex-basis:min(290px,84vw);transform:translateX(-105%);transition:transform .22s ease;box-shadow:none;padding-top:max(18px,env(safe-area-inset-top))}
+  #app.mobile-nav-open .hr-sidebar{transform:translateX(0);box-shadow:12px 0 36px rgba(15,45,52,.18)}
+  .hr-backdrop{display:block;position:fixed;inset:0;background:rgba(12,35,40,.38);z-index:19;opacity:0;pointer-events:none;transition:opacity .2s}
+  #app.mobile-nav-open .hr-backdrop{opacity:1;pointer-events:auto}
+  #app.sidebar-mini .hr-sidebar{width:min(290px,84vw);flex-basis:min(290px,84vw)}
+  #app.sidebar-mini .brand-copy,#app.sidebar-mini .side-text,#app.sidebar-mini .side-label,#app.sidebar-mini .side-link .soon,#app.sidebar-mini .toggle-copy{display:initial}
+  #app.sidebar-mini .sidebar-brand{justify-content:flex-start;padding:8px 10px 18px}
+  #app.sidebar-mini .side-link{justify-content:flex-start;padding:10px 12px}
+  #app.sidebar-mini .side-icon{width:26px;flex:0 0 26px}
+  #app.sidebar-mini .sidebar-toggle{font-size:14px}
+  .cards{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+  .cards .card{padding:13px}
+  .cards .card b{font-size:23px}
+  .cards .card span{font-size:12px}
+  .bar{gap:10px;padding:12px}
+  .bar>div,.bar .grow{min-width:0;flex-basis:100%}
+  .bar>button{flex:1}
+  .tabs{overflow-x:auto}
+  .tab{white-space:nowrap;flex:0 0 auto}
+}
+@media(max-width:420px){
+  header h1{font-size:14px}
+  header .btn{font-size:11px;padding:6px 7px}
+  .cards .card b{font-size:21px}
+  .two{grid-template-columns:1fr}
+}
+@media(prefers-reduced-motion:reduce){.hr-sidebar,.hr-backdrop{transition:none}}
+
 </style>
 </head>
 <body>
@@ -134,14 +210,45 @@ input:focus, select:focus, textarea:focus {
 
 <div id="app" class="hidden">
   <header>
-    <h1>ระบบ HR - ใบลาพนักงาน</h1>
+    <div class="header-title-wrap">
+      <button class="hr-mobile-menu" id="mobileMenuBtn" type="button" aria-label="เปิดเมนู" aria-expanded="false">☰</button>
+      <h1>ระบบ HR - ใบลาพนักงาน</h1>
+    </div>
     <div style="display:flex;gap:8px;flex-wrap:wrap">
       <button class="btn ghost sm" id="csvBtn" type="button">ส่งออก CSV</button>
       <button class="btn ghost sm" id="reloadBtn" type="button">โหลดใหม่</button>
       <button class="btn ghost sm" id="logoutBtn" type="button">ออกจากระบบ</button>
     </div>
   </header>
-  <main>
+  <div class="hr-layout">
+    <aside class="hr-sidebar" id="hrSidebar" aria-label="เมนูหลัก">
+      <div class="sidebar-brand">
+        <div class="brand-mark" aria-hidden="true">H</div>
+        <div class="brand-copy"><strong>HR WORKSPACE</strong><span>จัดการข้อมูลบุคลากร</span></div>
+      </div>
+      <div class="side-label">เมนูหลัก</div>
+      <button class="side-link active" id="navLeave" type="button" title="ใบลาพนักงาน">
+        <span class="side-icon" aria-hidden="true">▤</span><span class="side-text">ใบลาพนักงาน</span>
+      </button>
+      <button class="side-link" id="navEmployees" type="button" title="พนักงานและผู้อนุมัติ">
+        <span class="side-icon" aria-hidden="true">♙</span><span class="side-text">พนักงานและผู้อนุมัติ</span>
+      </button>
+      <div class="side-label">เพิ่มเติม</div>
+      <button class="side-link" type="button" disabled title="เตรียมไว้สำหรับฟังก์ชันในอนาคต">
+        <span class="side-icon" aria-hidden="true">◷</span><span class="side-text">ลงเวลาเข้า-ออกงาน</span><span class="soon">เร็ว ๆ นี้</span>
+      </button>
+      <button class="side-link" type="button" disabled title="เตรียมไว้สำหรับฟังก์ชันในอนาคต">
+        <span class="side-icon" aria-hidden="true">▥</span><span class="side-text">รายงาน</span><span class="soon">เร็ว ๆ นี้</span>
+      </button>
+      <button class="side-link" type="button" disabled title="เตรียมไว้สำหรับฟังก์ชันในอนาคต">
+        <span class="side-icon" aria-hidden="true">⚙</span><span class="side-text">ตั้งค่าระบบ</span><span class="soon">เร็ว ๆ นี้</span>
+      </button>
+      <div class="sidebar-bottom">
+        <button class="sidebar-toggle" id="sidebarToggle" type="button" aria-label="ย่อเมนู" title="ย่อ/ขยายเมนู"><span aria-hidden="true">⇤</span><span class="toggle-copy">ย่อเมนู</span></button>
+      </div>
+    </aside>
+    <div class="hr-backdrop" id="hrBackdrop"></div>
+    <main>
     <div class="tabs" role="tablist">
       <button class="tab" role="tab" id="tabReq" aria-selected="true" type="button">ใบลาทั้งหมด</button>
       <button class="tab" role="tab" id="tabEmp" aria-selected="false" type="button">พนักงานและผู้อนุมัติ</button>
@@ -168,7 +275,8 @@ input:focus, select:focus, textarea:focus {
       <div class="wrap"><table id="empTable" style="min-width:860px"></table></div>
       <p class="m">ลำดับอนุมัติของแต่ละคน: หัวหน้า → MGR → FM → HR ถ้าไม่กำหนดผู้อนุมัติขั้นไหน ระบบจะข้ามขั้นนั้น (เช่น หัวหน้าเอง ไม่ต้องกำหนดหัวหน้า)</p>
     </div>
-  </main>
+    </main>
+  </div>
 </div>
 
 <dialog id="empDlg">
@@ -282,7 +390,37 @@ function tab(w) {
   $('#paneReq').hidden = w !== 'req'; $('#paneEmp').hidden = w !== 'emp';
 }
 $('#tabReq').addEventListener('click', () => tab('req'));
+
 $('#tabEmp').addEventListener('click', () => tab('emp'));
+function setHrSection(which) {
+  tab(which);
+  $('#navLeave').classList.toggle('active', which === 'req');
+  $('#navEmployees').classList.toggle('active', which === 'emp');
+  $('#tabReq').setAttribute('aria-selected', which === 'req');
+  $('#tabEmp').setAttribute('aria-selected', which === 'emp');
+  closeMobileNav();
+}
+$('#navLeave').addEventListener('click', () => setHrSection('req'));
+$('#navEmployees').addEventListener('click', () => setHrSection('emp'));
+$('#tabReq').addEventListener('click', () => { $('#navLeave').classList.add('active'); $('#navEmployees').classList.remove('active'); });
+$('#tabEmp').addEventListener('click', () => { $('#navEmployees').classList.add('active'); $('#navLeave').classList.remove('active'); });
+function closeMobileNav() {
+  $('#app').classList.remove('mobile-nav-open');
+  $('#mobileMenuBtn').setAttribute('aria-expanded', 'false');
+}
+$('#mobileMenuBtn').addEventListener('click', () => {
+  const open = $('#app').classList.toggle('mobile-nav-open');
+  $('#mobileMenuBtn').setAttribute('aria-expanded', String(open));
+});
+$('#hrBackdrop').addEventListener('click', closeMobileNav);
+$('#sidebarToggle').addEventListener('click', () => {
+  const mini = $('#app').classList.toggle('sidebar-mini');
+  $('#sidebarToggle').setAttribute('aria-label', mini ? 'ขยายเมนู' : 'ย่อเมนู');
+  $('#sidebarToggle').title = mini ? 'ขยายเมนู' : 'ย่อ/ขยายเมนู';
+  $('#sidebarToggle').querySelector('span').textContent = mini ? '⇥' : '⇤';
+  $('#sidebarToggle').querySelector('.toggle-copy').textContent = mini ? 'ขยายเมนู' : 'ย่อเมนู';
+});
+window.addEventListener('resize', () => { if (window.innerWidth > 850) closeMobileNav(); });
 
 // ---------- ใบลาทั้งหมด ----------
 const cat = r => r.status === 'ออกใบลาแล้ว' ? 'done' : r.status === 'ไม่อนุมัติ' ? 'no' : r.status === 'ยกเลิก' ? 'cancel' : r.status === 'รอ HR ออกใบลา' ? 'hr' : 'flow';
