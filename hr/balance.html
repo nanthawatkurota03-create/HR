@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#0f4c5c">
-<title>หลังบ้าน: พนักงานและยอดวันลา</title>
+<title>HR: ยอดวันลาคงเหลือ</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -18,7 +18,7 @@ padding-bottom:env(safe-area-inset-bottom,0)}
 header{background:var(--brand);color:#fff;padding:calc(14px + env(safe-area-inset-top,0)) 16px 14px;display:flex;align-items:center;justify-content:space-between;gap:12px;position:sticky;top:0;z-index:5}
 header h1{font-size:19px;font-weight:600;margin:0}
 header a{color:#fff;font-size:14px;font-weight:500;border:1px solid #fff;border-radius:8px;padding:6px 12px;text-decoration:none;white-space:nowrap}
-main{max-width:1000px;margin:0 auto;padding:16px}
+main{max-width:1180px;margin:0 auto;padding:16px}
 .bar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:12px}
 .bar .grow{flex:1;min-width:160px}
 input,select,textarea{font:inherit;color:var(--ink);background:#fff;border:1px solid #b8c3c9;border-radius:8px;padding:8px 12px;min-height:44px;width:100%}
@@ -123,55 +123,60 @@ input:focus, select:focus, textarea:focus {
   body, header, main, section, .tile, .wrap { animation: none !important; }
 }
 
+
+/* แดชบอร์ดวันลาคงเหลือ */
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:12px}
+.stat{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:12px 14px}
+.stat b{display:block;font-size:26px;line-height:1.2}
+.stat span{color:var(--muted);font-size:13px}
+.rem.mid{color:var(--warn)}
+.cell .sub{display:block}
+.pill{display:inline-block;font-size:12px;padding:0 8px;border-radius:99px;background:var(--warn-bg);color:var(--warn);margin-left:4px}
+.bar select.f{min-width:140px}
+.hint2{color:var(--muted);font-size:13px;margin:4px 0 0}
+th.c,td.c{text-align:center}
+.brow2{display:grid;grid-template-columns:1.1fr 1fr 1fr 1fr;gap:8px;align-items:end;margin-top:10px}
+.brow2 .bn{font-weight:500;padding-bottom:10px}
+.brow2 label{margin:0 0 4px;font-size:12.5px;color:var(--muted)}
+.brow2 .r{padding-bottom:10px;font-weight:600}
+.brow2 .sy{padding-bottom:10px;color:var(--muted)}
+@media (max-width:560px){.stats{grid-template-columns:1fr}.brow2{grid-template-columns:1fr 1fr}.brow2 .bn{grid-column:1/-1;padding-bottom:0}}
+
 </style>
 </head>
 <body>
 <header>
-  <h1>พนักงานและยอดวันลา</h1>
+  <h1>ยอดวันลาคงเหลือ</h1>
   <a href="index.html">กลับหน้า HR</a>
 </header>
 
 <main>
+  <div class="stats" id="stats"></div>
   <div class="bar">
     <label for="year" style="margin:0">ปี</label>
     <select id="year"></select>
-    <input id="q" class="grow" type="search" placeholder="ค้นหารหัส ชื่อ หรือแผนก" autocomplete="off">
+    <input id="q" class="grow" type="search" placeholder="ค้นหารหัส ชื่อ หรือแผนก" autocomplete="off" aria-label="ค้นหา">
+    <select id="dept" class="f" aria-label="แผนก"><option value="">ทุกแผนก</option></select>
+    <label class="chk" for="showOff"><input id="showOff" type="checkbox"> แสดงพนักงานที่ไม่ใช้งาน</label>
   </div>
-
-  <div class="tabs" role="tablist">
-    <button class="tab" role="tab" id="tabBal" aria-selected="true" type="button">ยอดวันลา</button>
-    <button class="tab" role="tab" id="tabEmp" aria-selected="false" type="button">พนักงานและ PIN</button>
+  <div class="bar">
+    <button class="btn sm" id="btnSeed" type="button">ตั้งสิทธิ์ให้ทุกคน</button>
+    <button class="btn ghost sm" id="btnCsv" type="button">ส่งออก CSV</button>
+    <button class="btn ghost sm" id="btnReload" type="button">โหลดใหม่</button>
   </div>
-
-  <!-- ยอดวันลา -->
-  <div id="paneBal">
-    <div class="bar">
-      <button class="btn ghost sm" id="btnInit" type="button">สร้างยอดของปีนี้ให้ทุกคน</button>
-      <button class="btn ghost sm" id="btnRecalc" type="button">คำนวณ "ใช้ไปแล้ว" ใหม่จากใบลาที่อนุมัติ</button>
-      <label class="chk" for="showOff"><input id="showOff" type="checkbox"> แสดงพนักงานที่ไม่ใช้งาน</label>
-    </div>
-    <div class="wrap"><table id="balTable"></table></div>
-    <p class="sub">ประวัติการแก้ไขยอดทั้งหมดอยู่ในชีต BalanceLog ของ Google Sheet</p>
-  </div>
-
-  <!-- พนักงาน -->
-  <div id="paneEmp" hidden>
-    <div class="bar">
-      <button class="btn sm" id="btnAddEmp" type="button">เพิ่มพนักงาน</button>
-      <button class="btn ghost sm" id="btnImport" type="button">นำเข้าหลายคน</button>
-    </div>
-    <div class="wrap"><table id="empTable"></table></div>
-  </div>
+  <div class="wrap"><table id="tbl"></table></div>
+  <p class="hint2">คงเหลือ = สิทธิ์ทั้งปี − (ใช้ไปจากใบลาที่อนุมัติครบแล้ว + ปรับยอด) · นับตามปีของวันที่เริ่มลา · ลากิจนับ 1 วัน = 8 ชั่วโมง · แก้สิทธิ์ตรง ๆ ในชีต Balances ได้เช่นกัน (1 แถวต่อคนต่อปี ค.ศ.)</p>
 </main>
 
-<!-- แก้ยอดวันลา -->
+<!-- แก้สิทธิ์รายคน -->
 <dialog id="balDlg">
   <form id="balForm" method="dialog">
-    <h2 id="balDlgTitle">แก้ไขยอดวันลา</h2>
-    <div class="sub" id="balDlgSub"></div>
+    <h2 id="balTitle">กำหนดสิทธิ์วันลา</h2>
+    <div class="sub" id="balSub"></div>
     <div id="balRows"></div>
-    <label for="balNote">หมายเหตุ (บันทึกในประวัติ)</label>
-    <input id="balNote" autocomplete="off" placeholder="เช่น ปรับสิทธิ์ตามอายุงาน">
+    <label for="balNote">หมายเหตุ</label>
+    <input id="balNote" autocomplete="off" placeholder="เช่น ยกยอดพักร้อนมา 2 วัน">
+    <div class="sub" style="margin-top:8px">ช่อง “สิทธิ์ทั้งปี” เว้นว่าง = ยังไม่กำหนด · “ปรับยอดใช้ไป” ใช้ใส่วันที่ใช้ไปก่อนเริ่มใช้ระบบ (ใส่ค่าติดลบเพื่อคืนวัน)</div>
     <div class="derr" id="balErr" role="alert"></div>
     <div class="dact">
       <button class="btn ghost" id="balCancel" type="button">ยกเลิก</button>
@@ -180,362 +185,182 @@ input:focus, select:focus, textarea:focus {
   </form>
 </dialog>
 
-<!-- เพิ่ม/แก้พนักงาน -->
-<dialog id="empDlg">
-  <form id="empForm" method="dialog">
-    <h2 id="empDlgTitle">เพิ่มพนักงาน</h2>
-    <label for="eId">รหัสพนักงาน</label>
-    <input id="eId" autocomplete="off">
-    <label for="eName">ชื่อ-นามสกุล</label>
-    <input id="eName" autocomplete="off">
+<!-- ตั้งสิทธิ์ทุกคน -->
+<dialog id="seedDlg">
+  <form id="seedForm" method="dialog">
+    <h2>ตั้งสิทธิ์ให้พนักงานทุกคน</h2>
+    <div class="sub" id="seedSub"></div>
     <div class="row2">
-      <div><label for="eDept">แผนก</label><input id="eDept" autocomplete="off"></div>
-      <div><label for="ePhone">เบอร์ติดต่อ</label><input id="ePhone" type="tel" autocomplete="off"></div>
+      <div><label for="sdSick">ลาป่วย (วัน)</label><input id="sdSick" type="number" min="0" step="0.5" inputmode="decimal"></div>
+      <div><label for="sdBiz">ลากิจ (วัน)</label><input id="sdBiz" type="number" min="0" step="0.5" inputmode="decimal"></div>
     </div>
-    <div id="ePinBox">
-      <label for="ePin">PIN เริ่มต้น (ตัวเลข 4-8 หลัก)</label>
-      <div style="display:flex;gap:8px"><input id="ePin" inputmode="numeric" autocomplete="off"><button class="btn ghost" id="eRand" type="button">สุ่ม</button></div>
-      <div class="sub">พนักงานจะถูกบังคับให้เปลี่ยน PIN ตอนเข้าสู่ระบบครั้งแรก</div>
-    </div>
-    <div class="row2">
-      <div><label for="eEmail">อีเมล (รับแจ้งเตือนเมื่อมีใบลารออนุมัติ)</label><input id="eEmail" type="email" autocomplete="off"></div>
-      <div><label for="eStart">วันเริ่มงาน</label><input id="eStart" type="date"></div>
-    </div>
-    <label for="eSup">หัวหน้างาน (อนุมัติขั้นที่ 1)</label>
-    <select id="eSup"></select>
-    <label for="eGm">Group Mgr (อนุมัติขั้นที่ 2)</label>
-    <select id="eGm"></select>
-    <label for="eFm">FM/MD (อนุมัติขั้นที่ 3)</label>
-    <select id="eFm"></select>
-    <div class="sub">เว้นว่างขั้นใดก็ได้ ระบบจะข้ามขั้นนั้น และทุกใบลาจะจบที่ HR เสมอ</div>
-    <label for="eRole">บทบาทในระบบ</label>
-    <select id="eRole">
-      <option value="">พนักงานทั่วไป</option>
-      <option value="HR">HR (อนุมัติขั้นสุดท้าย)</option>
-    </select>
-    <label class="chk" for="eActive" style="margin-top:12px"><input id="eActive" type="checkbox" checked> ใช้งาน (ปิดเมื่อพนักงานลาออก จะล็อกอินไม่ได้)</label>
-    <div class="derr" id="empErr" role="alert"></div>
+    <label for="sdVac">ลาพักร้อน (วัน)</label><input id="sdVac" type="number" min="0" step="0.5" inputmode="decimal">
+    <label class="chk" for="sdOver" style="margin-top:12px"><input id="sdOver" type="checkbox"> ทับสิทธิ์ของคนที่เคยตั้งไว้แล้ว (เฉพาะช่องที่กรอก)</label>
+    <div class="sub" style="margin-top:8px">ปกติระบบจะสร้างแถวให้เฉพาะคนที่ยังไม่มีสิทธิ์ในปีนี้ และไม่แตะค่าปรับยอดของใคร หลังตั้งแล้วแก้รายคนได้ภายหลัง</div>
+    <div class="derr" id="seedErr" role="alert"></div>
     <div class="dact">
-      <button class="btn ghost" id="empCancel" type="button">ยกเลิก</button>
-      <button class="btn" id="empSave" type="submit">บันทึก</button>
+      <button class="btn ghost" id="seedCancel" type="button">ยกเลิก</button>
+      <button class="btn" id="seedSave" type="submit">ตั้งสิทธิ์</button>
     </div>
   </form>
 </dialog>
-
-<!-- รีเซ็ต PIN -->
-<dialog id="pinDlg">
-  <form id="pinForm" method="dialog">
-    <h2>รีเซ็ต PIN</h2>
-    <div class="sub" id="pinWho"></div>
-    <label for="pPin">PIN ใหม่ (ตัวเลข 4-8 หลัก)</label>
-    <div style="display:flex;gap:8px"><input id="pPin" inputmode="numeric" autocomplete="off"><button class="btn ghost" id="pRand" type="button">สุ่ม</button></div>
-    <div class="sub">แจ้ง PIN นี้ให้พนักงาน เขาจะต้องเปลี่ยนเองตอนเข้าสู่ระบบครั้งแรก</div>
-    <div class="derr" id="pinErr" role="alert"></div>
-    <div class="dact">
-      <button class="btn ghost" id="pinCancel" type="button">ยกเลิก</button>
-      <button class="btn" id="pinSave" type="submit">รีเซ็ต PIN</button>
-    </div>
-  </form>
-</dialog>
-
-<!-- นำเข้าหลายคน -->
-<dialog id="impDlg">
-  <form id="impForm" method="dialog">
-    <h2>นำเข้าพนักงานหลายคน</h2>
-    <label for="iText">วางรายชื่อ 1 บรรทัดต่อ 1 คน: รหัส, ชื่อ-นามสกุล, แผนก, รหัสหัวหน้างาน, รหัส Group Mgr, รหัส FM/MD, อีเมล (4 ช่องหลังไม่บังคับ)</label>
-    <textarea id="iText" placeholder="1001, สมชาย ใจดี, Lathe, 2001, 3001, 4001, somchai@mail.com&#10;2001, สมหญิง รักงาน, Lathe, , 3001, 4001"></textarea>
-    <div class="sub">คั่นด้วยคอมมาหรือแท็บ (วางจาก Excel ได้เลย) รหัสผู้อนุมัติต้องเป็นพนักงานที่มีอยู่ในระบบ (นำเข้าหัวหน้าก่อน แล้วค่อยนำเข้าลูกน้องอีกรอบ หรือแก้ทีหลังได้) รหัสที่มีอยู่แล้วจะถูกข้าม</div>
-    <label for="iPin">PIN เริ่มต้นของทุกคน (ตัวเลข 4-8 หลัก)</label>
-    <input id="iPin" inputmode="numeric" autocomplete="off">
-    <div class="derr" id="impErr" role="alert"></div>
-    <div class="dact">
-      <button class="btn ghost" id="impCancel" type="button">ยกเลิก</button>
-      <button class="btn" id="impSave" type="submit">นำเข้า</button>
-    </div>
-  </form>
-</dialog>
-
 <div id="toast" role="status"></div>
 
 <script>
-const API_URL = 'https://script.google.com/macros/s/AKfycbyohtDVshSFXMEmf93Q893hA7kYBVBzjWcWqc0KPb1Z6YiWIpd6rdmrMHg5GjermPCuUw/exec';
+// URL ของ Apps Script Web App (ตัวเดียวกับหน้าอื่น ลงท้ายด้วย /exec)
+const API_URL = 'https://script.google.com/macros/s/AKfycbw89zZuaEeZe6lNygue9yl1wb2W8u3opwFwKdAgDyYOuSwtv2Trpi6hZIxzDiq-EtH59w/exec';
 const $ = s => document.querySelector(s);
 const esc = s => { const d = document.createElement('div'); d.textContent = s == null ? '' : s; return d.innerHTML; };
-const hrChip = r => r === 'HR' ? '<span class="chip lv-manager">HR</span>' : '';
-const fmtN = n => String(+Number(n).toFixed(2));
+const fmtN = n => String(+Number(n).toFixed(3));
+const CATS = ['sick', 'biz', 'vac'], CAT_NAME = { sick: 'ลาป่วย', biz: 'ลากิจ', vac: 'ลาพักร้อน' };
 
 let PASS = '';
 try { PASS = sessionStorage.getItem('hrpass') || ''; } catch (e) {}
-if (!PASS) location.replace('../index.html');
+if (!PASS) location.replace('index.html');
 
-let DATA = { year: 0, tracked: [], employees: [], balances: [] };
-const balMap = {}; // empId|code -> {total, used}
-
+let DATA = { year: 0, rows: [] };
 function toast(msg) {
   const t = $('#toast'); t.textContent = msg; t.style.display = 'block';
   clearTimeout(toast.t); toast.t = setTimeout(() => t.style.display = 'none', 3600);
 }
 async function api(action, data) {
-  const res = await fetch(API_URL, {
-    method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-    body: JSON.stringify(Object.assign({ action: action, passcode: PASS }, data || {}))
-  });
+  const res = await fetch(API_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+    body: JSON.stringify(Object.assign({ action: action, passcode: PASS }, data || {})) });
   const j = await res.json();
-  if (!j.ok && j.error === 'auth') {
-    try { sessionStorage.removeItem('hrpass'); } catch (e) {}
-    location.replace('../index.html');
-  }
+  if (!j.ok && j.error === 'auth') { try { sessionStorage.removeItem('hrpass'); } catch (e) {} location.replace('index.html'); }
   return j;
-}
-function randPin() {
-  const a = new Uint32Array(1); crypto.getRandomValues(a);
-  return String(100000 + (a[0] % 900000));
 }
 
 // ----- ปี -----
 const thisYear = new Date().getFullYear();
-$('#year').innerHTML = [thisYear + 1, thisYear, thisYear - 1].map(y =>
-  '<option value="' + y + '"' + (y === thisYear ? ' selected' : '') + '>' + (y + 543) + '</option>').join('');
+$('#year').innerHTML = [thisYear + 1, thisYear, thisYear - 1, thisYear - 2].map(y =>
+  '<option value="' + y + '"' + (y === thisYear ? ' selected' : '') + '>' + (y + 543) + ' (' + y + ')</option>').join('');
 
 async function load() {
   try {
     const j = await api('hrBalList', { year: Number($('#year').value) });
-    if (!j.ok) { toast('โหลดข้อมูลไม่สำเร็จ: ' + (j.error || '')); return; }
+    if (!j.ok) { toast('โหลดข้อมูลไม่สำเร็จ: ' + (j.message || j.error || '')); return; }
     DATA = j;
-    Object.keys(balMap).forEach(k => delete balMap[k]);
-    j.balances.forEach(b => balMap[b.empId + '|' + b.code] = b);
-    renderAll();
+    const depts = Array.from(new Set(j.rows.map(r => r.dept).filter(Boolean))).sort((a, b) => a.localeCompare(b, 'th')), cur = $('#dept').value;
+    $('#dept').innerHTML = '<option value="">ทุกแผนก</option>' + depts.map(d => '<option>' + esc(d) + '</option>').join('');
+    if (depts.includes(cur)) $('#dept').value = cur;
+    render();
   } catch (e) { toast('เชื่อมต่อไม่ได้ ลองใหม่อีกครั้ง'); }
 }
-$('#year').addEventListener('change', load);
-$('#q').addEventListener('input', renderAll);
-$('#showOff').addEventListener('input', renderAll);
+['year'].forEach(id => $('#' + id).addEventListener('change', load));
+['q', 'dept', 'showOff'].forEach(id => $('#' + id).addEventListener('input', render));
+$('#btnReload').addEventListener('click', async () => { await load(); toast('โหลดข้อมูลล่าสุดแล้ว'); });
 
-// ----- แท็บ -----
-function tab(which) {
-  $('#tabBal').setAttribute('aria-selected', which === 'bal');
-  $('#tabEmp').setAttribute('aria-selected', which === 'emp');
-  $('#paneBal').hidden = which !== 'bal';
-  $('#paneEmp').hidden = which !== 'emp';
+function filtered() {
+  const q = $('#q').value.trim().toLowerCase(), d = $('#dept').value, off = $('#showOff').checked;
+  return DATA.rows.filter(r => (off || r.active) && (!d || r.dept === d) && (!q || (r.id + ' ' + r.name + ' ' + r.dept).toLowerCase().includes(q)));
 }
-$('#tabBal').addEventListener('click', () => tab('bal'));
-$('#tabEmp').addEventListener('click', () => tab('emp'));
-
-// ----- แสดงผล -----
-function filtered(includeOff) {
-  const q = $('#q').value.trim().toLowerCase();
-  return DATA.employees.filter(e => {
-    if (!includeOff && !e.active) return false;
-    return !q || (e.id + ' ' + e.name + ' ' + e.dept).toLowerCase().includes(q);
-  });
+function cell(x, c) {
+  if (x.quota === null) return '<td class="num"><span class="sub">ยังไม่กำหนด</span>' + (x.used || x.pending ? '<span class="sub">ใช้ไป ' + fmtN(x.used) + '</span>' : '') + '</td>';
+  const cls = x.remain <= 0 ? ' low' : x.remain <= x.quota * 0.2 ? ' mid' : '';
+  return '<td class="num cell"><span class="rem' + cls + '">' + fmtN(x.remain) + '</span> <span class="sub" style="display:inline">วัน</span>' +
+    '<span class="sub">ใช้ ' + fmtN(x.used) + ' / ' + fmtN(x.quota) + (c === 'biz' ? ' · เหลือ ' + fmtN(x.remain * 8) + ' ชม.' : '') + (x.pending ? ' <span class="pill">รออนุมัติ ' + fmtN(x.pending) + '</span>' : '') + '</span></td>';
 }
-function renderAll() { renderBal(); renderEmp(); }
-
-function renderBal() {
-  const list = filtered($('#showOff').checked);
-  const th = '<tr><th>รหัส</th><th>ชื่อ-นามสกุล</th><th>แผนก</th>' +
-    DATA.tracked.map(t => '<th>' + esc(t.name) + '<div class="sub">คงเหลือ (ใช้ไป/สิทธิ์)</div></th>').join('') + '<th></th></tr>';
-  if (!list.length) { $('#balTable').innerHTML = th + '<tr><td colspan="' + (4 + DATA.tracked.length) + '"><p class="empty">ไม่พบพนักงาน เพิ่มพนักงานในแท็บ "พนักงานและ PIN" ก่อน</p></td></tr>'; return; }
-  $('#balTable').innerHTML = th + list.map(e => {
-    const cells = DATA.tracked.map(t => {
-      const b = balMap[e.id + '|' + t.code];
-      if (!b) return '<td class="num"><span class="sub">-</span></td>';
-      const rem = b.total - b.used;
-      return '<td class="num"><span class="rem' + (rem <= 0 ? ' low' : '') + '">' + fmtN(rem) + '</span> <span class="sub">(' + fmtN(b.used) + '/' + fmtN(b.total) + ')</span></td>';
-    }).join('');
-    return '<tr><td>' + esc(e.id) + '</td><td>' + esc(e.name) + (e.role === 'HR' ? ' ' + hrChip(e.role) : '') + (e.active ? '' : ' <span class="chip s-idle">ไม่ใช้งาน</span>') + '</td><td>' + esc(e.dept) + '</td>' + cells +
-      '<td><button class="btn sm" data-bal="' + esc(e.id) + '" type="button">แก้ไข</button></td></tr>';
-  }).join('');
+function render() {
+  const all = DATA.rows.filter(r => r.active);
+  const unset = all.filter(r => CATS.some(c => r.bal[c].quota === null)).length;
+  const low = all.filter(r => CATS.some(c => r.bal[c].quota !== null && r.bal[c].remain <= 0)).length;
+  $('#stats').innerHTML = '<div class="stat"><b>' + all.length + '</b><span>พนักงานที่ใช้งาน</span></div>' +
+    '<div class="stat"><b>' + unset + '</b><span>ยังไม่ได้กำหนดสิทธิ์ครบทุกประเภท</span></div>' +
+    '<div class="stat"><b>' + low + '</b><span>มีวันลาหมด/ติดลบอย่างน้อย 1 ประเภท</span></div>';
+  const list = filtered();
+  const th = '<tr><th>รหัส</th><th>ชื่อ-นามสกุล</th><th>แผนก</th>' + CATS.map(c => '<th>' + CAT_NAME[c] + '<div class="sub" style="font-weight:400">คงเหลือ</div></th>').join('') + '<th></th></tr>';
+  if (!list.length) { $('#tbl').innerHTML = th + '<tr><td colspan="7"><p class="empty">ไม่พบพนักงาน</p></td></tr>'; return; }
+  $('#tbl').innerHTML = th + list.map(r =>
+    '<tr><td>' + esc(r.id) + '</td><td>' + esc(r.name) + (r.active ? '' : ' <span class="chip s-idle">ไม่ใช้งาน</span>') + '</td><td>' + esc(r.dept) + '</td>' +
+    CATS.map(c => cell(r.bal[c], c)).join('') +
+    '<td style="white-space:nowrap"><button class="btn sm" data-edit="' + esc(r.id) + '" type="button">กำหนด/แก้ไข</button> <button class="btn ghost sm" data-card="' + esc(r.id) + '" type="button">ใบลา</button></td></tr>').join('');
 }
-
-function renderEmp() {
-  const list = filtered(true);
-  const th = '<tr><th>รหัส</th><th>ชื่อ-นามสกุล</th><th>แผนก</th><th>สายอนุมัติ</th><th>สถานะ</th><th>PIN</th><th></th></tr>';
-  if (!list.length) { $('#empTable').innerHTML = th + '<tr><td colspan="7"><p class="empty">ยังไม่มีพนักงาน กด "เพิ่มพนักงาน" หรือ "นำเข้าหลายคน"</p></td></tr>'; return; }
-  $('#empTable').innerHTML = th + list.map(e => {
-    const pin = !e.hasPin ? '<span class="chip s-no">ยังไม่ตั้ง</span>' : (e.mustChange ? '<span class="chip s-wait">รอเปลี่ยนครั้งแรก</span>' : '<span class="chip s-ok">ตั้งแล้ว</span>');
-    return '<tr><td>' + esc(e.id) + '</td><td>' + esc(e.name) + '</td><td>' + esc(e.dept) + '</td>' +
-      '<td>' + chainText(e) + '</td>' +
-      '<td><span class="chip ' + (e.active ? 's-ok' : 's-idle') + '">' + (e.active ? 'ใช้งาน' : 'ไม่ใช้งาน') + '</span></td><td>' + pin + '</td>' +
-      '<td style="white-space:nowrap"><button class="btn ghost sm" data-edit="' + esc(e.id) + '" type="button">แก้ไข</button> ' +
-      '<button class="btn ghost sm" data-pin="' + esc(e.id) + '" type="button">รีเซ็ต PIN</button></td></tr>';
-  }).join('');
-}
-
-const emp = id => DATA.employees.find(e => e.id === id);
-const nm = id => { const x = id && emp(id); return x ? x.name : (id ? id + ' (ไม่พบ)' : ''); };
-function chainText(e) {
-  const p = [];
-  if (e.sup) p.push('หัวหน้า: ' + esc(nm(e.sup)));
-  if (e.gm) p.push('GM: ' + esc(nm(e.gm)));
-  if (e.fm) p.push('FM/MD: ' + esc(nm(e.fm)));
-  return p.length ? '<div class="sub">' + p.join(' → ') + '</div>' : '<span class="sub">ไม่ได้กำหนด (ส่งตรง HR)</span>';
-}
-function fillApprovers(e) {
-  const opts = '<option value="">— ไม่มี (ข้ามขั้นนี้) —</option>' + DATA.employees
-    .filter(x => x.active && (!e || x.id !== e.id))
-    .map(x => '<option value="' + esc(x.id) + '">' + esc(x.id + ' · ' + x.name) + '</option>').join('');
-  ['eSup', 'eGm', 'eFm'].forEach(k => $('#' + k).innerHTML = opts);
-}
-document.addEventListener('click', ev => {
-  const t = ev.target.closest('button'); if (!t) return;
-  if (t.dataset.bal) openBal(t.dataset.bal);
-  else if (t.dataset.edit) openEmp(t.dataset.edit);
-  else if (t.dataset.pin) openPin(t.dataset.pin);
+$('#tbl').addEventListener('click', ev => {
+  const b = ev.target.closest('button'); if (!b) return;
+  if (b.dataset.edit) openEdit(b.dataset.edit);
+  else if (b.dataset.card) location.href = '../card.html?emp=' + encodeURIComponent(b.dataset.card);
 });
 
-
-// ----- แก้ยอดวันลา -----
-let balEmp = null;
-function openBal(id) {
-  balEmp = id; const e = emp(id);
-  $('#balDlgTitle').textContent = 'แก้ไขยอดวันลา ปี ' + (DATA.year + 543);
-  $('#balDlgSub').textContent = e.id + ' · ' + e.name;
-  $('#balRows').innerHTML = DATA.tracked.map(t => {
-    const b = balMap[id + '|' + t.code] || { total: t.total, used: 0 };
-    return '<div class="brow" data-code="' + t.code + '"><div class="bn">' + esc(t.name) + '</div>' +
-      '<div><label>สิทธิ์ทั้งหมด</label><input class="bt" type="number" min="0" step="0.5" inputmode="decimal" value="' + b.total + '"></div>' +
-      '<div><label>ใช้ไปแล้ว</label><input class="bu" type="number" min="0" step="0.5" inputmode="decimal" value="' + b.used + '"></div>' +
-      '<div><label>คงเหลือ</label><div class="r">-</div></div></div>';
+// ----- แก้สิทธิ์รายคน -----
+let editId = null;
+function openEdit(id) {
+  editId = id; const r = DATA.rows.find(x => x.id === id), raw = r.raw || { quota: {}, adj: {} };
+  $('#balTitle').textContent = 'กำหนดสิทธิ์วันลา ปี ' + (DATA.year + 543);
+  $('#balSub').textContent = r.id + ' · ' + r.name;
+  $('#balRows').innerHTML = CATS.map(c => {
+    const b = r.bal[c], sys = b.used - b.adj;
+    const q = raw.quota[c] === null || raw.quota[c] === undefined ? (r.raw ? '' : (b.quota === null ? '' : b.quota)) : raw.quota[c];
+    return '<div class="brow2" data-c="' + c + '" data-sys="' + sys + '"><div class="bn">' + CAT_NAME[c] + '</div>' +
+      '<div><label>สิทธิ์ทั้งปี (วัน)</label><input class="bq" type="number" min="0" step="0.5" inputmode="decimal" value="' + q + '"></div>' +
+      '<div><label>ปรับยอดใช้ไป (วัน)</label><input class="ba" type="number" step="0.5" inputmode="decimal" value="' + (raw.adj[c] || 0) + '"></div>' +
+      '<div><label>ใช้จากระบบ / คงเหลือ</label><div class="r"><span class="sy">' + fmtN(sys) + ' / </span><span class="rv">-</span></div></div></div>';
   }).join('');
-  $('#balNote').value = ''; $('#balErr').textContent = '';
-  calcRem();
-  $('#balDlg').showModal();
+  $('#balNote').value = r.note || ''; $('#balErr').textContent = '';
+  calcRem(); $('#balDlg').showModal();
 }
 function calcRem() {
-  document.querySelectorAll('#balRows .brow').forEach(r => {
-    const t = parseFloat(r.querySelector('.bt').value), u = parseFloat(r.querySelector('.bu').value);
-    r.querySelector('.r').textContent = (isNaN(t) || isNaN(u)) ? '-' : fmtN(t - u);
+  document.querySelectorAll('#balRows .brow2').forEach(r => {
+    const q = r.querySelector('.bq').value.trim(), a = parseFloat(r.querySelector('.ba').value) || 0, sys = parseFloat(r.dataset.sys) || 0;
+    r.querySelector('.rv').textContent = q === '' ? 'ยังไม่กำหนด' : fmtN(parseFloat(q) - sys - a);
   });
 }
 $('#balRows').addEventListener('input', calcRem);
 $('#balCancel').addEventListener('click', () => $('#balDlg').close());
 $('#balForm').addEventListener('submit', async ev => {
   ev.preventDefault();
-  const items = [];
-  for (const r of document.querySelectorAll('#balRows .brow')) {
-    const t = parseFloat(r.querySelector('.bt').value), u = parseFloat(r.querySelector('.bu').value);
-    if (isNaN(t) || isNaN(u) || t < 0 || u < 0) { $('#balErr').textContent = 'กรอกตัวเลขตั้งแต่ 0 ขึ้นไปให้ครบทุกช่อง'; return; }
-    items.push({ code: r.dataset.code, total: t, used: u });
+  const body = { empId: editId, year: DATA.year, note: $('#balNote').value.trim() }, key = { sick: ['sick', 'adjSick'], biz: ['biz', 'adjBiz'], vac: ['vac', 'adjVac'] };
+  for (const r of document.querySelectorAll('#balRows .brow2')) {
+    const q = r.querySelector('.bq').value.trim(), a = r.querySelector('.ba').value.trim(), k = key[r.dataset.c];
+    if (q !== '' && (isNaN(Number(q)) || Number(q) < 0)) { $('#balErr').textContent = 'สิทธิ์วันลาต้องเป็นตัวเลขตั้งแต่ 0 ขึ้นไป'; return; }
+    if (a !== '' && isNaN(Number(a))) { $('#balErr').textContent = 'ปรับยอดต้องเป็นตัวเลข'; return; }
+    body[k[0]] = q; body[k[1]] = a === '' ? 0 : Number(a);
   }
   $('#balSave').disabled = true; $('#balErr').textContent = '';
   try {
-    const j = await api('hrBalSave', { empId: balEmp, year: DATA.year, items: items, note: $('#balNote').value.trim() });
-    if (j.ok) { $('#balDlg').close(); toast('บันทึกยอดวันลาแล้ว'); await load(); }
-    else $('#balErr').textContent = 'บันทึกไม่สำเร็จ: ' + (j.error || '');
+    const j = await api('hrBalSave', body);
+    if (j.ok) { $('#balDlg').close(); toast('บันทึกแล้ว'); await load(); }
+    else $('#balErr').textContent = 'บันทึกไม่สำเร็จ: ' + (j.message || j.error || '');
   } catch (e) { $('#balErr').textContent = 'เชื่อมต่อไม่ได้ ลองใหม่อีกครั้ง'; }
   $('#balSave').disabled = false;
 });
 
-// ----- สร้างยอดปีนี้ / คำนวณใหม่ -----
-$('#btnInit').addEventListener('click', async () => {
-  if (!confirm('สร้างยอดวันลาปี ' + (DATA.year + 543) + ' (ใช้สิทธิ์เริ่มต้น) ให้พนักงานที่ยังไม่มียอด?')) return;
-  $('#btnInit').disabled = true;
-  try {
-    const j = await api('hrBalInit', { year: DATA.year });
-    toast(j.ok ? 'สร้างยอดใหม่ ' + j.created + ' รายการ' : 'ไม่สำเร็จ: ' + (j.error || ''));
-    await load();
-  } catch (e) { toast('เชื่อมต่อไม่ได้ ลองใหม่อีกครั้ง'); }
-  $('#btnInit').disabled = false;
+// ----- ตั้งสิทธิ์ทุกคน -----
+$('#btnSeed').addEventListener('click', () => {
+  $('#seedSub').textContent = 'ปี ' + (DATA.year + 543) + ' · ใช้กับพนักงานที่ใช้งานอยู่ทุกคน';
+  ['sdSick', 'sdBiz', 'sdVac'].forEach(id => $('#' + id).value = ''); $('#sdOver').checked = false; $('#seedErr').textContent = '';
+  $('#seedDlg').showModal();
 });
-$('#btnRecalc').addEventListener('click', async () => {
-  if (!confirm('ระบบจะตั้งค่า "ใช้ไปแล้ว" ของปี ' + (DATA.year + 543) + ' ใหม่ตามใบลาที่อนุมัติใน LeaveRequests ทุกคน\n\nค่าที่เคยแก้ด้วยมือ (เช่น ยอดยกมาก่อนเริ่มใช้ระบบ) จะถูกทับ ดำเนินการต่อ?')) return;
-  $('#btnRecalc').disabled = true;
+$('#seedCancel').addEventListener('click', () => $('#seedDlg').close());
+$('#seedForm').addEventListener('submit', async ev => {
+  ev.preventDefault();
+  const v = id => $('#' + id).value.trim(), vals = [v('sdSick'), v('sdBiz'), v('sdVac')];
+  if (vals.every(x => x === '')) { $('#seedErr').textContent = 'กรอกสิทธิ์อย่างน้อย 1 ประเภท'; return; }
+  if (vals.some(x => x !== '' && (isNaN(Number(x)) || Number(x) < 0))) { $('#seedErr').textContent = 'สิทธิ์ต้องเป็นตัวเลขตั้งแต่ 0 ขึ้นไป'; return; }
+  if (!confirm('ตั้งสิทธิ์ปี ' + (DATA.year + 543) + ' ให้พนักงานที่ใช้งานทุกคน' + ($('#sdOver').checked ? ' (ทับค่าเดิมของคนที่เคยตั้งไว้)' : '') + ' ?')) return;
+  $('#seedSave').disabled = true; $('#seedErr').textContent = '';
   try {
-    const j = await api('hrBalRecalc', { year: DATA.year });
-    toast(j.ok ? 'คำนวณใหม่แล้ว เปลี่ยน ' + j.changed + ' รายการ' : 'ไม่สำเร็จ: ' + (j.error || ''));
-    await load();
-  } catch (e) { toast('เชื่อมต่อไม่ได้ ลองใหม่อีกครั้ง'); }
-  $('#btnRecalc').disabled = false;
+    const j = await api('hrBalSeed', { year: DATA.year, sick: vals[0], biz: vals[1], vac: vals[2], overwrite: $('#sdOver').checked });
+    if (j.ok) { $('#seedDlg').close(); toast('สร้างใหม่ ' + j.created + ' คน' + (j.updated ? ' · อัปเดต ' + j.updated + ' คน' : '')); await load(); }
+    else $('#seedErr').textContent = 'ไม่สำเร็จ: ' + (j.message || j.error || '');
+  } catch (e) { $('#seedErr').textContent = 'เชื่อมต่อไม่ได้ ลองใหม่อีกครั้ง'; }
+  $('#seedSave').disabled = false;
 });
 
-// ----- เพิ่ม/แก้พนักงาน -----
-let empNew = true;
-function openEmp(id) {
-  empNew = !id; const e = id ? emp(id) : null;
-  $('#empDlgTitle').textContent = empNew ? 'เพิ่มพนักงาน' : 'แก้ไขพนักงาน';
-  $('#eId').value = e ? e.id : ''; $('#eId').readOnly = !empNew;
-  $('#eName').value = e ? e.name : ''; $('#eDept').value = e ? e.dept : ''; $('#ePhone').value = e ? e.phone : '';
-  $('#eActive').checked = e ? e.active : true;
-  fillApprovers(e);
-  $('#eSup').value = e ? e.sup || '' : ''; $('#eGm').value = e ? e.gm || '' : ''; $('#eFm').value = e ? e.fm || '' : '';
-  $('#eEmail').value = e ? e.email || '' : ''; $('#eStart').value = e ? e.startDate || '' : '';
-  $('#eRole').value = e ? e.role || '' : '';
-  $('#ePinBox').hidden = !empNew; $('#ePin').value = empNew ? randPin() : '';
-  $('#empErr').textContent = '';
-  $('#empDlg').showModal();
-}
-$('#btnAddEmp').addEventListener('click', () => openEmp(null));
-$('#eRand').addEventListener('click', () => $('#ePin').value = randPin());
-$('#empCancel').addEventListener('click', () => $('#empDlg').close());
-$('#empForm').addEventListener('submit', async ev => {
-  ev.preventDefault();
-  const id = $('#eId').value.trim(), name = $('#eName').value.trim(), pin = $('#ePin').value.trim();
-  if (!id || !name) { $('#empErr').textContent = 'กรอกรหัสพนักงานและชื่อ'; return; }
-  if (/[|.]/.test(id)) { $('#empErr').textContent = 'รหัสพนักงานห้ามมีเครื่องหมาย | หรือ .'; return; }
-  if ([$('#eSup').value, $('#eGm').value, $('#eFm').value].includes(id)) { $('#empErr').textContent = 'ผู้อนุมัติต้องไม่ใช่ตัวพนักงานเอง'; return; }
-  if (empNew && emp(id)) { $('#empErr').textContent = 'มีรหัสพนักงานนี้อยู่แล้ว'; return; }
-  if (empNew && !/^\d{4,8}$/.test(pin)) { $('#empErr').textContent = 'PIN ต้องเป็นตัวเลข 4-8 หลัก'; return; }
-  $('#empSave').disabled = true; $('#empErr').textContent = '';
-  try {
-    const j = await api('hrEmpSave', { empId: id, name: name, dept: $('#eDept').value.trim(), phone: $('#ePhone').value.trim(),
-      active: $('#eActive').checked, pin: pin,
-      sup: $('#eSup').value, gm: $('#eGm').value, fm: $('#eFm').value,
-      email: $('#eEmail').value.trim(), role: $('#eRole').value, startDate: $('#eStart').value });
-    if (j.ok) {
-      $('#empDlg').close();
-      toast(empNew ? 'เพิ่มพนักงานแล้ว PIN เริ่มต้น: ' + pin : 'บันทึกแล้ว');
-      await load();
-    } else $('#empErr').textContent = 'บันทึกไม่สำเร็จ: ' + (j.error || '');
-  } catch (e) { $('#empErr').textContent = 'เชื่อมต่อไม่ได้ ลองใหม่อีกครั้ง'; }
-  $('#empSave').disabled = false;
-});
-
-// ----- รีเซ็ต PIN -----
-let pinEmp = null;
-function openPin(id) {
-  pinEmp = id; const e = emp(id);
-  $('#pinWho').textContent = e.id + ' · ' + e.name;
-  $('#pPin').value = randPin(); $('#pinErr').textContent = '';
-  $('#pinDlg').showModal();
-}
-$('#pRand').addEventListener('click', () => $('#pPin').value = randPin());
-$('#pinCancel').addEventListener('click', () => $('#pinDlg').close());
-$('#pinForm').addEventListener('submit', async ev => {
-  ev.preventDefault();
-  const pin = $('#pPin').value.trim();
-  if (!/^\d{4,8}$/.test(pin)) { $('#pinErr').textContent = 'PIN ต้องเป็นตัวเลข 4-8 หลัก'; return; }
-  $('#pinSave').disabled = true; $('#pinErr').textContent = '';
-  try {
-    const j = await api('hrPinReset', { empId: pinEmp, pin: pin });
-    if (j.ok) { $('#pinDlg').close(); toast('รีเซ็ต PIN แล้ว PIN ใหม่: ' + pin); await load(); }
-    else $('#pinErr').textContent = 'ไม่สำเร็จ: ' + (j.error || '');
-  } catch (e) { $('#pinErr').textContent = 'เชื่อมต่อไม่ได้ ลองใหม่อีกครั้ง'; }
-  $('#pinSave').disabled = false;
-});
-
-// ----- นำเข้าหลายคน -----
-$('#btnImport').addEventListener('click', () => {
-  $('#iText').value = ''; $('#iPin').value = ''; $('#impErr').textContent = '';
-  $('#impDlg').showModal();
-});
-$('#impCancel').addEventListener('click', () => $('#impDlg').close());
-$('#impForm').addEventListener('submit', async ev => {
-  ev.preventDefault();
-  const rows = $('#iText').value.split(/\r?\n/).map(l => l.split(/[,\t]/).map(x => x.trim())).filter(r => r[0] && r[1]);
-  const pin = $('#iPin').value.trim();
-  if (!rows.length) { $('#impErr').textContent = 'วางรายชื่ออย่างน้อย 1 คน (รหัส, ชื่อ, แผนก)'; return; }
-  if (!/^\d{4,8}$/.test(pin)) { $('#impErr').textContent = 'PIN เริ่มต้นต้องเป็นตัวเลข 4-8 หลัก'; return; }
-  $('#impSave').disabled = true; $('#impErr').textContent = '';
-  try {
-    const j = await api('hrEmpImport', { rows: rows, pin: pin });
-    if (j.ok) {
-      $('#impDlg').close();
-      toast('นำเข้า ' + j.added + ' คน' + (j.skipped.length ? ' (ข้าม ' + j.skipped.length + ' รหัสที่ซ้ำหรือไม่ถูกต้อง)' : ''));
-      await load();
-    } else $('#impErr').textContent = 'นำเข้าไม่สำเร็จ: ' + (j.error || '');
-  } catch (e) { $('#impErr').textContent = 'เชื่อมต่อไม่ได้ ลองใหม่อีกครั้ง'; }
-  $('#impSave').disabled = false;
+// ----- ส่งออก CSV -----
+$('#btnCsv').addEventListener('click', () => {
+  const rows = filtered();
+  if (!rows.length) { toast('ไม่มีข้อมูลให้ส่งออก'); return; }
+  const q = s => '"' + String(s == null ? '' : s).replace(/"/g, '""') + '"';
+  const head = ['รหัส', 'ชื่อ-นามสกุล', 'แผนก'];
+  CATS.forEach(c => head.push(CAT_NAME[c] + ' สิทธิ์', CAT_NAME[c] + ' ใช้ไป', CAT_NAME[c] + ' รออนุมัติ', CAT_NAME[c] + ' คงเหลือ'));
+  const lines = [head.map(q).join(',')].concat(rows.map(r => {
+    const a = [r.id, r.name, r.dept];
+    CATS.forEach(c => { const x = r.bal[c]; a.push(x.quota === null ? '' : x.quota, x.used, x.pending, x.remain === null ? '' : x.remain); });
+    return a.map(q).join(',');
+  }));
+  const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob(['\ufeff' + lines.join('\r\n')], { type: 'text/csv;charset=utf-8' }));
+  a.download = 'leave-balance-' + DATA.year + '.csv'; a.click(); URL.revokeObjectURL(a.href);
 });
 
 load();
