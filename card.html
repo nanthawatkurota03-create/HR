@@ -189,6 +189,7 @@ const $ = s => document.querySelector(s);
 const esc = s => { const d = document.createElement('div'); d.textContent = s == null ? '' : s; return d.innerHTML; };
 const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
 const f1 = n => Number(n).toFixed(1);
+const fmtN = n => String(+Number(n).toFixed(3));
 
 // ----- ผู้ใช้: พนักงาน (token) หรือ HR (?emp=รหัส + รหัสผ่าน HR) -----
 const HR_EMP = new URLSearchParams(location.search).get('emp');
@@ -228,7 +229,8 @@ const st = v => v === 'ok' ? ck : v === 'no' ? '<span class="x">&#10007;</span>'
 function longDate(s) { const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(s || ''); return m ? m[3] + ' ' + MONTHS[+m[2] - 1] + ' ' + m[1] : '-'; }
 
 function render(j) {
-  const e = j.emp, hasVac = e.vac !== '' && e.vac != null, used = j.tot.vac;
+  const e = j.emp, bv = j.bal && j.bal.vac, vq = bv ? bv.quota : (e.vac === '' ? null : e.vac), hasVac = vq !== null && vq !== undefined, used = bv ? bv.used : j.tot.vac;
+  e.vac = hasVac ? vq : '';
   $('#sum').innerHTML = hasVac ? 'สรุปวันลาพักร้อนคงเหลือ ' + f1(e.vac - used) + ' วัน <small>(Update ' + esc(j.today) + ')</small>'
     : 'สรุปวันลาพักร้อน <small>(ยังไม่ได้กำหนดสิทธิ์ ติดต่อ HR)</small>';
   $('#tt').textContent = 'ใบลา / LEAVE CARD ประจำปี ' + j.year;
@@ -236,15 +238,15 @@ function render(j) {
   $('#tV').innerHTML = hasVac ? f1(e.vac) + ' <small>Days</small>' : '-';
   $('#tU').textContent = hasVac ? 'ใช้ไป ' + f1(used) + ' · คงเหลือ ' + f1(e.vac - used) : '';
 
-  const cat = (r, c) => r.cat === c ? r.days : '';
+  const cat = (r, c) => r.cat === c ? fmtN(r.days) : '';
   let h = j.rows.map(r =>
-    '<tr' + (r.cancelled ? ' class="cx"' : '') + '><td>' + esc(r.code) + '</td><td>' + esc(r.filed) + '</td><td>' + esc(r.start) + '</td><td>' + esc(r.end) + '</td><td>' + r.days + '</td>' +
+    '<tr' + (r.cancelled ? ' class="cx"' : '') + '><td>' + esc(r.code) + '</td><td>' + esc(r.filed) + '</td><td>' + esc(r.start) + '</td><td>' + esc(r.end) + '</td><td>' + fmtN(r.days) + '</td>' +
     '<td>' + cat(r, 'sick') + '</td><td>' + cat(r, 'biz') + '</td><td>' + cat(r, 'vac') + '</td><td>' + cat(r, 'other') + '</td>' +
-    '<td class="l">' + esc(r.reason) + '</td><td>' + ck + '</td>' +
+    '<td class="l">' + (r.when ? '<b>[' + esc(r.when) + ']</b> ' : '') + (r.retro ? '<b>[ย้อนหลัง]</b> ' : '') + esc(r.reason) + '</td><td>' + ck + '</td>' +
     '<td>' + (r.health === 'yes' ? ck : '') + '</td><td>' + (r.health === 'no' ? ck : '') + '</td>' +
     '<td>' + st(r.sup) + '</td><td>' + st(r.mgr) + '</td><td>' + esc(r.approvedOn) + '</td><td>' + st(r.fm) + '</td><td>' + st(r.hr) + '</td></tr>').join('');
   for (let i = j.rows.length; i < 10; i++) h += '<tr class="e">' + '<td></td>'.repeat(18) + '</tr>';
-  h += '<tr class="tot"><td colspan="4"></td><td>รวม</td><td>' + j.tot.sick + '</td><td>' + j.tot.biz + '</td><td>' + j.tot.vac + '</td><td>' + j.tot.other + '</td><td class="l">อนุมัติแล้วเท่านั้น</td><td colspan="8"></td></tr>';
+  h += '<tr class="tot"><td colspan="4"></td><td>รวม</td><td>' + fmtN(j.tot.sick) + '</td><td>' + fmtN(j.tot.biz) + '</td><td>' + fmtN(j.tot.vac) + '</td><td>' + fmtN(j.tot.other) + '</td><td class="l">อนุมัติแล้วเท่านั้น</td><td colspan="8"></td></tr>';
   $('#rows').innerHTML = h;
   $('#msg').hidden = true; $('#card').hidden = false;
   loadPhoto(e);
