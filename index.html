@@ -111,6 +111,23 @@ a.link{text-decoration:none}
 .att{margin-top:8px;display:flex;flex-direction:column;align-items:flex-start}
 #toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0));transform:translateX(-50%);background:var(--ink);color:#fff;padding:10px 16px;border-radius:8px;display:none;max-width:90%;font-size:15px;z-index:9}
 
+/* ลาครึ่งวัน/รายชั่วโมง + วันลาคงเหลือ */
+.seg{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.seg button{border:1px solid #b8c3c9;background:#fff;color:var(--ink);border-radius:10px;min-height:44px;font:inherit;font-weight:500;padding:6px 4px}
+.seg button.on{background:var(--brand);border-color:var(--brand);color:#fff}
+.seg button:disabled{opacity:.45}
+.hint{margin-top:8px;padding:8px 12px;border-radius:8px;background:var(--warn-bg);color:var(--warn);font-size:14px}
+.hint.info{background:#e1f0f3;color:var(--brand)}
+.hint.bad{background:var(--no-bg);color:var(--no)}
+#balTiles{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.bt3{border:1px solid var(--line);border-radius:12px;padding:12px;background:#f8fafb;min-width:0}
+.bt3 .l{font-size:13px;color:var(--muted);font-weight:500}
+.bt3 .v{font-size:28px;font-weight:600;line-height:1.2;margin-top:2px}
+.bt3 .v small{font-size:13px;font-weight:500;color:var(--muted)}
+.bt3 .u{font-size:12.5px;color:var(--muted);margin-top:2px}
+.bt3.low .v{color:var(--no)}.bt3.mid .v{color:var(--warn)}
+@media(max-width:520px){#balTiles{grid-template-columns:1fr}.bt3{display:grid;grid-template-columns:1fr auto;align-items:center;gap:0 10px}.bt3 .l{grid-column:1}.bt3 .v{grid-column:2;grid-row:1/3;text-align:right}.bt3 .u{grid-column:1}}
+
 /* KUROTA HR motion layer: lightweight CSS-only animations */
 @keyframes hrFadeUp {
   from { opacity: 0; transform: translate3d(0, 8px, 0); }
@@ -268,6 +285,14 @@ input:focus, select:focus, textarea:focus {
       </div>
     </section>
 
+    <section id="balCard">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <h2 style="margin:0">วันลาคงเหลือ ปี <span id="balYear"></span></h2>
+        <button class="link" id="balRefresh" type="button">อัปเดต</button>
+      </div>
+      <div id="balTiles" style="margin-top:12px"><span class="m">กำลังโหลด...</span></div>
+    </section>
+
     <button class="alert" id="alertBar" type="button" hidden></button>
 
     <div class="tabs" role="tablist">
@@ -299,11 +324,32 @@ input:focus, select:focus, textarea:focus {
             <div><label for="start">ตั้งแต่วันที่</label><input id="start" type="date" required></div>
             <div><label for="end">ถึงวันที่</label><input id="end" type="date" required></div>
           </div>
-          <label class="check" for="half"><input id="half" type="checkbox" disabled> ลาครึ่งวัน (เลือกได้เมื่อลาวันเดียว)</label>
+          <label>รูปแบบการลา</label>
+          <div class="seg" id="modeSeg" role="group" aria-label="รูปแบบการลา">
+            <button type="button" class="on" data-mode="full" aria-pressed="true">เต็มวัน</button>
+            <button type="button" data-mode="half" aria-pressed="false">ครึ่งวัน</button>
+            <button type="button" data-mode="hour" id="modeHour" aria-pressed="false">รายชั่วโมง</button>
+          </div>
+          <div class="m" id="modeNote" style="margin-top:4px">ลารายชั่วโมงใช้ได้เฉพาะ “02 ลากิจ” (ขั้นต่ำ 1 ชั่วโมง)</div>
+          <div id="partial" hidden>
+            <label for="shift">กะการทำงาน</label>
+            <select id="shift">
+              <option value="day">กะเช้า (08:00–12:00 / 13:00–17:00)</option>
+              <option value="night">กะดึก (20:00–00:00 / 01:00–05:00)</option>
+            </select>
+            <div id="halfBox"><label for="part">ช่วงที่ลา</label><select id="part"></select></div>
+            <div id="hourBox" class="row">
+              <div><label for="hFrom">เริ่มลาตั้งแต่เวลา</label><select id="hFrom"></select></div>
+              <div><label for="hCount">จำนวนชั่วโมงที่ลา</label><select id="hCount"></select></div>
+            </div>
+            <div class="m" id="shiftNote" style="margin-top:6px">ลาครึ่งวัน/รายชั่วโมงเลือกได้วันเดียว (กะดึกให้ใส่วันที่เริ่มกะ) ช่วงพักไม่นับเป็นชั่วโมงลา</div>
+          </div>
           <div class="days" id="days">จำนวนวันลา: -</div>
+          <div class="hint info" id="balHint" hidden></div>
+          <div class="hint" id="retroNote" hidden>ใบลานี้เป็นการลาย้อนหลัง กรุณาแนบรูปเอกสารประกอบ (เช่น ใบรับรองแพทย์ หรือหลักฐานอื่น ๆ) และระบุเหตุผลที่ยื่นย้อนหลังในช่องเหตุผล</div>
           <label for="reason">เหตุผลการลา</label><textarea id="reason" required></textarea>
           <label for="phone">เบอร์ติดต่อระหว่างลา</label><input id="phone" type="tel" inputmode="tel" autocomplete="tel">
-          <label>ไฟล์แนบ (รูป / PDF / Word สูงสุด 3 ไฟล์)</label>
+          <label>ไฟล์แนบ / รูปเอกสารประกอบ (รูป / PDF / Word สูงสุด 5 ไฟล์)</label>
           <div id="fileList"></div>
           <button class="link" id="addFile" type="button">+ เพิ่มไฟล์</button>
           <input id="fileIn" type="file" multiple accept="image/*,.pdf,.doc,.docx" hidden>
@@ -355,6 +401,20 @@ const esc = s => { const d = document.createElement('div'); d.textContent = s ==
 function fmtDate(s) { const [y, m, d] = String(s).slice(0, 10).split('-').map(Number); return d + '/' + m + '/' + (y + 543); }
 function fmtTs(s) { const d = new Date(s); return isNaN(d) ? '' : d.toLocaleString('th-TH', { dateStyle: 'short', timeStyle: 'short' }); }
 const rangeTxt = r => r.start === r.end ? fmtDate(r.start) : fmtDate(r.start) + ' - ' + fmtDate(r.end);
+const fmtN = n => String(+Number(n).toFixed(3));
+const pad2 = n => (n < 10 ? '0' : '') + n;
+const SHIFTS = { day: { name: 'กะเช้า', slots: [8, 9, 10, 11, 13, 14, 15, 16] }, night: { name: 'กะดึก', slots: [20, 21, 22, 23, 1, 2, 3, 4] } };
+const hh = h => pad2(h) + ':00', slotEnd = h => hh((h + 1) % 24);
+const todayStr = () => { const d = new Date(); return d.getFullYear() + '-' + pad2(d.getMonth() + 1) + '-' + pad2(d.getDate()); };
+// ข้อความรูปแบบการลาในรายการใบลา
+const whenTxt = r => {
+  if (!r.mode || r.mode === 'full') return '';
+  const sn = r.shift && SHIFTS[r.shift] ? SHIFTS[r.shift].name : '', t = r.tStart && r.tEnd ? ' ' + r.tStart + '–' + r.tEnd : '';
+  return (r.mode === 'half' ? 'ครึ่งวัน' : 'รายชั่วโมง') + (sn ? ' · ' + sn : '') + t;
+};
+const amtTxt = r => r.mode === 'hour' ? fmtN(r.hours) + ' ชม.' : fmtN(r.days) + ' วัน';
+const whenLine = r => whenTxt(r) ? ' · ' + esc(whenTxt(r)) : '';
+const retroChip = r => r.retro ? ' <span class="chip s-wait">ย้อนหลัง</span>' : '';
 const isOpen = st => String(st).indexOf('รอ') === 0;
 async function api(body) {
   const res = await fetch(API_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(body) });
@@ -471,7 +531,7 @@ $('#pinForm').addEventListener('submit', async ev => {
 });
 
 // ----- ไฟล์แนบ -----
-const MAX_FILES = 3, MAX_DOC = 4 * 1024 * 1024;
+const MAX_FILES = 5, MAX_DOC = 4 * 1024 * 1024;
 let F = [];
 function renderFiles() {
   $('#fileList').innerHTML = F.map((f, i) => '<div class="fl"><span>' + esc(f.name) + '</span><button class="link" data-rm="' + i + '" type="button">ลบ</button></div>').join('');
@@ -514,22 +574,103 @@ async function openFile(id) {
 document.addEventListener('click', ev => { const b = ev.target.closest('[data-file]'); if (b) openFile(b.dataset.file); });
 
 // ----- กรอกใบลา -----
-function calcDays() {
-  const s = $('#start').value, e = $('#end').value, half = $('#half');
-  half.disabled = !(s && e && s === e); if (half.disabled) half.checked = false;
-  if (!s || !e) { $('#days').textContent = 'จำนวนวันลา: -'; return null; }
-  if (e < s) { $('#days').textContent = 'วันที่สิ้นสุดต้องไม่ก่อนวันที่เริ่ม'; return null; }
-  const days = half.checked ? 0.5 : (new Date(e) - new Date(s)) / 86400000 + 1;
-  $('#days').textContent = 'จำนวนวันลา: ' + days + ' วัน';
-  return days;
+let MODE = 'full';
+function updSeg() { document.querySelectorAll('#modeSeg button').forEach(b => { const on = b.dataset.mode === MODE; b.classList.toggle('on', on); b.setAttribute('aria-pressed', on); }); }
+function fillShiftOpts() {
+  const S = SHIFTS[$('#shift').value], pv = $('#part').value, fv = $('#hFrom').value;
+  $('#part').innerHTML = '<option value="am">ช่วงแรก ' + hh(S.slots[0]) + '–' + slotEnd(S.slots[3]) + '</option><option value="pm">ช่วงหลัง ' + hh(S.slots[4]) + '–' + slotEnd(S.slots[7]) + '</option>';
+  if (pv) $('#part').value = pv;
+  $('#hFrom').innerHTML = S.slots.map(h => '<option value="' + hh(h) + '">' + hh(h) + '</option>').join('');
+  if (fv && S.slots.indexOf(+fv.slice(0, 2)) >= 0) $('#hFrom').value = fv;
+  fillHCount();
 }
-['start', 'end', 'half'].forEach(id => $('#' + id).addEventListener('input', calcDays));
+function fillHCount() {
+  const S = SHIFTS[$('#shift').value], i = Math.max(0, S.slots.indexOf(+$('#hFrom').value.slice(0, 2))), max = S.slots.length - i, cv = +$('#hCount').value || 1;
+  let h = ''; for (let n = 1; n <= max; n++) h += '<option value="' + n + '">' + n + ' ชั่วโมง</option>';
+  $('#hCount').innerHTML = h; $('#hCount').value = Math.min(cv, max);
+}
+const CAT_OF = { '01': 'sick', '02': 'biz', '03': 'vac', '12': 'vac' }, CAT_NAME = { sick: 'ลาป่วย', biz: 'ลากิจ', vac: 'ลาพักร้อน' };
+let BAL = {}, BAL_REQ = {};
+async function loadBal(year, force) {
+  if (!S || !navigator.onLine) return null;
+  if (!force && BAL_REQ[year]) return BAL_REQ[year];
+  BAL_REQ[year] = api({ action: 'balance', token: S.token, year: year }).then(j => { if (j.ok) BAL[year] = j.bal; else authFail(j); return BAL[year] || null; }).catch(() => null);
+  return BAL_REQ[year];
+}
+function renderBalCard() {
+  const y = new Date().getFullYear(), b = BAL[y];
+  $('#balYear').textContent = y + 543;
+  if (!b) { $('#balTiles').innerHTML = '<span class="m">ยังโหลดวันลาคงเหลือไม่ได้ ลองกดอัปเดต</span>'; return; }
+  $('#balTiles').innerHTML = ['sick', 'biz', 'vac'].map(c => {
+    const x = b[c];
+    if (x.quota === null) return '<div class="bt3"><div class="l">' + CAT_NAME[c] + '</div><div class="v">-</div><div class="u">HR ยังไม่ได้กำหนดสิทธิ์</div></div>';
+    const cls = x.remain <= 0 ? ' low' : x.remain <= x.quota * 0.2 ? ' mid' : '';
+    return '<div class="bt3' + cls + '"><div class="l">' + CAT_NAME[c] + '</div><div class="v">' + fmtN(x.remain) + '<small> วัน</small></div>' +
+      '<div class="u">ใช้ไป ' + fmtN(x.used) + ' / สิทธิ์ ' + fmtN(x.quota) + (c === 'biz' ? ' · เหลือ ' + fmtN(x.remain * 8) + ' ชม.' : '') + (x.pending ? ' · รออนุมัติ ' + fmtN(x.pending) : '') + '</div></div>';
+  }).join('');
+}
+async function refreshBal() { await loadBal(new Date().getFullYear(), true); renderBalCard(); calcLeave(); }
+$('#balRefresh').addEventListener('click', async () => { await refreshBal(); toast('อัปเดตวันลาคงเหลือแล้ว'); });
+function balHint(L) {
+  const el = $('#balHint'), cat = CAT_OF[$('#type').value.slice(0, 2)], s = $('#start').value;
+  el.hidden = true;
+  if (!cat || !L || !s) return;
+  const y = +s.slice(0, 4);
+  if (!BAL[y]) { if (!BAL_REQ[y]) loadBal(y).then(() => calcLeave()); return; }
+  const x = BAL[y][cat];
+  if (x.quota === null) return;
+  const after = x.remain - L.days;
+  el.className = 'hint ' + (after < 0 ? 'bad' : 'info');
+  el.textContent = CAT_NAME[cat] + ' คงเหลือ ' + fmtN(x.remain) + ' วัน → หลังลาใบนี้เหลือ ' + fmtN(after) + ' วัน' + (after < 0 ? ' (เกินสิทธิ์ ผู้อนุมัติ/HR จะพิจารณา)' : '');
+  el.hidden = false;
+}
+// คำนวณและแสดงผลฟอร์ม คืนข้อมูลการลา หรือ null ถ้ายังไม่ครบ/ไม่ถูกต้อง
+function calcLeave() {
+  const isBiz = $('#type').value.slice(0, 2) === '02';
+  $('#modeHour').disabled = !isBiz;
+  if (!isBiz && MODE === 'hour') { MODE = 'full'; }
+  updSeg();
+  const partial = MODE !== 'full';
+  $('#partial').hidden = !partial; $('#halfBox').hidden = MODE !== 'half'; $('#hourBox').hidden = MODE !== 'hour';
+  if (partial) $('#end').value = $('#start').value;
+  $('#end').disabled = partial;
+  const s = $('#start').value, e = $('#end').value, out = $('#days');
+  $('#retroNote').hidden = !(s && s < todayStr());
+  $('#balHint').hidden = true;
+  if (!s || !e) { out.textContent = 'จำนวนวันลา: -'; return null; }
+  if (e < s) { out.textContent = 'วันที่สิ้นสุดต้องไม่ก่อนวันที่เริ่ม'; return null; }
+  let L;
+  if (MODE === 'full') {
+    const days = (new Date(e) - new Date(s)) / 86400000 + 1;
+    L = { mode: 'full', days: days, hours: days * 8 };
+    out.textContent = 'จำนวนวันลา: ' + days + ' วัน';
+  } else {
+    const sh = $('#shift').value, S2 = SHIFTS[sh];
+    if (MODE === 'half') {
+      const p = $('#part').value, i = p === 'pm' ? 4 : 0;
+      L = { mode: 'half', shift: sh, part: p, days: 0.5, hours: 4, tStart: hh(S2.slots[i]), tEnd: slotEnd(S2.slots[i + 3]) };
+      out.textContent = 'ลาครึ่งวัน (' + S2.name + ' ' + L.tStart + '–' + L.tEnd + ') = 0.5 วัน';
+    } else {
+      const i = S2.slots.indexOf(+$('#hFrom').value.slice(0, 2)), n = +$('#hCount').value;
+      if (i < 0 || !(n >= 1) || i + n > S2.slots.length) { out.textContent = 'เลือกช่วงเวลาที่ลา'; return null; }
+      L = { mode: 'hour', shift: sh, from: hh(S2.slots[i]), hours: n, days: n / 8, tStart: hh(S2.slots[i]), tEnd: slotEnd(S2.slots[i + n - 1]) };
+      out.textContent = 'ลารายชั่วโมง (' + S2.name + ' ' + L.tStart + '–' + L.tEnd + ') = ' + n + ' ชม. (' + fmtN(L.days) + ' วัน, นับ 1 วัน = 8 ชม.)';
+    }
+  }
+  balHint(L);
+  return L;
+}
+document.querySelectorAll('#modeSeg button').forEach(b => b.addEventListener('click', () => { if (b.disabled) return; MODE = b.dataset.mode; calcLeave(); }));
+$('#shift').addEventListener('change', () => { fillShiftOpts(); calcLeave(); });
+$('#hFrom').addEventListener('change', () => { fillHCount(); calcLeave(); });
+['start', 'end', 'type', 'part', 'hCount'].forEach(id => $('#' + id).addEventListener('input', calcLeave));
+fillShiftOpts();
 $('#f').addEventListener('submit', async ev => {
   ev.preventDefault();
   if (!S) return;
-  const days = calcDays(), v = id => $('#' + id).value.trim();
+  const L = calcLeave(), v = id => $('#' + id).value.trim();
   if (!v('start') || !v('end') || !v('reason')) { toast('กรอกข้อมูลที่จำเป็นให้ครบ'); return; }
-  if (days === null) { toast('ตรวจสอบวันที่ลาอีกครั้ง'); return; }
+  if (L === null) { toast('ตรวจสอบวันที่และช่วงเวลาที่ลาอีกครั้ง'); return; }
   if (!navigator.onLine) { toast('ต้องมีอินเทอร์เน็ตเพื่อส่งใบลา'); return; }
   if (!sendCid) sendCid = crypto.randomUUID(); // ส่งซ้ำด้วยรหัสเดิม กันใบลาซ้ำถ้าเน็ตหลุด
   $('#submit').disabled = true; $('#submit').textContent = 'กำลังส่ง...';
@@ -538,10 +679,11 @@ $('#f').addEventListener('submit', async ev => {
     try { files = await Promise.all(F.map(packFile)); }
     catch (e) { toast('อ่านไฟล์แนบไม่ได้ ลองเลือกไฟล์ใหม่'); $('#submit').disabled = false; $('#submit').textContent = 'ส่งใบลา'; return; }
     const j = await api({ action: 'submit', token: S.token, cid: sendCid, type: $('#type').value, start: v('start'), end: v('end'),
-      half: $('#half').checked, reason: v('reason'), phone: v('phone'), files: files });
+      mode: L.mode, shift: L.shift || '', part: L.part || '', from: L.from || '', hours: L.mode === 'hour' ? L.hours : 0,
+      reason: v('reason'), phone: v('phone'), files: files });
     if (j.ok) {
       toast('ส่งใบลาแล้ว เลขที่ ' + j.no);
-      $('#start').value = $('#end').value = $('#reason').value = ''; $('#half').checked = false; sendCid = null; F = []; renderFiles(); calcDays(); loadMine();
+      $('#start').value = $('#end').value = $('#reason').value = ''; MODE = 'full'; sendCid = null; F = []; renderFiles(); calcLeave(); loadMine(); refreshBal();
     } else if (!authFail(j)) { toast(j.message || 'ส่งไม่สำเร็จ: ' + j.error); sendCid = null; }
   } catch (e) { toast('เชื่อมต่อไม่ได้ ลองส่งใหม่อีกครั้ง'); }
   $('#submit').disabled = false; $('#submit').textContent = 'ส่งใบลา';
@@ -571,15 +713,15 @@ async function loadMine() {
   if (!S || !navigator.onLine) return;
   try {
     const j = await api({ action: 'mine', token: S.token });
-    if (j.ok) renderMine(j.items); else authFail(j);
+    if (j.ok) { renderMine(j.items); refreshBal(); } else authFail(j);
   } catch (e) {}
 }
 function renderMine(items) {
   const el = $('#list');
   if (!items.length) { el.innerHTML = '<p class="empty">ยังไม่มีใบลา กรอกฟอร์มด้านบนเพื่อส่งใบลาฉบับแรก</p>'; return; }
   el.innerHTML = items.map(r =>
-    '<div class="item" data-no="' + esc(r.no) + '"><div class="top"><div><div class="t">' + esc(r.type) + ' ' + r.days + ' วัน</div>' +
-    '<div class="m">' + rangeTxt(r) + ' · เลขที่ ' + esc(r.no) + '</div></div><span class="chip ' + chipCls(r.status) + '">' + esc(r.status) + '</span></div>' +
+    '<div class="item" data-no="' + esc(r.no) + '"><div class="top"><div><div class="t">' + esc(r.type) + ' ' + amtTxt(r) + retroChip(r) + '</div>' +
+    '<div class="m">' + rangeTxt(r) + whenLine(r) + ' · เลขที่ ' + esc(r.no) + '</div></div><span class="chip ' + chipCls(r.status) + '">' + esc(r.status) + '</span></div>' +
     attHtml(r) + timeline(r) + (isOpen(r.status) ? '<button class="link" data-cancel="1" type="button" style="margin-top:8px">ยกเลิกใบลานี้</button>' : '') + '</div>').join('');
 }
 $('#refresh').addEventListener('click', async () => { if (!navigator.onLine) { toast('ออฟไลน์อยู่'); return; } await loadMine(); toast('อัปเดตสถานะแล้ว'); });
@@ -604,13 +746,13 @@ async function loadInbox() {
   } catch (e) { el.innerHTML = '<p class="empty">โหลดไม่สำเร็จ ลองใหม่อีกครั้ง</p>'; }
 }
 const upHtml = up => (up && up.length) ? '<h2 style="margin:16px 0 8px">กำลังมาถึง (เพื่อรับทราบ)</h2>' + up.map(r =>
-  '<div class="item"><div class="top"><div><div class="t">' + esc(r.name) + '</div><div class="m">' + esc(r.type) + ' ' + r.days + ' วัน · ' + rangeTxt(r) + '</div></div><span class="chip s-idle">' + esc(r.status) + '</span></div></div>').join('') : '';
+  '<div class="item"><div class="top"><div><div class="t">' + esc(r.name) + '</div><div class="m">' + esc(r.type) + ' ' + amtTxt(r) + ' · ' + rangeTxt(r) + whenLine(r) + (r.retro ? ' · ย้อนหลัง' : '') + '</div></div><span class="chip s-idle">' + esc(r.status) + '</span></div></div>').join('') : '';
 function renderInbox(items, up) {
   const el = $('#iList');
   el.innerHTML = (items.length ? '' : '<p class="empty">ไม่มีใบลาที่รอการอนุมัติของคุณ</p>') + items.map(r =>
     '<div class="item" data-no="' + esc(r.no) + '"><div class="top"><div><div class="t">' + esc(r.name) + '</div><div class="m">' + esc(r.empId) + (r.dept ? ' · ' + esc(r.dept) : '') + '</div></div>' +
     '<span class="chip s-wait">' + esc(r.status) + '</span></div>' +
-    '<div style="margin-top:8px"><b>' + esc(r.type) + '</b> ' + r.days + ' วัน<div class="m">' + rangeTxt(r) + '</div>' +
+    '<div style="margin-top:8px"><b>' + esc(r.type) + '</b> ' + amtTxt(r) + retroChip(r) + '<div class="m">' + rangeTxt(r) + whenLine(r) + '</div>' +
     '<div style="margin-top:4px">' + esc(r.reason) + '</div>' + (r.phone ? '<div class="m">โทร ' + esc(r.phone) + '</div>' : '') + '</div>' + attHtml(r) + timeline(r) +
     '<label for="n_' + esc(r.no) + '">หมายเหตุ / เหตุผลที่ไม่อนุมัติ (ไม่บังคับ)</label><input id="n_' + esc(r.no) + '" class="note" autocomplete="off">' +
     '<div class="acts2"><button class="bt no" data-d="no" type="button">ไม่อนุมัติ</button><button class="bt ok" data-d="ok" type="button">อนุมัติ</button></div></div>').join('') + upHtml(up);
@@ -679,7 +821,7 @@ $('#installBtn').addEventListener('click', async () => {
 if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js');
 
 // ----- เริ่มต้น -----
-net(); calcDays();
+net(); calcLeave();
 if (S && S.token && S.emp) { showApp(); if (S.emp.mustChange && navigator.onLine) openPin(true); loadMe(); loadMine(); }
 else { S = null; showLogin(''); }
 </script>
