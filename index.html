@@ -21,7 +21,7 @@ header{background:var(--brand);color:#fff;padding:calc(14px + env(safe-area-inse
 header h1{font-size:19px;font-weight:600;margin:0}
 .hbtns{display:flex;gap:8px;align-items:center}
 #installBtn{display:none;background:#fff;color:var(--brand);border:0;border-radius:8px;padding:6px 12px;font:inherit;font-size:14px;font-weight:500}
-#hrLink{color:#fff;border:1px solid #fff;border-radius:8px;padding:6px 12px;font-size:14px;font-weight:500;text-decoration:none}
+#cardLink{color:#fff;border:1px solid #fff;border-radius:8px;padding:6px 12px;font-size:14px;font-weight:500;text-decoration:none;white-space:nowrap}
 dialog{border:0;border-radius:12px;padding:20px;width:min(360px,92vw);color:var(--ink)}
 dialog::backdrop{background:rgba(20,38,43,.5)}
 dialog h2{margin:0 0 4px}
@@ -110,6 +110,14 @@ a.link{text-decoration:none}
 .fl .link{flex:none}
 .att{margin-top:8px;display:flex;flex-direction:column;align-items:flex-start}
 #toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0));transform:translateX(-50%);background:var(--ink);color:#fff;padding:10px 16px;border-radius:8px;display:none;max-width:90%;font-size:15px;z-index:9}
+
+/* sidebar: ปุ่มด้านล่างสุด + ลิงก์ */
+#employeeSidebar{display:flex;flex-direction:column}
+a.side-link{text-decoration:none}
+.side-bottom{margin-top:auto;padding-top:10px;border-top:1px solid var(--line);display:flex;flex-direction:column;gap:5px}
+.side-link.danger{color:var(--no)}
+/* แก้เมนูมือถือกดไม่ได้: animation ที่ main ทำให้ sidebar (position:fixed) ถูกกักอยู่ใน main แล้ว backdrop ทับ */
+@media(max-width:760px){main{animation:none}}
 
 /* ลาครึ่งวัน/รายชั่วโมง + วันลาคงเหลือ */
 .seg{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
@@ -214,7 +222,7 @@ input:focus, select:focus, textarea:focus {
   <h1>ขอใบลา</h1>
   <div class="hbtns">
     <button id="installBtn" type="button">ติดตั้งแอป</button>
-    <a id="hrLink" href="hr/index.html">สำหรับ HR</a>
+    <a id="cardLink" href="card.html" hidden>ใบลา (Leave Card)</a>
   </div>
 </header>
 
@@ -249,6 +257,7 @@ input:focus, select:focus, textarea:focus {
       <div id="lgErr" class="derr" role="alert"></div>
       <button class="btn" id="lgGo" type="submit">เข้าสู่ระบบ</button>
       <p class="m" style="margin:12px 0 0">ยังไม่มี PIN หรือลืม PIN ติดต่อ HR</p>
+      <p style="margin:12px 0 0"><a class="link" href="hr/index.html">เข้าหน้าต่างสำหรับ HR</a></p>
     </form>
   </section>
 
@@ -271,17 +280,17 @@ input:focus, select:focus, textarea:focus {
         <button class="side-link" type="button" data-future="ประกาศและคู่มือ" title="ประกาศและคู่มือ"><span class="si" aria-hidden="true">▧</span><span class="sl">ประกาศและคู่มือ</span></button>
       </nav>
       <div class="side-foot">เมนูเพิ่มเติมจะเปิดใช้งานเมื่อมีการเพิ่มระบบ</div>
+      <div class="side-bottom">
+        <a class="side-link" href="hr/index.html" title="สำหรับ HR"><span class="si" aria-hidden="true">▥</span><span class="sl">สำหรับ HR</span></a>
+        <button class="side-link" id="chPin" type="button" title="เปลี่ยน PIN"><span class="si" aria-hidden="true">⚿</span><span class="sl">เปลี่ยน PIN</span></button>
+        <button class="side-link danger" id="logout" type="button" title="ออกจากระบบ"><span class="si" aria-hidden="true">⎋</span><span class="sl">ออกจากระบบ</span></button>
+      </div>
     </aside>
     <div id="appContent">
     <section id="profileCard">
       <div class="who">
         <div style="display:flex;gap:12px;align-items:flex-start"><img class="av" id="whoImg" alt="" hidden>
           <div><div class="n" id="whoName"></div><div class="m" id="whoMeta"></div><div class="m" id="chainInfo"></div></div></div>
-        <div class="acts">
-          <a class="link" href="card.html">ใบลา (Leave Card)</a>
-          <button class="link" id="chPin" type="button">เปลี่ยน PIN</button>
-          <button class="link" id="logout" type="button">ออกจากระบบ</button>
-        </div>
       </div>
     </section>
 
@@ -424,13 +433,13 @@ const save = () => LS.set('session', S);
 
 // ----- แสดงหน้า -----
 function showLogin(msg) {
-  $('#loginBox').hidden = false; $('#app').hidden = true; $('#mobileMenuBtn').hidden = true; closeMobileNav();
+  $('#loginBox').hidden = false; $('#app').hidden = true; $('#mobileMenuBtn').hidden = true; $('#cardLink').hidden = true; closeMobileNav();
   $('#lgErr').textContent = msg || '';
   const last = LS.get('lastEmpId', '');
   if (last && !$('#lgId').value) $('#lgId').value = last;
 }
 function showApp() {
-  $('#loginBox').hidden = true; $('#app').hidden = false; $('#mobileMenuBtn').hidden = false; closeMobileNav();
+  $('#loginBox').hidden = true; $('#app').hidden = false; $('#mobileMenuBtn').hidden = false; $('#cardLink').hidden = false; closeMobileNav();
   $('#whoName').textContent = S.emp.name;
   $('#whoMeta').textContent = 'รหัส ' + S.emp.id + (S.emp.dept ? ' · แผนก ' + S.emp.dept : '');
   $('#chainInfo').textContent = S.chain ? 'ลำดับอนุมัติ: ' + S.chain.map(c => c.role === 'HR' ? 'HR' : c.role + ' (' + c.name + ')').join(' → ') : '';
@@ -510,7 +519,7 @@ function openPin(forced) {
   ['#pinOld', '#pinNew', '#pinNew2'].forEach(s => $(s).value = '');
   $('#pinErr').textContent = ''; $('#pinDlg').showModal(); $('#pinOld').focus();
 }
-$('#chPin').addEventListener('click', () => openPin(false));
+$('#chPin').addEventListener('click', () => { closeMobileNav(); openPin(false); });
 $('#pinCancel').addEventListener('click', () => $('#pinDlg').close());
 $('#pinDlg').addEventListener('cancel', ev => { if (pinForced) ev.preventDefault(); });
 $('#pinForm').addEventListener('submit', async ev => {
