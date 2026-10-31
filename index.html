@@ -89,6 +89,15 @@ input:focus,select:focus,textarea:focus,button:focus-visible,a:focus-visible{out
 .item .t{font-weight:600}
 .chip{font-size:13px;font-weight:500;padding:2px 10px;border-radius:99px;white-space:nowrap}
 .s-wait{background:var(--warn-bg);color:var(--warn)}.s-ok{background:var(--ok-bg);color:var(--ok)}.s-no{background:var(--no-bg);color:var(--no)}.s-idle{background:var(--idle-bg);color:var(--muted)}
+.ihead{cursor:pointer;-webkit-tap-highlight-color:transparent;border-radius:8px}
+.ihead:focus-visible{outline:2px solid var(--brand);outline-offset:3px}
+.prog{display:flex;align-items:center;gap:10px;margin-top:8px;font-size:13.5px;color:var(--muted)}
+.pd{display:flex;gap:5px;flex:none}
+.pd i{width:11px;height:11px;border-radius:50%;border:2px solid #b8c3c9;background:#fff}
+.pd .d{background:var(--ok);border-color:var(--ok)}.pd .c{background:var(--warn);border-color:var(--warn)}.pd .n{background:var(--no);border-color:var(--no)}
+.chev{margin-left:auto;flex:none;font-size:15px;color:var(--brand);transition:transform .2s ease}
+.ihead[aria-expanded=true] .chev{transform:rotate(180deg)}
+.ibody{padding-top:2px}
 .tl{list-style:none;margin:12px 0 0;padding:0}
 .tl li{position:relative;padding:0 0 12px 24px;font-size:14px}
 .tl li::before{content:"";position:absolute;left:5px;top:14px;bottom:-2px;width:2px;background:var(--line)}
@@ -368,7 +377,7 @@ input:focus, select:focus, textarea:focus {
       <section id="historySection">
         <div style="display:flex;justify-content:space-between;align-items:center">
           <h2 style="margin:0">ใบลาของฉัน</h2>
-          <button class="link" id="refresh" type="button">อัปเดตสถานะ</button>
+          <span style="display:flex;gap:14px"><button class="link" id="expAll" type="button" hidden>ขยายทั้งหมด</button><button class="link" id="refresh" type="button">อัปเดตสถานะ</button></span>
         </div>
         <div id="list" style="margin-top:12px"></div>
       </section>
@@ -725,14 +734,54 @@ async function loadMine() {
     if (j.ok) { renderMine(j.items); refreshBal(); } else authFail(j);
   } catch (e) {}
 }
+const EXP = new Set(); // เลขที่ใบลาที่กางอยู่ (คงสถานะไว้ตอนโหลดใหม่)
+function stepCls(r, st, i) {
+  const open = isOpen(r.status);
+  if (st.role === 'HR') return r.issued ? 'd' : (open && i === r.cur) ? 'c' : '';
+  return st.decision === 'ok' ? 'd' : st.decision === 'no' ? 'n' : (open && i === r.cur) ? 'c' : '';
+}
+function progTxt(r) {
+  if (r.status === 'ยกเลิก') return 'ยกเลิกแล้ว';
+  if (r.status === 'ไม่อนุมัติ') { const x = r.steps.find(z => z.decision === 'no'); return 'ไม่อนุมัติโดย ' + (x ? x.role : ''); }
+  if (r.issued) return 'ออกใบลาแล้ว';
+  const x = r.steps[r.cur];
+  return !x ? r.status : x.role === 'HR' ? 'รอ HR ออกใบลา' : 'รอ ' + x.role + (x.name ? ' · ' + x.name : '');
+}
 function renderMine(items) {
   const el = $('#list');
+  $('#expAll').hidden = !items.length;
   if (!items.length) { el.innerHTML = '<p class="empty">ยังไม่มีใบลา กรอกฟอร์มด้านบนเพื่อส่งใบลาฉบับแรก</p>'; return; }
-  el.innerHTML = items.map(r =>
-    '<div class="item" data-no="' + esc(r.no) + '"><div class="top"><div><div class="t">' + esc(r.type) + ' ' + amtTxt(r) + retroChip(r) + '</div>' +
-    '<div class="m">' + rangeTxt(r) + whenLine(r) + ' · เลขที่ ' + esc(r.no) + '</div></div><span class="chip ' + chipCls(r.status) + '">' + esc(r.status) + '</span></div>' +
-    attHtml(r) + timeline(r) + (isOpen(r.status) ? '<button class="link" data-cancel="1" type="button" style="margin-top:8px">ยกเลิกใบลานี้</button>' : '') + '</div>').join('');
+  el.innerHTML = items.map(r => {
+    const open = EXP.has(r.no);
+    return '<div class="item" data-no="' + esc(r.no) + '"><div class="ihead" role="button" tabindex="0" aria-expanded="' + open + '" data-toggle="1">' +
+      '<div class="top"><div><div class="t">' + esc(r.type) + ' ' + amtTxt(r) + retroChip(r) + '</div>' +
+      '<div class="m">' + rangeTxt(r) + whenLine(r) + ' · เลขที่ ' + esc(r.no) + '</div></div><span class="chip ' + chipCls(r.status) + '">' + esc(r.status) + '</span></div>' +
+      '<div class="prog"><span class="pd"><i class="d"></i>' + r.steps.map((st, i) => '<i class="' + stepCls(r, st, i) + '"></i>').join('') + '</span><span>' + esc(progTxt(r)) + '</span><span class="chev" aria-hidden="true">▾</span></div></div>' +
+      '<div class="ibody"' + (open ? '' : ' hidden') + '>' + attHtml(r) + timeline(r) + (isOpen(r.status) ? '<button class="link" data-cancel="1" type="button" style="margin-top:8px">ยกเลิกใบลานี้</button>' : '') + '</div></div>';
+  }).join('');
+  syncExpAll();
 }
+function setItem(item, on) {
+  item.querySelector('.ihead').setAttribute('aria-expanded', on); item.querySelector('.ibody').hidden = !on;
+  on ? EXP.add(item.dataset.no) : EXP.delete(item.dataset.no);
+}
+function syncExpAll() {
+  const all = document.querySelectorAll('#list .item'), n = document.querySelectorAll('#list .ibody:not([hidden])').length;
+  $('#expAll').textContent = all.length && n === all.length ? 'ย่อทั้งหมด' : 'ขยายทั้งหมด';
+}
+$('#expAll').addEventListener('click', () => {
+  const items = document.querySelectorAll('#list .item'), on = $('#expAll').textContent === 'ขยายทั้งหมด';
+  items.forEach(it => setItem(it, on)); syncExpAll();
+});
+$('#list').addEventListener('click', ev => {
+  const h = ev.target.closest('[data-toggle]'); if (!h) return;
+  const it = h.closest('.item'); setItem(it, h.getAttribute('aria-expanded') !== 'true'); syncExpAll();
+});
+$('#list').addEventListener('keydown', ev => {
+  if (ev.key !== 'Enter' && ev.key !== ' ') return;
+  const h = ev.target.closest('[data-toggle]'); if (!h || ev.target !== h) return;
+  ev.preventDefault(); h.click();
+});
 $('#refresh').addEventListener('click', async () => { if (!navigator.onLine) { toast('ออฟไลน์อยู่'); return; } await loadMine(); toast('อัปเดตสถานะแล้ว'); });
 $('#list').addEventListener('click', async ev => {
   const b = ev.target.closest('[data-cancel]'); if (!b) return;
