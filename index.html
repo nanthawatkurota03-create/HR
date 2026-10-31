@@ -116,8 +116,8 @@ a.link{text-decoration:none}
 a.side-link{text-decoration:none}
 .side-bottom{margin-top:auto;padding-top:10px;border-top:1px solid var(--line);display:flex;flex-direction:column;gap:5px}
 .side-link.danger{color:var(--no)}
-/* แก้เมนูมือถือกดไม่ได้: animation ที่ main ทำให้ sidebar (position:fixed) ถูกกักอยู่ใน main แล้ว backdrop ทับ */
-@media(max-width:760px){main{animation:none}}
+/* แก้เมนูมือถือกดไม่ได้: animation (transform) ที่ main ทำให้ sidebar ถูกกักอยู่ใน main แล้ว backdrop ทับ ต้องใช้ !important เพราะกฎ animation ของ main อยู่ท้ายไฟล์ */
+@media(max-width:760px){main{animation:none!important;transform:none!important}}
 
 /* ลาครึ่งวัน/รายชั่วโมง + วันลาคงเหลือ */
 .seg{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
